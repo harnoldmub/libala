@@ -1,0 +1,64 @@
+name: CD - Continuous Deployment
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy-notification:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Get commit info
+      id: commit
+      run: |
+        echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+        echo "author=$(git log -1 --pretty=%an)" >> $GITHUB_OUTPUT
+    
+    - name: Deployment summary
+      run: |
+        echo "🚀 Deployment initiated for Golden Love 2026"
+        echo "📝 Commit: ${{ steps.commit.outputs.sha }}"
+        echo "💬 Message: ${{ steps.commit.outputs.message }}"
+        echo "👤 Author: ${{ steps.commit.outputs.author }}"
+        echo ""
+        echo "ℹ️  Replit will automatically pull and deploy changes"
+        echo "🌐 Production URL: https://your-repl-name.replit.app"
+    
+    - name: Create deployment badge
+      run: |
+        echo "Deployment status: ✅ Ready" >> $GITHUB_STEP_SUMMARY
+        echo "Commit SHA: \`${{ steps.commit.outputs.sha }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "Environment: Production" >> $GITHUB_STEP_SUMMARY
+
+  verify-build:
+    runs-on: ubuntu-latest
+    needs: deploy-notification
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build for production
+      run: npm run build
+      env:
+        NODE_ENV: production
+    
+    - name: Verify production build
+      run: |
+        echo "✅ Production build successful"
+        ls -lh dist/

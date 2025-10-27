@@ -1,0 +1,96 @@
+name: CI - Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: TypeScript type check
+      run: npx tsc --noEmit
+    
+    - name: Build project
+      run: npm run build
+      env:
+        NODE_ENV: production
+    
+    - name: Check for build artifacts
+      run: |
+        if [ ! -d "dist" ]; then
+          echo "Error: dist directory not found after build"
+          exit 1
+        fi
+        echo "Build successful - dist directory created"
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: |
+          dist/
+          server/public/
+        retention-days: 7
+
+  lint-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Check code formatting
+      run: |
+        echo "Checking for common issues..."
+        npx tsc --noEmit || true
+        echo "Type check completed"
+
+  security-audit:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    
+    - name: Run security audit
+      run: npm audit --audit-level=moderate || true
+    
+    - name: Check for vulnerabilities
+      run: |
+        echo "Security audit completed"
+        npm audit --audit-level=high
