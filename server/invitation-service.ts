@@ -42,7 +42,7 @@ export async function generateInvitationPDF(
         .text("SAVE", centerX - 20, 80, { width: 40, align: "center" });
 
       doc
-        .font("Helvetica-Light")
+        .font("Helvetica")
         .fontSize(24)
         .fillColor("#8b7355")
         .text("the", centerX - 15, 125, { width: 30, align: "center" });
