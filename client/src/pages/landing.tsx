@@ -382,51 +382,51 @@ export default function Landing() {
         className="py-24 md:py-32 lg:py-40 px-6 bg-background"
       >
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-center">
             {/* Arnold Portrait */}
-            <div className="order-2 lg:order-1">
+            <div className="order-2 lg:order-1 animate-in fade-in slide-in-from-left-8 duration-700">
               <div
-                className="aspect-[3/4] overflow-hidden bg-muted"
+                className="aspect-[3/4] overflow-hidden bg-muted max-w-xs mx-auto hover:shadow-xl transition-shadow duration-300"
                 data-testid="card-arnold"
               >
                 <img
                   src={arnoldPortrait}
                   alt="Arnold"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                   data-testid="img-arnold"
                 />
               </div>
             </div>
 
             {/* Center Text */}
-            <div className="order-1 lg:order-2 text-center px-4 lg:px-8">
+            <div className="order-1 lg:order-2 text-center px-4 lg:px-8 animate-in fade-in zoom-in duration-700 animation-delay-200">
               <h2 className="text-3xl md:text-4xl font-serif font-light text-foreground mb-8 tracking-wide">
                 NOTRE HISTOIRE
               </h2>
 
-              <div className="h-px w-16 bg-primary mx-auto mb-8" />
+              <div className="h-px w-16 bg-primary mx-auto mb-8 animate-in scale-x-0 origin-center duration-1000 animation-delay-300" />
 
-              <p className="text-sm md:text-base font-sans leading-relaxed text-muted-foreground mb-8 italic">
+              <p className="text-sm md:text-base font-sans leading-relaxed text-muted-foreground mb-8 italic animate-in fade-in duration-700 animation-delay-400">
                 "Notre histoire a commencé comme un conte de fées moderne. Deux
                 âmes destinées à se rencontrer, réunies par le destin et
                 l'amour."
               </p>
 
-              <p className="text-xs md:text-sm font-sans text-foreground tracking-widest">
+              <p className="text-xs md:text-sm font-sans text-foreground tracking-widest animate-in fade-in duration-700 animation-delay-500">
                 Ruth & Arnold
               </p>
             </div>
 
             {/* Ruth Portrait */}
-            <div className="order-3">
+            <div className="order-3 animate-in fade-in slide-in-from-right-8 duration-700">
               <div
-                className="aspect-[3/4] overflow-hidden bg-muted"
+                className="aspect-[3/4] overflow-hidden bg-muted max-w-xs mx-auto hover:shadow-xl transition-shadow duration-300"
                 data-testid="card-ruth"
               >
                 <img
                   src={ruthPortrait}
                   alt="Ruth"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                   data-testid="img-ruth"
                 />
               </div>
@@ -441,13 +441,13 @@ export default function Landing() {
         className="py-24 md:py-32 lg:py-40 px-6 bg-gradient-to-b from-background to-muted/20"
       >
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-light text-foreground mb-16 text-center tracking-wide">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-light text-foreground mb-16 text-center tracking-wide animate-in fade-in slide-in-from-top-4 duration-700">
             PROGRAMME DE CÉLÉBRATION
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {/* March 19 */}
-            <Card className="p-10 md:p-12 border-l-4 border-l-primary hover:shadow-xl transition-all duration-300">
+            <Card className="p-10 md:p-12 border-l-4 border-l-primary hover:shadow-xl transition-all duration-300 animate-in fade-in slide-in-from-left-8 duration-700">
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="text-2xl font-serif font-bold text-primary">19</span>
@@ -475,7 +475,7 @@ export default function Landing() {
             </Card>
 
             {/* March 21 */}
-            <Card className="p-10 md:p-12 border-l-4 border-l-chart-2 hover:shadow-xl transition-all duration-300">
+            <Card className="p-10 md:p-12 border-l-4 border-l-chart-2 hover:shadow-xl transition-all duration-300 animate-in fade-in slide-in-from-right-8 duration-700 animation-delay-200">
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-12 h-12 rounded-full bg-chart-2/10 flex items-center justify-center">
                   <span className="text-2xl font-serif font-bold text-chart-2">21</span>
@@ -527,16 +527,16 @@ export default function Landing() {
         <div className="max-w-3xl mx-auto">
           {!isSubmitted ? (
             <>
-              <h2 className="text-3xl md:text-4xl font-serif font-light text-center mb-12 text-foreground tracking-wide">
+              <h2 className="text-3xl md:text-4xl font-serif font-light text-center mb-12 text-foreground tracking-wide animate-in fade-in slide-in-from-top-4 duration-700">
                 CONFIRMEZ VOTRE PRÉSENCE
               </h2>
 
-              <p className="text-sm md:text-base text-center text-muted-foreground font-sans mb-16 italic">
+              <p className="text-sm md:text-base text-center text-muted-foreground font-sans mb-16 italic animate-in fade-in duration-700 animation-delay-200">
                 Merci de nous indiquer vos disponibilités afin de préparer nos
                 invitations officielles
               </p>
 
-              <Card className="p-8 md:p-16 bg-gradient-to-br from-background to-muted/10 border-2 border-primary/10">
+              <Card className="p-8 md:p-16 bg-gradient-to-br from-background to-muted/10 border-2 border-primary/10 animate-in fade-in zoom-in duration-700 animation-delay-300">
                 <Form {...form}>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
@@ -758,7 +758,7 @@ export default function Landing() {
         className="py-24 md:py-32 lg:py-40 px-6 bg-muted/30"
       >
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-serif font-light text-center mb-16 text-foreground tracking-wide">
+          <h2 className="text-3xl md:text-4xl font-serif font-light text-center mb-16 text-foreground tracking-wide animate-in fade-in slide-in-from-top-4 duration-700">
             NOS MOMENTS PRÉCIEUX
           </h2>
 
@@ -766,9 +766,10 @@ export default function Landing() {
             {galleryImages.map((image, idx) => (
               <div
                 key={idx}
-                className="relative aspect-[3/4] overflow-hidden cursor-pointer group"
+                className="relative aspect-[3/4] overflow-hidden cursor-pointer group animate-in fade-in zoom-in duration-700"
                 onClick={() => setLightboxImage(image)}
                 data-testid={`gallery-image-${idx}`}
+                style={{ animationDelay: `${idx * 100}ms` }}
               >
                 <img
                   src={image.src}
