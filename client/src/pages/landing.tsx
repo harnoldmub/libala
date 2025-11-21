@@ -320,12 +320,12 @@ export default function Landing() {
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-30"
+          className="absolute inset-0 bg-cover bg-center opacity-20"
           style={{
             backgroundImage: `url(${heroImage})`,
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-background/95" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-white/10 to-background/80" />
 
         <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
           <div className="mb-12 animate-fade-in-up">
@@ -334,19 +334,19 @@ export default function Landing() {
             </p>
           </div>
 
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif font-light text-primary mb-8 leading-tight animate-fade-in-up animation-delay-200">
+          <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif font-light text-primary mb-8 leading-tight animate-fade-in-up animation-delay-200 drop-shadow-lg">
             RUTH
             <br />
-            <span className="text-foreground">&</span>
+            <span className="text-foreground drop-shadow-lg">&</span>
             <br />
             ARNOLD
           </h1>
 
-          <p className="text-base md:text-lg font-sans text-foreground mb-6 tracking-wide animate-fade-in-up animation-delay-400">
+          <p className="text-base md:text-lg font-sans text-foreground mb-6 tracking-wide animate-fade-in-up animation-delay-400 drop-shadow-sm">
             19 & 21 Mars 2026
           </p>
 
-          <p className="text-sm md:text-base font-sans text-foreground/90 mb-16 max-w-2xl mx-auto leading-relaxed animate-fade-in-up animation-delay-600">
+          <p className="text-sm md:text-base font-sans text-foreground/95 mb-16 max-w-2xl mx-auto leading-relaxed animate-fade-in-up animation-delay-600 drop-shadow-sm">
             Rejoignez-nous pour célébrer notre union lors de deux journées
             inoubliables
             <br />
@@ -356,17 +356,17 @@ export default function Landing() {
 
           <div className="animate-fade-in-up animation-delay-800">
             <Button
-              variant="outline"
+              variant="default"
               size="lg"
-              className="rounded-none px-12 py-6 text-sm tracking-widest uppercase border-2 hover-elevate"
+              className="rounded-full px-12 py-6 text-sm tracking-widest uppercase font-semibold shadow-lg hover:shadow-xl transition-all"
               onClick={() => {
                 document
-                  .getElementById("story")
+                  .getElementById("program")
                   ?.scrollIntoView({ behavior: "smooth" });
               }}
               data-testid="button-voir-plus"
             >
-              Découvrir
+              Découvrir le Programme
             </Button>
           </div>
         </div>
@@ -435,37 +435,86 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Dates Section */}
-      <section className="py-24 md:py-32 lg:py-40 px-6 bg-background">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-light text-foreground mb-12 tracking-wide leading-tight">
-            HEUREUX DE VOUS
-            <br />
-            ACCUEILLIR PARMI NOUS
+      {/* Program Section */}
+      <section
+        id="program"
+        className="py-24 md:py-32 lg:py-40 px-6 bg-gradient-to-b from-background to-muted/20"
+      >
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-light text-foreground mb-16 text-center tracking-wide">
+            PROGRAMME DE CÉLÉBRATION
           </h2>
 
-          <p className="text-sm md:text-base font-sans text-muted-foreground mb-16 italic max-w-2xl mx-auto">
-            Rejoignez-nous pour célébrer notre union lors de deux journées
-            inoubliables
-          </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+            {/* March 19 */}
+            <Card className="p-10 md:p-12 border-l-4 border-l-primary hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-2xl font-serif font-bold text-primary">19</span>
+                </div>
+                <div>
+                  <h3 className="text-2xl md:text-3xl font-serif font-semibold text-foreground">
+                    JEUDI 19 MARS
+                  </h3>
+                  <p className="text-sm text-muted-foreground font-sans">Dot & Cérémonie</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex gap-4 pb-4 border-b border-border/50">
+                  <div className="w-1 bg-primary rounded-full mt-1 flex-shrink-0" />
+                  <div>
+                    <p className="font-sans font-semibold text-foreground">Dot</p>
+                    <p className="text-sm text-muted-foreground">
+                      Lieu: À confirmer
+                      <br />
+                      Heure: À confirmer
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Card>
 
-          <div className="mb-16">
-            <div
-              className="text-5xl md:text-7xl lg:text-8xl font-serif font-light text-primary mb-8"
-              data-testid="text-date-19"
-            >
-              19 & 21 MARS 2026
-            </div>
-
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-sm md:text-base text-muted-foreground font-sans tracking-wide">
-              <span data-testid="card-date-19">• MARIAGE CIVIL & DOT</span>
-              <span className="hidden md:inline">|</span>
-              <span data-testid="card-date-21">• BÉNÉDICTION & RÉCEPTION</span>
-            </div>
+            {/* March 21 */}
+            <Card className="p-10 md:p-12 border-l-4 border-l-chart-2 hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-12 h-12 rounded-full bg-chart-2/10 flex items-center justify-center">
+                  <span className="text-2xl font-serif font-bold text-chart-2">21</span>
+                </div>
+                <div>
+                  <h3 className="text-2xl md:text-3xl font-serif font-semibold text-foreground">
+                    SAMEDI 21 MARS
+                  </h3>
+                  <p className="text-sm text-muted-foreground font-sans">Mariage & Réception</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex gap-4 pb-4 border-b border-border/50">
+                  <div className="w-1 bg-chart-2 rounded-full mt-1 flex-shrink-0" />
+                  <div>
+                    <p className="font-sans font-semibold text-foreground">Mariage Civil</p>
+                    <p className="text-sm text-muted-foreground">10h00</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 pb-4 border-b border-border/50">
+                  <div className="w-1 bg-chart-2 rounded-full mt-1 flex-shrink-0" />
+                  <div>
+                    <p className="font-sans font-semibold text-foreground">Bénédiction</p>
+                    <p className="text-sm text-muted-foreground">13h00</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="w-1 bg-chart-2 rounded-full mt-1 flex-shrink-0" />
+                  <div>
+                    <p className="font-sans font-semibold text-foreground">Soirée & Réception</p>
+                    <p className="text-sm text-muted-foreground">20h00</p>
+                  </div>
+                </div>
+              </div>
+            </Card>
           </div>
 
-          <div className="max-w-4xl mx-auto border-t border-border pt-12">
-            <h3 className="text-lg md:text-xl font-sans font-light text-foreground mb-8 tracking-widest uppercase">
+          <div className="max-w-4xl mx-auto mt-16 border-t border-border pt-12">
+            <h3 className="text-lg md:text-xl font-sans font-semibold text-foreground mb-8 text-center tracking-widest uppercase">
               Compte à rebours
             </h3>
             <Countdown />
@@ -487,7 +536,7 @@ export default function Landing() {
                 invitations officielles
               </p>
 
-              <Card className="p-10 md:p-16">
+              <Card className="p-8 md:p-16 bg-gradient-to-br from-background to-muted/10 border-2 border-primary/10">
                 <Form {...form}>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
@@ -499,14 +548,14 @@ export default function Landing() {
                         name="firstName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-base font-sans">
+                            <FormLabel className="text-base font-sans font-semibold text-foreground">
                               Prénom *
                             </FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
                                 placeholder="Votre prénom"
-                                className="border-2 focus:border-primary transition-colors"
+                                className="rounded-lg border-2 border-primary/20 focus:border-primary transition-all hover:border-primary/40 bg-background/50"
                                 data-testid="input-firstname"
                               />
                             </FormControl>
@@ -520,14 +569,14 @@ export default function Landing() {
                         name="lastName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-base font-sans">
+                            <FormLabel className="text-base font-sans font-semibold text-foreground">
                               Nom *
                             </FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
                                 placeholder="Votre nom"
-                                className="border-2 focus:border-primary transition-colors"
+                                className="rounded-lg border-2 border-primary/20 focus:border-primary transition-all hover:border-primary/40 bg-background/50"
                                 data-testid="input-lastname"
                               />
                             </FormControl>
@@ -542,7 +591,7 @@ export default function Landing() {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base font-sans">
+                          <FormLabel className="text-base font-sans font-semibold text-foreground">
                             Adresse email *
                           </FormLabel>
                           <FormControl>
@@ -550,7 +599,7 @@ export default function Landing() {
                               {...field}
                               type="email"
                               placeholder="votre@email.com"
-                              className="border-2 focus:border-primary transition-colors"
+                              className="rounded-lg border-2 border-primary/20 focus:border-primary transition-all hover:border-primary/40 bg-background/50"
                               data-testid="input-email"
                             />
                           </FormControl>
@@ -564,7 +613,7 @@ export default function Landing() {
                       name="partySize"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base font-sans">
+                          <FormLabel className="text-base font-sans font-semibold text-foreground">
                             Nombre de personnes *
                           </FormLabel>
                           <FormControl>
@@ -575,7 +624,7 @@ export default function Landing() {
                               value={field.value?.toString()}
                             >
                               <SelectTrigger
-                                className="border-2 focus:border-primary transition-colors"
+                                className="rounded-lg border-2 border-primary/20 focus:border-primary transition-all hover:border-primary/40"
                                 data-testid="select-partysize"
                               >
                                 <SelectValue placeholder="Sélectionnez" />
@@ -603,7 +652,7 @@ export default function Landing() {
                       name="availability"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base font-sans">
+                          <FormLabel className="text-base font-sans font-semibold text-foreground">
                             Disponibilité *
                           </FormLabel>
                           <Select
@@ -612,7 +661,7 @@ export default function Landing() {
                           >
                             <FormControl>
                               <SelectTrigger
-                                className="border-2 focus:border-primary transition-colors"
+                                className="rounded-lg border-2 border-primary/20 focus:border-primary transition-all hover:border-primary/40"
                                 data-testid="select-availability"
                               >
                                 <SelectValue placeholder="Sélectionnez votre disponibilité" />
@@ -653,7 +702,7 @@ export default function Landing() {
                     <Button
                       type="submit"
                       size="lg"
-                      className="w-full rounded-full text-base font-sans"
+                      className="w-full rounded-full text-base font-semibold shadow-lg hover:shadow-xl transition-all"
                       disabled={rsvpMutation.isPending}
                       data-testid="button-submit-rsvp"
                     >
@@ -788,6 +837,17 @@ export default function Landing() {
                 <button
                   onClick={() =>
                     document
+                      .getElementById("program")
+                      ?.scrollIntoView({ behavior: "smooth" })
+                  }
+                  className="block text-sm text-muted-foreground hover:text-primary transition-colors font-sans text-left"
+                  data-testid="button-footer-nav-program"
+                >
+                  Programme
+                </button>
+                <button
+                  onClick={() =>
+                    document
                       .getElementById("galerie")
                       ?.scrollIntoView({ behavior: "smooth" })
                   }
@@ -801,11 +861,20 @@ export default function Landing() {
 
             <div>
               <h3 className="text-xs font-sans tracking-widest uppercase text-foreground mb-6">
-                GOLDEN LOVE
+                ADMIN
               </h3>
-              <p className="text-sm text-muted-foreground font-sans italic">
-                Deux dates, un seul amour
-              </p>
+              <div className="space-y-3">
+                <a
+                  href="/login"
+                  className="block text-sm text-muted-foreground hover:text-primary transition-colors font-sans"
+                  data-testid="link-admin-login"
+                >
+                  Accès Administration
+                </a>
+                <p className="text-xs text-muted-foreground/60 font-sans italic mt-4">
+                  Deux dates, un seul amour
+                </p>
+              </div>
             </div>
           </div>
 
