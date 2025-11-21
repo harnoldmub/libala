@@ -19,9 +19,15 @@ export async function generateInvitationPDF(
       });
 
       const buffers: Buffer[] = [];
-      doc.on("data", (chunk: any) => buffers.push(chunk));
-      doc.on("end", () => resolve(Buffer.concat(buffers)));
-      doc.on("error", reject);
+      doc.on("data", (chunk: Buffer) => buffers.push(chunk));
+      doc.on("end", () => {
+        try {
+          resolve(Buffer.concat(buffers));
+        } catch (e) {
+          reject(e);
+        }
+      });
+      doc.on("error", (err) => reject(err));
 
       // PAGE 1: Save the Date
       doc.fillColor("#f5f1e8").rect(0, 0, doc.page.width, doc.page.height).fill();

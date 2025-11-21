@@ -49,6 +49,10 @@ export function setupLocalAuth(app: Express) {
         if (loginErr) {
           return res.status(500).json({ message: "Erreur de connexion" });
         }
+        // Set session cookie expiration to 4 hours
+        if (req.session) {
+          req.session.cookie.maxAge = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
+        }
         return res.json({ success: true, user });
       });
     })(req, res, next);
