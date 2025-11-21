@@ -18,6 +18,7 @@ export interface IStorage {
   
   // RSVP operations
   createRsvpResponse(response: InsertRsvpResponse): Promise<RsvpResponse>;
+  getRsvpResponse(id: number): Promise<RsvpResponse | undefined>;
   getAllRsvpResponses(): Promise<RsvpResponse[]>;
   updateRsvpTableNumber(id: number, tableNumber: number | null): Promise<RsvpResponse>;
   deleteRsvpResponse(id: number): Promise<void>;
@@ -75,6 +76,14 @@ export class DatabaseStorage implements IStorage {
       .insert(rsvpResponses)
       .values(responseData)
       .returning();
+    return response;
+  }
+
+  async getRsvpResponse(id: number): Promise<RsvpResponse | undefined> {
+    const [response] = await db
+      .select()
+      .from(rsvpResponses)
+      .where(eq(rsvpResponses.id, id));
     return response;
   }
 

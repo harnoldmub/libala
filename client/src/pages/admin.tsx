@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { LogOut, Search, Users, Table2, Download, Mail, Edit, Trash2, BarChart3 } from "lucide-react";
+import { LogOut, Search, Users, Table2, Download, Mail, Edit, Trash2, BarChart3, FileText } from "lucide-react";
 import { DashboardWidgets } from "@/components/dashboard-widgets";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -52,6 +52,10 @@ export default function Admin() {
   const [editingResponse, setEditingResponse] = useState<RsvpResponse | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [invitationPreviewOpen, setInvitationPreviewOpen] = useState(false);
+  const [previewingResponse, setPreviewingResponse] = useState<RsvpResponse | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -177,6 +181,33 @@ export default function Admin() {
       toast({
         title: "Erreur",
         description: "Impossible de modifier la réponse",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const generateInvitationMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/invitation/generate/${id}`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to generate invitation");
+      return response.blob();
+    },
+    onSuccess: async (blob, id) => {
+      const url = URL.createObjectURL(blob);
+      setPreviewUrl(url);
+      const response = responses.find(r => r.id === id);
+      if (response) {
+        setPreviewingResponse(response);
+        setInvitationPreviewOpen(true);
+      }
+    },
+    onError: () => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de générer l'invitation",
         variant: "destructive",
       });
     },
@@ -486,6 +517,16 @@ export default function Admin() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            onClick={() => generateInvitationMutation.mutate(response.id)}
+                            disabled={generateInvitationMutation.isPending}
+                            data-testid={`button-invitation-${response.id}`}
+                            title="Générer l'invitation"
+                          >
+                            <FileText className="h-4 w-4 text-primary" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => {
                               setDeletingId(response.id);
                               setDeleteDialogOpen(true);
@@ -537,6 +578,50 @@ export default function Admin() {
                 {deleteRsvpMutation.isPending ? "Suppression..." : "Supprimer"}
               </Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Invitation Preview Dialog */}
+        <Dialog open={invitationPreviewOpen} onOpenChange={setInvitationPreviewOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle>
+                Aperçu invitation - {previewingResponse?.firstName} {previewingResponse?.lastName}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-4">
+              {previewUrl && (
+                <iframe
+                  ref={iframeRef}
+                  src={previewUrl}
+                  className="w-full h-[600px] border rounded-lg"
+                  title="Aperçu invitation"
+                />
+              )}
+              <div className="flex gap-2 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setInvitationPreviewOpen(false)}
+                  data-testid="button-close-preview"
+                >
+                  Fermer
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (previewUrl) {
+                      const link = document.createElement("a");
+                      link.href = previewUrl;
+                      link.download = `invitation-${previewingResponse?.firstName}-${previewingResponse?.lastName}.pdf`;
+                      link.click();
+                    }
+                  }}
+                  data-testid="button-download-invitation"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Télécharger
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
 

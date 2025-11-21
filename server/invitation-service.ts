@@ -6,7 +6,6 @@ export interface InvitationData {
   firstName: string;
   lastName: string;
   tableNumber: number | null;
-  availability: string;
 }
 
 export async function generateInvitationPDF(
@@ -16,25 +15,20 @@ export async function generateInvitationPDF(
     try {
       const doc = new PDFDocument({
         size: "A5",
-        margin: 40,
+        margin: 30,
       });
 
       const buffers: Buffer[] = [];
-      doc.on("data", (chunk) => buffers.push(chunk));
+      doc.on("data", (chunk: any) => buffers.push(chunk));
       doc.on("end", () => resolve(Buffer.concat(buffers)));
       doc.on("error", reject);
 
       // PAGE 1: Save the Date
-      // Background color
       doc.fillColor("#f5f1e8").rect(0, 0, doc.page.width, doc.page.height).fill();
-
-      // Gold accent line at top
       doc.fillColor("#8b7355").rect(0, 0, doc.page.width, 3).fill();
 
-      // Centered content
       const centerX = doc.page.width / 2;
 
-      // Title
       doc
         .font("Helvetica-Bold")
         .fontSize(32)
@@ -53,87 +47,66 @@ export async function generateInvitationPDF(
         .fillColor("#8b7355")
         .text("DATE", centerX - 20, 160, { width: 40, align: "center" });
 
-      // Date
       doc
         .font("Helvetica")
         .fontSize(14)
         .fillColor("#8b7355")
         .text("19 & 21 MARS 2026", centerX - 50, 220, { width: 100, align: "center" });
 
-      // Couple names
       doc
         .font("Helvetica-Oblique")
         .fontSize(16)
         .fillColor("#8b7355")
         .text("Ruth & Arnold", centerX - 40, 270, { width: 80, align: "center" });
 
-      // Guest name at bottom
       doc
         .font("Helvetica")
-        .fontSize(10)
+        .fontSize(9)
         .fillColor("#8b7355")
-        .text(`Cher(e) ${data.firstName} ${data.lastName.toUpperCase()}`, 40, doc.page.height - 60, {
-          width: doc.page.width - 80,
+        .text(`Cher(e) ${data.firstName} ${data.lastName.toUpperCase()}`, 30, doc.page.height - 50, {
+          width: doc.page.width - 60,
           align: "center",
         });
 
-      // PAGE 2: Program & Details
+      // PAGE 2: Program & QR Code
       doc.addPage();
-
-      // Background color
       doc
         .fillColor("#f5f1e8")
         .rect(0, 0, doc.page.width, doc.page.height)
         .fill();
-
-      // Gold accent line at top
       doc.fillColor("#8b7355").rect(0, 0, doc.page.width, 3).fill();
 
-      // Program title
       doc
         .font("Helvetica-Bold")
-        .fontSize(14)
+        .fontSize(13)
         .fillColor("#8b7355")
-        .text("PROGRAMME", 40, 30, { width: doc.page.width - 80, align: "center" });
+        .text("PROGRAMME", 30, 30, { width: doc.page.width - 60, align: "center" });
 
-      // Program details
       let yPos = 55;
       const programs = [
-        { date: "19 MARS", label: "Dot & Cérémonie", details: "Lieu & Heure: À confirmer" },
-        {
-          date: "21 MARS",
-          label: "CIVIL - 10h",
-          details: "Mariage Civil",
-        },
-        { date: "21 MARS", label: "BÉNÉDICTION - 13h", details: "Cérémonie religieuse" },
-        { date: "21 MARS", label: "SOIRÉE - 20h", details: "Réception & dîner" },
+        "19 MARS • Dot & Cérémonie",
+        "21 MARS • Civil - 10h",
+        "21 MARS • Bénédiction - 13h",
+        "21 MARS • Soirée - 20h",
       ];
 
       programs.forEach((prog) => {
         doc
-          .font("Helvetica-Bold")
-          .fontSize(9)
-          .fillColor("#8b7355")
-          .text(`${prog.date} • ${prog.label}`, 40, yPos, {
-            width: doc.page.width - 80,
-          });
-        doc
           .font("Helvetica")
           .fontSize(8)
-          .fillColor("#666")
-          .text(prog.details, 40, yPos + 14, { width: doc.page.width - 80 });
-        yPos += 28;
+          .fillColor("#8b7355")
+          .text(prog, 30, yPos, { width: doc.page.width - 60 });
+        yPos += 16;
       });
 
-      // QR Code section
-      yPos += 10;
+      yPos += 5;
       doc
         .font("Helvetica-Bold")
-        .fontSize(11)
+        .fontSize(10)
         .fillColor("#8b7355")
-        .text("Code d'accès", 40, yPos, { width: doc.page.width - 80, align: "center" });
+        .text("Accès Événement", 30, yPos, { width: doc.page.width - 60, align: "center" });
 
-      // Generate QR code with guest ID
+      // Generate QR code
       const qrDataUrl = await QRCode.toDataURL(data.id.toString(), {
         errorCorrectionLevel: "H",
         type: "image/png",
@@ -147,32 +120,30 @@ export async function generateInvitationPDF(
         "base64"
       );
 
-      const qrX = centerX - 40;
-      const qrY = yPos + 15;
-      doc.image(qrBuffer, qrX, qrY, { width: 80, height: 80 });
+      const qrX = centerX - 35;
+      const qrY = yPos + 12;
+      doc.image(qrBuffer, qrX, qrY, { width: 70, height: 70 });
 
-      // Table assignment if available
       if (data.tableNumber) {
         doc
-          .font("Helvetica")
-          .fontSize(9)
+          .font("Helvetica-Bold")
+          .fontSize(11)
           .fillColor("#8b7355")
-          .text(`Table n° ${data.tableNumber}`, centerX - 30, qrY + 85, {
-            width: 60,
+          .text(`Table ${data.tableNumber}`, centerX - 25, qrY + 75, {
+            width: 50,
             align: "center",
           });
       }
 
-      // Footer message
       doc
         .font("Helvetica-Oblique")
-        .fontSize(8)
+        .fontSize(7)
         .fillColor("#999")
         .text(
-          "Merci de confirmer votre présence et de communiquer vos préférences culinaires.",
-          40,
-          doc.page.height - 40,
-          { width: doc.page.width - 80, align: "center" }
+          "Merci de confirmer votre présence",
+          30,
+          doc.page.height - 30,
+          { width: doc.page.width - 60, align: "center" }
         );
 
       doc.end();

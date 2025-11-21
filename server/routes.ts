@@ -165,10 +165,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate PDF invitation route
-  app.get("/api/invitation/pdf/:id", isLocallyAuthenticated, async (req, res) => {
+  // Generate invitation PDF
+  app.post("/api/invitation/generate/:id", isLocallyAuthenticated, async (req, res) => {
     try {
-      const { generateInvitationPDF } = await import("./pdf-service");
+      const { generateInvitationPDF } = await import("./invitation-service");
       const id = parseInt(req.params.id);
       
       const response = await storage.getRsvpResponse(id);
@@ -181,45 +181,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: response.firstName,
         lastName: response.lastName,
         tableNumber: response.tableNumber,
-        availability: response.availability,
       });
 
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="invitation-${response.firstName}-${response.lastName}.pdf"`
+        `inline; filename="invitation-${response.firstName}-${response.lastName}.pdf"`
       );
       res.send(pdfBuffer);
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      res.status(500).json({ message: "Failed to generate PDF" });
-    }
-  });
-
-  // Preview PDF invitation route (returns as blob)
-  app.get("/api/invitation/preview/:id", isLocallyAuthenticated, async (req, res) => {
-    try {
-      const { generateInvitationPDF } = await import("./pdf-service");
-      const id = parseInt(req.params.id);
-      
-      const response = await storage.getRsvpResponse(id);
-      if (!response) {
-        return res.status(404).json({ message: "Guest not found" });
-      }
-
-      const pdfBuffer = await generateInvitationPDF({
-        id: response.id,
-        firstName: response.firstName,
-        lastName: response.lastName,
-        tableNumber: response.tableNumber,
-        availability: response.availability,
-      });
-
-      res.setHeader("Content-Type", "application/pdf");
-      res.send(pdfBuffer);
-    } catch (error) {
-      console.error("Error previewing PDF:", error);
-      res.status(500).json({ message: "Failed to preview PDF" });
+      console.error("Error generating invitation:", error);
+      res.status(500).json({ message: "Failed to generate invitation" });
     }
   });
 
