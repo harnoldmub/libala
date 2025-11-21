@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { LogOut, Search, Users, Table2, Download, Mail, Edit, Trash2, BarChart3, FileText } from "lucide-react";
+import { LogOut, Search, Users, Table2, Download, Mail, Edit, Trash2, BarChart3, FileText, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { DashboardWidgets } from "@/components/dashboard-widgets";
 import type { RsvpResponse } from "@shared/schema";
 
 export default function Admin() {
@@ -191,22 +192,35 @@ export default function Admin() {
         method: "POST",
         credentials: "include",
       });
-      if (!response.ok) throw new Error("Failed to generate invitation");
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || "Failed to generate invitation");
+      }
       return response.blob();
     },
     onSuccess: async (blob, id) => {
-      const url = URL.createObjectURL(blob);
-      setPreviewUrl(url);
-      const response = responses.find(r => r.id === id);
-      if (response) {
-        setPreviewingResponse(response);
-        setInvitationPreviewOpen(true);
+      try {
+        const url = URL.createObjectURL(blob);
+        setPreviewUrl(url);
+        const resp = responses.find(r => r.id === id);
+        if (resp) {
+          setPreviewingResponse(resp);
+          setInvitationPreviewOpen(true);
+        }
+      } catch (error) {
+        console.error("Error displaying invitation:", error);
+        toast({
+          title: "Erreur",
+          description: "Impossible d'afficher l'invitation",
+          variant: "destructive",
+        });
       }
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Invitation error:", error);
       toast({
         title: "Erreur",
-        description: "Impossible de générer l'invitation",
+        description: error.message || "Impossible de générer l'invitation",
         variant: "destructive",
       });
     },
@@ -304,6 +318,9 @@ export default function Admin() {
       </header>
 
       <div className="container px-6 py-8">
+        {/* Dashboard Widgets */}
+        <DashboardWidgets responses={responses} />
+
         {/* Actions & Filters */}
         <Card className="p-6 mb-8 mt-8">
           <div className="flex flex-col gap-4">
@@ -484,10 +501,77 @@ export default function Admin() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Table2 className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-sans text-sm" data-testid={`text-table-${response.id}`}>
-                            {response.tableNumber ? `Table ${response.tableNumber}` : 'Non attribuée'}
-                          </span>
+                          {response.tableNumber ? (
+                            <>
+                              <Table2 className="h-4 w-4 text-chart-2" />
+                              <span className="font-sans text-sm font-semibold" data-testid={`text-table-${response.id}`}>
+                                Table {response.tableNumber}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 px-2"
+                                onClick={() => updateTableMutation.mutate({ id: response.id, tableNumber: null })}
+                                data-testid={`button-remove-table-${response.id}`}
+                              >
+                                ✕
+                              </Button>
+                            </>
+                          ) : (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7"
+                                  data-testid={`button-assign-table-${response.id}`}
+                                >
+                                  <Plus className="h-3 w-3 mr-1" />
+                                  Attribuer
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-sm">
+                                <DialogHeader>
+                                  <DialogTitle>Attribuer une table</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label htmlFor={`table-input-${response.id}`}>Numéro de table</Label>
+                                    <Input
+                                      id={`table-input-${response.id}`}
+                                      type="number"
+                                      min="1"
+                                      placeholder="Ex: 1, 2, 3..."
+                                      data-testid={`input-table-number-${response.id}`}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                          const value = parseInt((e.target as HTMLInputElement).value);
+                                          if (value > 0) {
+                                            updateTableMutation.mutate({ id: response.id, tableNumber: value });
+                                            (e.target as HTMLInputElement).value = '';
+                                          }
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                  <Button
+                                    onClick={() => {
+                                      const input = document.getElementById(`table-input-${response.id}`) as HTMLInputElement;
+                                      const value = parseInt(input.value);
+                                      if (value > 0) {
+                                        updateTableMutation.mutate({ id: response.id, tableNumber: value });
+                                      }
+                                    }}
+                                    disabled={updateTableMutation.isPending}
+                                    className="w-full"
+                                    data-testid={`button-confirm-table-${response.id}`}
+                                  >
+                                    {updateTableMutation.isPending ? "Enregistrement..." : "Enregistrer"}
+                                  </Button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground font-sans text-sm">
