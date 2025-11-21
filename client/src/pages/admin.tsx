@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { LogOut, Search, Users, Table2, Download, Mail, Edit, Trash2 } from "lucide-react";
+import { LogOut, Search, Users, Table2, Download, Mail, Edit, Trash2, BarChart3 } from "lucide-react";
+import { DashboardWidgets } from "@/components/dashboard-widgets";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -273,36 +274,11 @@ export default function Admin() {
       </header>
 
       <div className="container px-6 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-8">
-          <Card className="p-3 md:p-4">
-            <div className="text-xl md:text-2xl font-bold text-foreground">{stats.total}</div>
-            <div className="text-xs md:text-sm text-muted-foreground font-sans leading-tight">Total réponses</div>
-          </Card>
-          <Card className="p-3 md:p-4">
-            <div className="text-xl md:text-2xl font-bold text-primary">{stats.both}</div>
-            <div className="text-xs md:text-sm text-muted-foreground font-sans leading-tight">Les deux dates</div>
-          </Card>
-          <Card className="p-3 md:p-4">
-            <div className="text-xl md:text-2xl font-bold text-foreground">{stats.march19}</div>
-            <div className="text-xs md:text-sm text-muted-foreground font-sans leading-tight">19 mars</div>
-          </Card>
-          <Card className="p-3 md:p-4">
-            <div className="text-xl md:text-2xl font-bold text-foreground">{stats.march21}</div>
-            <div className="text-xs md:text-sm text-muted-foreground font-sans leading-tight">21 mars</div>
-          </Card>
-          <Card className="p-3 md:p-4">
-            <div className="text-xl md:text-2xl font-bold text-muted-foreground">{stats.unavailable}</div>
-            <div className="text-xs md:text-sm text-muted-foreground font-sans leading-tight">Indisponibles</div>
-          </Card>
-          <Card className="p-3 md:p-4">
-            <div className="text-xl md:text-2xl font-bold text-chart-2">{stats.assigned}</div>
-            <div className="text-xs md:text-sm text-muted-foreground font-sans leading-tight">Places attribuées</div>
-          </Card>
-        </div>
+        {/* Dashboard Widgets */}
+        <DashboardWidgets responses={responses} />
 
         {/* Actions & Filters */}
-        <Card className="p-6 mb-8">
+        <Card className="p-6 mb-8 mt-8">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center">
               <h3 className="font-serif font-semibold text-lg">Gestion des invités</h3>

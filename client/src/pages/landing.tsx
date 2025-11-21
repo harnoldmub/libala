@@ -320,21 +320,21 @@ export default function Landing() {
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-20"
+          className="absolute inset-0 bg-cover bg-center opacity-30"
           style={{
             backgroundImage: `url(${heroImage})`,
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-background/95" />
 
         <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
-          <div className="mb-12">
+          <div className="mb-12 animate-fade-in-up">
             <p className="text-sm md:text-base font-sans tracking-[0.3em] uppercase text-muted-foreground mb-8">
               Celebrating Love
             </p>
           </div>
 
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif font-light text-primary mb-8 leading-tight">
+          <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif font-light text-primary mb-8 leading-tight animate-fade-in-up animation-delay-200">
             RUTH
             <br />
             <span className="text-foreground">&</span>
@@ -342,11 +342,11 @@ export default function Landing() {
             ARNOLD
           </h1>
 
-          <p className="text-base md:text-lg font-sans text-foreground mb-6 tracking-wide">
+          <p className="text-base md:text-lg font-sans text-foreground mb-6 tracking-wide animate-fade-in-up animation-delay-400">
             19 & 21 Mars 2026
           </p>
 
-          <p className="text-sm md:text-base font-sans text-foreground/90 mb-16 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm md:text-base font-sans text-foreground/90 mb-16 max-w-2xl mx-auto leading-relaxed animate-fade-in-up animation-delay-600">
             Rejoignez-nous pour célébrer notre union lors de deux journées
             inoubliables
             <br />
@@ -354,7 +354,7 @@ export default function Landing() {
             bonheur avec vous
           </p>
 
-          <div>
+          <div className="animate-fade-in-up animation-delay-800">
             <Button
               variant="outline"
               size="lg"
