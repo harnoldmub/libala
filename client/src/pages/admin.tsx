@@ -671,12 +671,17 @@ export default function Admin() {
             </DialogHeader>
             <div className="flex flex-col gap-4">
               {previewUrl && (
-                <iframe
-                  ref={iframeRef}
-                  src={previewUrl}
+                <object
+                  data={previewUrl}
+                  type="application/pdf"
                   className="w-full h-[600px] border rounded-lg"
-                  title="Aperçu invitation"
-                />
+                >
+                  <embed
+                    src={previewUrl}
+                    type="application/pdf"
+                    className="w-full h-[600px]"
+                  />
+                </object>
               )}
               <div className="flex gap-2 justify-end">
                 <Button
