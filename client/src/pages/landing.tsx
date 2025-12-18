@@ -298,10 +298,7 @@ export default function Landing() {
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/rsvp"] });
 
-      setTimeout(() => {
-        const element = document.getElementById("rsvp-success");
-        element?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 100);
+      // Ne pas scroller - rester sur la réponse affichée
     },
     onError: (error: Error) => {
       toast({
