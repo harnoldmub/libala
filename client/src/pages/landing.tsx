@@ -352,7 +352,7 @@ export default function Landing() {
             <img
               src={logoRA}
               alt="R&A Logo"
-              className="h-32 md:h-40 lg:h-48 w-auto mx-auto drop-shadow-2xl"
+              className="h-20 md:h-24 lg:h-28 w-auto mx-auto drop-shadow-2xl"
               data-testid="logo-hero"
             />
           </motion.div>
