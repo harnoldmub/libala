@@ -357,14 +357,19 @@ export default function Landing() {
             Celebrating Love
           </p>
 
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-light text-primary mb-4 leading-tight animate-fade-in-up animation-delay-200 drop-shadow-lg">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-light text-primary mb-6 leading-tight animate-fade-in-up animation-delay-200 drop-shadow-lg">
             RUTH <span className="text-foreground drop-shadow-lg">&</span>{" "}
             ARNOLD
           </h1>
 
-          <p className="text-sm md:text-base font-sans text-foreground mb-3 tracking-wide animate-fade-in-up animation-delay-300 drop-shadow-sm">
-            19 & 21 Mars 2026
-          </p>
+          <div className="animate-fade-in-up animation-delay-300 mb-6">
+            <p className="text-2xl md:text-4xl lg:text-5xl font-serif font-light text-foreground tracking-wide drop-shadow-lg">
+              19 & 21 Mars 2026
+            </p>
+            <p className="text-base md:text-lg font-sans text-primary tracking-[0.3em] uppercase mt-2 drop-shadow-sm">
+              Bruxelles
+            </p>
+          </div>
 
           <p className="text-xs md:text-sm font-sans text-foreground/90 mb-6 max-w-xl mx-auto leading-relaxed animate-fade-in-up animation-delay-400 drop-shadow-sm">
             Rejoignez-nous pour célébrer notre union lors de deux journées
@@ -791,9 +796,9 @@ export default function Landing() {
                       Dot
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Lieu: À confirmer
+                      Bruxelles
                       <br />
-                      Heure: À confirmer
+                      19h30
                     </p>
                   </div>
                 </div>
@@ -824,7 +829,11 @@ export default function Landing() {
                     <p className="font-sans font-semibold text-foreground">
                       Mariage Civil
                     </p>
-                    <p className="text-sm text-muted-foreground">10h00</p>
+                    <p className="text-sm text-muted-foreground">
+                      Rhode-Saint-Genèse
+                      <br />
+                      10h00
+                    </p>
                   </div>
                 </div>
                 <div className="flex gap-4 pb-4 border-b border-border/50">
@@ -833,7 +842,11 @@ export default function Landing() {
                     <p className="font-sans font-semibold text-foreground">
                       Bénédiction
                     </p>
-                    <p className="text-sm text-muted-foreground">13h00</p>
+                    <p className="text-sm text-muted-foreground">
+                      Bruxelles
+                      <br />
+                      13h00
+                    </p>
                   </div>
                 </div>
                 <div className="flex gap-4">
@@ -842,7 +855,11 @@ export default function Landing() {
                     <p className="font-sans font-semibold text-foreground">
                       Soirée & Réception
                     </p>
-                    <p className="text-sm text-muted-foreground">20h00</p>
+                    <p className="text-sm text-muted-foreground">
+                      Bruxelles
+                      <br />
+                      20h00
+                    </p>
                   </div>
                 </div>
               </div>
