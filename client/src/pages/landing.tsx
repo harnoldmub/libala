@@ -344,7 +344,7 @@ export default function Landing() {
         <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
           {/* Logo prominent en haut */}
           <motion.div 
-            className="mb-8 animate-fade-in-up"
+            className="mb-4 animate-fade-in-up"
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
@@ -352,38 +352,28 @@ export default function Landing() {
             <img
               src={logoRA}
               alt="R&A Logo"
-              className="h-20 md:h-24 lg:h-28 w-auto mx-auto drop-shadow-2xl"
+              className="h-16 md:h-20 lg:h-24 w-auto mx-auto drop-shadow-2xl"
               data-testid="logo-hero"
             />
           </motion.div>
           
-          <div className="mb-8 animate-fade-in-up animation-delay-200">
-            <p className="text-sm md:text-base font-sans tracking-[0.3em] uppercase text-muted-foreground mb-4">
-              Celebrating Love
-            </p>
-          </div>
+          <p className="text-xs md:text-sm font-sans tracking-[0.3em] uppercase text-muted-foreground mb-3 animate-fade-in-up animation-delay-100">
+            Celebrating Love
+          </p>
 
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif font-light text-primary mb-8 leading-tight animate-fade-in-up animation-delay-200 drop-shadow-lg">
-            RUTH
-            <br />
-            <span className="text-foreground drop-shadow-lg">&</span>
-            <br />
-            ARNOLD
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-light text-primary mb-4 leading-tight animate-fade-in-up animation-delay-200 drop-shadow-lg">
+            RUTH <span className="text-foreground drop-shadow-lg">&</span> ARNOLD
           </h1>
 
-          <p className="text-base md:text-lg font-sans text-foreground mb-6 tracking-wide animate-fade-in-up animation-delay-400 drop-shadow-sm">
+          <p className="text-sm md:text-base font-sans text-foreground mb-3 tracking-wide animate-fade-in-up animation-delay-300 drop-shadow-sm">
             19 & 21 Mars 2026
           </p>
 
-          <p className="text-sm md:text-base font-sans text-foreground/95 mb-16 max-w-2xl mx-auto leading-relaxed animate-fade-in-up animation-delay-600 drop-shadow-sm">
-            Rejoignez-nous pour célébrer notre union lors de deux journées
-            inoubliables
-            <br />
-            Un mariage traditionnel et une grande fête pour partager notre
-            bonheur avec vous
+          <p className="text-xs md:text-sm font-sans text-foreground/90 mb-6 max-w-xl mx-auto leading-relaxed animate-fade-in-up animation-delay-400 drop-shadow-sm">
+            Rejoignez-nous pour célébrer notre union lors de deux journées inoubliables
           </p>
 
-          <div className="animate-fade-in-up animation-delay-800">
+          <div className="animate-fade-in-up animation-delay-500">
             <Button
               variant="default"
               size="lg"
