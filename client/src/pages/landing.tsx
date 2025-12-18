@@ -41,8 +41,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { AccommodationSection } from "@/components/accommodation";
 import { motion, useScroll, useTransform } from "framer-motion";
 import heroImage from "@assets/IMG_6360_1760648841327.jpg";
-import ruthPortrait from "@assets/ar-gallery_1760648320766.png";
-import arnoldPortrait from "@assets/rk-gallery_1760648320767.png";
+import couplePhoto from "@assets/DSC_8913_1766077508558.jpg";
 import gallery1 from "@assets/IMG_6337_1760648863844.jpg";
 import gallery2 from "@assets/IMG_6346_1760648863844.jpg";
 import gallery3 from "@assets/IMG_6359_1760648863845.jpg";
@@ -707,55 +706,40 @@ export default function Landing() {
         id="story"
         className="py-24 md:py-32 lg:py-40 px-6 bg-background"
       >
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-center">
-            {/* Arnold Portrait */}
-            <div className="order-2 lg:order-1 animate-in fade-in slide-in-from-left-8 duration-700">
-              <div
-                className="aspect-[3/4] overflow-hidden bg-muted max-w-xs mx-auto hover:shadow-xl transition-shadow duration-300"
-                data-testid="card-arnold"
-              >
-                <img
-                  src={arnoldPortrait}
-                  alt="Arnold"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                  data-testid="img-arnold"
-                />
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Photo avec cadre doré */}
+            <div className="animate-in fade-in slide-in-from-left-8 duration-700">
+              <div className="relative p-4 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 rounded-lg shadow-2xl">
+                <div className="absolute inset-0 border-4 border-primary/30 rounded-lg" />
+                <div className="relative aspect-[3/4] overflow-hidden rounded-md">
+                  <img
+                    src={couplePhoto}
+                    alt="Ruth & Arnold"
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                    data-testid="img-couple"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Center Text */}
-            <div className="order-1 lg:order-2 text-center px-4 lg:px-8 animate-in fade-in zoom-in duration-700 animation-delay-200">
-              <h2 className="text-3xl md:text-4xl font-serif font-light text-foreground mb-8 tracking-wide">
+            {/* Texte à côté */}
+            <div className="text-center lg:text-left px-4 lg:px-0 animate-in fade-in slide-in-from-right-8 duration-700 animation-delay-200">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-light text-foreground mb-8 tracking-wide">
                 NOTRE HISTOIRE
               </h2>
 
-              <div className="h-px w-16 bg-primary mx-auto mb-8 animate-in scale-x-0 origin-center duration-1000 animation-delay-300" />
+              <div className="h-px w-16 bg-primary mb-8 mx-auto lg:mx-0 animate-in scale-x-0 origin-left duration-1000 animation-delay-300" />
 
-              <p className="text-sm md:text-base font-sans leading-relaxed text-muted-foreground mb-8 italic animate-in fade-in duration-700 animation-delay-400">
+              <p className="text-base md:text-lg font-sans leading-relaxed text-muted-foreground mb-8 italic animate-in fade-in duration-700 animation-delay-400">
                 "Notre histoire a commencé comme un conte de fées moderne. Deux
                 âmes destinées à se rencontrer, réunies par le destin et
                 l'amour."
               </p>
 
-              <p className="text-xs md:text-sm font-sans text-foreground tracking-widest animate-in fade-in duration-700 animation-delay-500">
-                Ruth & Arnold
+              <p className="text-sm md:text-base font-sans text-foreground tracking-widest animate-in fade-in duration-700 animation-delay-500">
+                — Ruth & Arnold
               </p>
-            </div>
-
-            {/* Ruth Portrait */}
-            <div className="order-3 animate-in fade-in slide-in-from-right-8 duration-700">
-              <div
-                className="aspect-[3/4] overflow-hidden bg-muted max-w-xs mx-auto hover:shadow-xl transition-shadow duration-300"
-                data-testid="card-ruth"
-              >
-                <img
-                  src={ruthPortrait}
-                  alt="Ruth"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                  data-testid="img-ruth"
-                />
-              </div>
             </div>
           </div>
         </div>
