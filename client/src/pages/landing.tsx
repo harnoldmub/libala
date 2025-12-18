@@ -42,6 +42,7 @@ import { AccommodationSection } from "@/components/accommodation";
 import { motion, useScroll, useTransform } from "framer-motion";
 import heroImage from "@assets/IMG_6360_1760648841327.jpg";
 import couplePhoto from "@assets/DSC_8913_1766077508558.jpg";
+import gallery1 from "@assets/DSC_8912_1766079012345.jpg";
 import gallery3 from "@assets/IMG_6359_1760648863845.jpg";
 import gallery4 from "@assets/IMG_6362_1760648863845.jpg";
 import gallery5 from "@assets/IMG_7449_1760648927188.jpg";
@@ -51,7 +52,7 @@ import marryMePhoto from "@assets/IMG_6346_1760648863844.jpg";
 const galleryImages = [
   {
     id: "couple-moment-1",
-    src: "/gallery/IMG_8152.JPG",
+    src: gallery1,
     alt: "Moment complice ensemble",
   },
   {
