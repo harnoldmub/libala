@@ -8,7 +8,7 @@ import {
   type UpdateRsvpResponse,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, ne } from "drizzle-orm";
+import { eq, and, ne, sql } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -24,6 +24,7 @@ export interface IStorage {
   deleteRsvpResponse(id: number): Promise<void>;
   updateRsvpResponse(id: number, response: UpdateRsvpResponse): Promise<RsvpResponse>;
   getRsvpResponseByQrToken(token: string): Promise<RsvpResponse | undefined>;
+  getRsvpByEmailAndFirstName(email: string, firstName: string): Promise<RsvpResponse | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -93,6 +94,20 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(rsvpResponses)
       .where(eq(rsvpResponses.qrToken, token));
+    return response;
+  }
+
+  async getRsvpByEmailAndFirstName(email: string, firstName: string): Promise<RsvpResponse | undefined> {
+    // Case insensitive search
+    const [response] = await db
+      .select()
+      .from(rsvpResponses)
+      .where(
+        and(
+          eq(sql`lower(${rsvpResponses.email})`, email.toLowerCase()),
+          eq(sql`lower(${rsvpResponses.firstName})`, firstName.toLowerCase())
+        )
+      );
     return response;
   }
 

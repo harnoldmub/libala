@@ -41,6 +41,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/rsvp", async (req, res) => {
     try {
       const validated = insertRsvpResponseSchema.parse(req.body);
+
+      // Check for duplicates (same email + firstname)
+      if (validated.email) {
+        const existing = await storage.getRsvpByEmailAndFirstName(validated.email, validated.firstName);
+        if (existing) {
+          return res.status(409).json({
+            message: "Vous êtes déjà inscrit avec cette adresse email et ce prénom."
+          });
+        }
+      }
+
       const response = await storage.createRsvpResponse(validated);
 
       // Send email confirmation to couple (non-blocking)

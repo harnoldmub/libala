@@ -311,7 +311,7 @@ export default function Landing() {
     onError: (error: Error) => {
       toast({
         title: "Erreur",
-        description: "Une erreur s'est produite. Veuillez réessayer.",
+        description: error.message || "Une erreur s'est produite. Veuillez réessayer.",
         variant: "destructive",
       });
     },
