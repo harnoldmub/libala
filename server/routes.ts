@@ -33,7 +33,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(req.user);
     } catch (error) {
       console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+      res.status(500).json({ message: "Erreur lors de la récupération de l'utilisateur" });
     }
   });
 
@@ -76,7 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           details: (error as any).issues
         });
       }
-      res.status(400).json({ message: "Invalid request data" });
+      res.status(400).json({ message: "Données de requête invalides" });
     }
   });
 
@@ -86,7 +86,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(responses);
     } catch (error) {
       console.error("Error fetching RSVPs:", error);
-      res.status(500).json({ message: "Failed to fetch RSVPs" });
+      res.status(500).json({ message: "Erreur lors de la récupération des RSVP" });
     }
   });
 
@@ -98,7 +98,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(response);
     } catch (error) {
       console.error("Error updating RSVP:", error);
-      res.status(500).json({ message: "Failed to update RSVP" });
+      res.status(500).json({ message: "Erreur lors de la mise à jour du RSVP" });
     }
   });
 
@@ -109,7 +109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting RSVP:", error);
-      res.status(500).json({ message: "Failed to delete RSVP" });
+      res.status(500).json({ message: "Erreur lors de la suppression du RSVP" });
     }
   });
 
@@ -132,7 +132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Zod validation issues:", JSON.stringify((error as any).issues, null, 2));
       }
       res.status(400).json({
-        message: "Invalid request data",
+        message: "Données de requête invalides",
         error: error instanceof Error ? error.message : String(error),
         details: error && typeof error === 'object' && 'issues' in error ? (error as any).issues : undefined
       });
@@ -143,7 +143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { ids } = req.body;
       if (!Array.isArray(ids)) {
-        return res.status(400).json({ message: "IDs list required" });
+        return res.status(400).json({ message: "Liste d'identifiants requise" });
       }
 
       for (const id of ids) {
@@ -163,7 +163,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       console.error("Error bulk confirming:", error);
-      res.status(500).json({ message: "Failed to confirm" });
+      res.status(500).json({ message: "Erreur lors de la confirmation" });
     }
   });
 
@@ -172,7 +172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { token } = req.query;
       if (!token || typeof token !== 'string') {
-        return res.status(400).json({ message: "Token required" });
+        return res.status(400).json({ message: "Token requis" });
       }
 
       const guest = await storage.getRsvpResponseByQrToken(token);
@@ -193,7 +193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Check-in error:", error);
-      res.status(500).json({ message: "Server error" });
+      res.status(500).json({ message: "Erreur serveur" });
     }
   });
 
@@ -202,7 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const guest = await storage.getRsvpResponse(id);
-      if (!guest) return res.status(404).json({ message: "Guest not found" });
+      if (!guest) return res.status(404).json({ message: "Invité non trouvé" });
 
       await storage.updateRsvpResponse(id, {
         ...guest,
@@ -213,7 +213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       console.error("Check-in confirmation error:", error);
-      res.status(500).json({ message: "Error checking in" });
+      res.status(500).json({ message: "Erreur lors de l'enregistrement" });
     }
   });
 
@@ -222,9 +222,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       let guest = await storage.getRsvpResponse(id);
-      if (!guest) return res.status(404).json({ message: "Guest not found" });
+      if (!guest) return res.status(404).json({ message: "Invité non trouvé" });
 
-      if (!guest.email) return res.status(400).json({ message: "Email missing for this guest" });
+      if (!guest.email) return res.status(400).json({ message: "Email manquant pour cet invité" });
 
       // Generate token if missing
       let qrToken = guest.qrToken;
@@ -239,7 +239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send Email
       if (!guest.email) {
         // Should not happen as we checked before, but after update guest is refreshed
-        return res.status(400).json({ message: "Email missing" });
+        return res.status(400).json({ message: "Email manquant" });
       }
 
       await sendPersonalizedInvitation({
@@ -258,7 +258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: "Error sending invitation" });
+      res.status(500).json({ message: "Erreur lors de l'envoi de l'invitation" });
     }
   });
 
@@ -267,7 +267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       let guest = await storage.getRsvpResponse(id);
-      if (!guest) return res.status(404).json({ message: "Guest not found" });
+      if (!guest) return res.status(404).json({ message: "Invité non trouvé" });
 
       // Generate token if missing
       let qrToken = guest.qrToken;
@@ -292,7 +292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: "Error logging WhatsApp" });
+      res.status(500).json({ message: "Erreur lors de l'enregistrement WhatsApp" });
     }
   });
 
@@ -301,7 +301,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid ID" });
+        return res.status(400).json({ message: "Identifiant invalide" });
       }
 
       const response = await storage.getRsvpResponse(id);
@@ -335,7 +335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const guests = req.body;
       if (!Array.isArray(guests)) {
-        return res.status(400).json({ message: "Input must be an array" });
+        return res.status(400).json({ message: "L'entrée doit être un tableau" });
       }
 
       const results = {
@@ -365,7 +365,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(results);
     } catch (error) {
       console.error("Error in bulk import:", error);
-      res.status(500).json({ message: "Failed to process bulk import" });
+      res.status(500).json({ message: "Erreur lors de l'import en masse" });
     }
   });
 
@@ -404,7 +404,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.send('\uFEFF' + csvContent); // BOM for Excel UTF-8 support
     } catch (error) {
       console.error("Error exporting CSV:", error);
-      res.status(500).json({ message: "Failed to export CSV" });
+      res.status(500).json({ message: "Erreur lors de l'export CSV" });
     }
   });
 
@@ -459,7 +459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.send(pdfBuffer);
     } catch (error) {
       console.error("Error generating invitation:", error);
-      res.status(500).json({ message: "Failed to generate invitation" });
+      res.status(500).json({ message: "Erreur lors de la génération de l'invitation" });
     }
   });
 
