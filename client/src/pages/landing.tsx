@@ -59,14 +59,14 @@ const galleryImages = [
     src: "/gallery/IMG_8381.JPG",
     alt: "Notre belle complicité",
   },
+  { id: "selfie-outdoor", src: gallery5, alt: "Selfie en amoureux" },
   {
     id: "engagement-bouquet",
     src: gallery3,
     alt: "Nos fiançailles avec le bouquet",
   },
-  { id: "kiss-bouquet", src: gallery4, alt: "Notre baiser avec les roses" },
-  { id: "selfie-outdoor", src: gallery5, alt: "Selfie en amoureux" },
   { id: "marry-me", src: marryMePhoto, alt: "La grande demande - Marry Me" },
+  { id: "kiss-bouquet", src: gallery4, alt: "Notre baiser avec les roses" },
 ];
 
 function Countdown() {
@@ -199,8 +199,6 @@ function Lightbox({
         >
           <X className="h-6 w-6" />
         </Button>
-
-
       </div>
 
       <div className="flex flex-col items-center gap-4 max-w-5xl w-full">
@@ -308,7 +306,8 @@ export default function Landing() {
     onError: (error: Error) => {
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur s'est produite. Veuillez réessayer.",
+        description:
+          error.message || "Une erreur s'est produite. Veuillez réessayer.",
         variant: "destructive",
       });
     },
@@ -340,7 +339,7 @@ export default function Landing() {
 
         <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
           {/* Logo prominent en haut */}
-          <motion.div 
+          <motion.div
             className="mb-4 animate-fade-in-up"
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -353,13 +352,14 @@ export default function Landing() {
               data-testid="logo-hero"
             />
           </motion.div>
-          
+
           <p className="text-xs md:text-sm font-sans tracking-[0.3em] uppercase text-muted-foreground mb-3 animate-fade-in-up animation-delay-100">
             Celebrating Love
           </p>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-light text-primary mb-4 leading-tight animate-fade-in-up animation-delay-200 drop-shadow-lg">
-            RUTH <span className="text-foreground drop-shadow-lg">&</span> ARNOLD
+            RUTH <span className="text-foreground drop-shadow-lg">&</span>{" "}
+            ARNOLD
           </h1>
 
           <p className="text-sm md:text-base font-sans text-foreground mb-3 tracking-wide animate-fade-in-up animation-delay-300 drop-shadow-sm">
@@ -367,7 +367,8 @@ export default function Landing() {
           </p>
 
           <p className="text-xs md:text-sm font-sans text-foreground/90 mb-6 max-w-xl mx-auto leading-relaxed animate-fade-in-up animation-delay-400 drop-shadow-sm">
-            Rejoignez-nous pour célébrer notre union lors de deux journées inoubliables
+            Rejoignez-nous pour célébrer notre union lors de deux journées
+            inoubliables
           </p>
 
           <div className="animate-fade-in-up animation-delay-500">
@@ -504,9 +505,13 @@ export default function Landing() {
 
                         // Parse current value
                         const currentValue = field.value || "";
-                        const match = COUNTRY_CODES.find(c => currentValue.startsWith(c.code));
+                        const match = COUNTRY_CODES.find((c) =>
+                          currentValue.startsWith(c.code),
+                        );
                         const countryCode = match ? match.code : "+33";
-                        const localNumber = match ? currentValue.slice(match.code.length) : currentValue;
+                        const localNumber = match
+                          ? currentValue.slice(match.code.length)
+                          : currentValue;
 
                         return (
                           <FormItem>
@@ -547,7 +552,8 @@ export default function Landing() {
                               </div>
                             </FormControl>
                             <p className="text-xs text-muted-foreground">
-                              Facultatif : pour recevoir votre invitation directement sur WhatsApp.
+                              Facultatif : pour recevoir votre invitation
+                              directement sur WhatsApp.
                             </p>
                             <FormMessage />
                           </FormItem>
@@ -758,20 +764,26 @@ export default function Landing() {
             <Card className="p-10 md:p-12 border-l-4 border-l-primary hover:shadow-xl transition-all duration-300 animate-in fade-in slide-in-from-left-8 duration-700">
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-2xl font-serif font-bold text-primary">19</span>
+                  <span className="text-2xl font-serif font-bold text-primary">
+                    19
+                  </span>
                 </div>
                 <div>
                   <h3 className="text-2xl md:text-3xl font-serif font-semibold text-foreground">
                     JEUDI 19 MARS
                   </h3>
-                  <p className="text-sm text-muted-foreground font-sans">Dot & Cérémonie</p>
+                  <p className="text-sm text-muted-foreground font-sans">
+                    Dot & Cérémonie
+                  </p>
                 </div>
               </div>
               <div className="space-y-4">
                 <div className="flex gap-4 pb-4 border-b border-border/50">
                   <div className="w-1 bg-primary rounded-full mt-1 flex-shrink-0" />
                   <div>
-                    <p className="font-sans font-semibold text-foreground">Dot</p>
+                    <p className="font-sans font-semibold text-foreground">
+                      Dot
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       Lieu: À confirmer
                       <br />
@@ -786,42 +798,50 @@ export default function Landing() {
             <Card className="p-10 md:p-12 border-l-4 border-l-chart-2 hover:shadow-xl transition-all duration-300 animate-in fade-in slide-in-from-right-8 duration-700 animation-delay-200">
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-12 h-12 rounded-full bg-chart-2/10 flex items-center justify-center">
-                  <span className="text-2xl font-serif font-bold text-chart-2">21</span>
+                  <span className="text-2xl font-serif font-bold text-chart-2">
+                    21
+                  </span>
                 </div>
                 <div>
                   <h3 className="text-2xl md:text-3xl font-serif font-semibold text-foreground">
                     SAMEDI 21 MARS
                   </h3>
-                  <p className="text-sm text-muted-foreground font-sans">Mariage & Réception</p>
+                  <p className="text-sm text-muted-foreground font-sans">
+                    Mariage & Réception
+                  </p>
                 </div>
               </div>
               <div className="space-y-4">
                 <div className="flex gap-4 pb-4 border-b border-border/50">
                   <div className="w-1 bg-chart-2 rounded-full mt-1 flex-shrink-0" />
                   <div>
-                    <p className="font-sans font-semibold text-foreground">Mariage Civil</p>
+                    <p className="font-sans font-semibold text-foreground">
+                      Mariage Civil
+                    </p>
                     <p className="text-sm text-muted-foreground">10h00</p>
                   </div>
                 </div>
                 <div className="flex gap-4 pb-4 border-b border-border/50">
                   <div className="w-1 bg-chart-2 rounded-full mt-1 flex-shrink-0" />
                   <div>
-                    <p className="font-sans font-semibold text-foreground">Bénédiction</p>
+                    <p className="font-sans font-semibold text-foreground">
+                      Bénédiction
+                    </p>
                     <p className="text-sm text-muted-foreground">13h00</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
                   <div className="w-1 bg-chart-2 rounded-full mt-1 flex-shrink-0" />
                   <div>
-                    <p className="font-sans font-semibold text-foreground">Soirée & Réception</p>
+                    <p className="font-sans font-semibold text-foreground">
+                      Soirée & Réception
+                    </p>
                     <p className="text-sm text-muted-foreground">20h00</p>
                   </div>
                 </div>
               </div>
             </Card>
           </div>
-
-
         </div>
       </section>
 
