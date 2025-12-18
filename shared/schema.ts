@@ -67,12 +67,16 @@ export const rsvpResponses = pgTable("rsvp_responses", {
 export const insertRsvpResponseSchema = z.object({
   firstName: z.string().min(1, "Le prénom est requis"),
   lastName: z.string().min(1, "Le nom est requis"),
-  email: z.string().email("Veuillez entrer une adresse email valide").optional().or(z.literal('')),
+  email: z.string().optional().nullable()
+    .transform(val => !val || val === '' ? null : val)
+    .refine(val => !val || z.string().email().safeParse(val).success, {
+      message: "Veuillez entrer une adresse email valide"
+    }),
   partySize: z.number().int().min(1).max(2, "Sélectionnez Solo (1) ou Couple (2)"),
   availability: z.enum(['19-march', '21-march', 'both', 'unavailable', 'pending'], {
     errorMap: () => ({ message: "Veuillez sélectionner une option" })
   }),
-  phone: z.string().optional().nullable(),
+  phone: z.string().optional().nullable().transform(val => !val || val === '' ? null : val),
 });
 
 export const updateRsvpResponseSchema = z.object({

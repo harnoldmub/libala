@@ -476,6 +476,7 @@ export default function Landing() {
                           <FormControl>
                             <Input
                               {...field}
+                              value={field.value || ""}
                               type="email"
                               placeholder="votre@email.com"
                               className="rounded-lg border-2 border-primary/20 focus:border-primary transition-all hover:border-primary/40 bg-background/50"

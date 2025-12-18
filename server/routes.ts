@@ -40,7 +40,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // RSVP routes
   app.post("/api/rsvp", async (req, res) => {
     try {
+      console.log("POST /api/rsvp - Request body:", JSON.stringify(req.body, null, 2));
       const validated = insertRsvpResponseSchema.parse(req.body);
+      console.log("POST /api/rsvp - Validated data:", JSON.stringify(validated, null, 2));
 
       // Check for duplicates (same email + firstname)
       if (validated.email) {
@@ -66,6 +68,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(response);
     } catch (error) {
       console.error("Error creating RSVP:", error);
+      // If it's a Zod error, log the issues
+      if (error && typeof error === 'object' && 'issues' in error) {
+        console.error("Zod validation issues:", JSON.stringify((error as any).issues, null, 2));
+        return res.status(400).json({
+          message: "Données invalides",
+          details: (error as any).issues
+        });
+      }
       res.status(400).json({ message: "Invalid request data" });
     }
   });
