@@ -904,9 +904,6 @@ export default function Landing() {
                 >
                   WhatsApp: +33 6 98 82 71 93
                 </a>
-                <p className="text-sm text-muted-foreground font-sans">
-                  Paris, France
-                </p>
               </div>
             </div>
 
