@@ -19,9 +19,9 @@ export async function sendRsvpConfirmationEmail(guestData: {
 }) {
   try {
     const availabilityText = {
-      '19-march': '19 mars uniquement',
-      '21-march': '21 mars uniquement',
-      'both': 'Civil + Bénédiction nuptiale + Grande fête',
+      '19-march': '19 mars uniquement (Fête de la Dot)',
+      '21-march': '21 mars uniquement (Mariage Civil + Bénédiction nuptiale + Grande fête)',
+      'both': 'Les deux dates (19 et 21 mars)',
       'unavailable': 'Pas disponible'
     }[guestData.availability] || guestData.availability;
 
@@ -122,9 +122,9 @@ export async function sendGuestConfirmationEmail(guestData: {
 }) {
   try {
     const availabilityText = {
-      '19-march': '19 mars uniquement',
-      '21-march': '21 mars uniquement',
-      'both': 'Civil + Bénédiction nuptiale + Grande fête',
+      '19-march': '19 mars uniquement (Fête de la Dot)',
+      '21-march': '21 mars uniquement (Mariage Civil + Bénédiction nuptiale + Grande fête)',
+      'both': 'Les deux dates (19 et 21 mars)',
       'unavailable': 'Pas disponible'
     }[guestData.availability] || guestData.availability;
 
