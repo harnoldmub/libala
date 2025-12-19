@@ -19,9 +19,9 @@ export async function sendRsvpConfirmationEmail(guestData: {
 }) {
   try {
     const availabilityText = {
-      '19-march': '19 mars uniquement (Mariage civil + Fête de la Dot)',
-      '21-march': '21 mars uniquement (Bénédiction nuptiale + Grande fête)',
-      'both': 'Les deux dates (19 et 21 mars)',
+      '19-march': '19 mars uniquement',
+      '21-march': '21 mars uniquement',
+      'both': 'Civil + Bénédiction nuptiale + Grande fête',
       'unavailable': 'Pas disponible'
     }[guestData.availability] || guestData.availability;
 
@@ -122,9 +122,9 @@ export async function sendGuestConfirmationEmail(guestData: {
 }) {
   try {
     const availabilityText = {
-      '19-march': '19 mars uniquement (Mariage civil + Fête de la Dot)',
-      '21-march': '21 mars uniquement (Bénédiction nuptiale + Grande fête)',
-      'both': 'Les deux dates (19 et 21 mars)',
+      '19-march': '19 mars uniquement',
+      '21-march': '21 mars uniquement',
+      'both': 'Civil + Bénédiction nuptiale + Grande fête',
       'unavailable': 'Pas disponible'
     }[guestData.availability] || guestData.availability;
 
@@ -226,20 +226,6 @@ export async function sendGuestConfirmationEmail(guestData: {
             <div class="info-box">
               <p style="margin: 0;"><strong>Votre disponibilité :</strong></p>
               <p style="margin: 10px 0 0 0; font-size: 18px; color: #C8A96A;">${availabilityText}</p>
-            </div>
-            
-            <div class="dates-section">
-              <h3 style="color: #C8A96A; text-align: center; margin-top: 0;">Rappel des dates</h3>
-              
-              <div class="date-item">
-                <div class="date-title">Jeudi 19 Mars 2026</div>
-                <p style="margin: 5px 0; color: #666;">Mariage civil + Fête de la Dot - Bruxelles</p>
-              </div>
-              
-              <div class="date-item">
-                <div class="date-title">Samedi 21 Mars 2026</div>
-                <p style="margin: 5px 0; color: #666;">Bénédiction nuptiale + Grande fête - Bruxelles</p>
-              </div>
             </div>
             
             <p style="background: #fff8e7; border: 1px solid #C8A96A; border-radius: 6px; padding: 15px; font-size: 14px; color: #666;">
