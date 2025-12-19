@@ -281,6 +281,10 @@ export async function sendGuestConfirmationEmail(guestData: {
               </div>
             </div>
             
+            <p style="background: #fff8e7; border: 1px solid #C8A96A; border-radius: 6px; padding: 15px; font-size: 14px; color: #666;">
+              <strong style="color: #C8A96A;">Important :</strong> Votre réponse a bien été enregistrée, mais celle-ci ne constitue pas une confirmation définitive de votre présence. Votre invitation officielle vous sera envoyée avant le mariage.
+            </p>
+            
             <p>Nous avons hâte de partager ces moments précieux avec vous !</p>
             
             <p style="margin-top: 30px;">
