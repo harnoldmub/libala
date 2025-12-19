@@ -1,45 +1,16 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-let connectionSettings: any;
-
-async function getCredentials() {
-  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME
-  const xReplitToken = process.env.REPL_IDENTITY
-    ? 'repl ' + process.env.REPL_IDENTITY
-    : process.env.WEB_REPL_RENEWAL
-      ? 'depl ' + process.env.WEB_REPL_RENEWAL
-      : null;
-
-  if (!xReplitToken) {
-    throw new Error('X_REPLIT_TOKEN not found for repl/depl');
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
   }
+});
 
-  connectionSettings = await fetch(
-    'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=resend',
-    {
-      headers: {
-        'Accept': 'application/json',
-        'X_REPLIT_TOKEN': xReplitToken
-      }
-    }
-  ).then(res => res.json()).then(data => data.items?.[0]);
-
-  if (!connectionSettings || (!connectionSettings.settings.api_key)) {
-    throw new Error('Resend not connected');
-  }
-  return { apiKey: connectionSettings.settings.api_key, fromEmail: connectionSettings.settings.from_email };
-}
-
-// WARNING: Never cache this client.
-// Access tokens expire, so a new client must be created each time.
-// Always call this function again to get a fresh client.
-export async function getUncachableResendClient() {
-  const credentials = await getCredentials();
-  return {
-    client: new Resend(credentials.apiKey),
-    fromEmail: credentials.fromEmail || 'onboarding@resend.dev'
-  };
-}
+const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@example.com';
 
 export async function sendRsvpConfirmationEmail(guestData: {
   firstName: string;
@@ -47,8 +18,6 @@ export async function sendRsvpConfirmationEmail(guestData: {
   availability: string;
 }) {
   try {
-    const { client, fromEmail } = await getUncachableResendClient();
-
     const availabilityText = {
       '19-march': '19 mars uniquement (Mariage civil + Fête de la Dot)',
       '21-march': '21 mars uniquement (Bénédiction nuptiale + Grande fête)',
@@ -125,26 +94,20 @@ export async function sendRsvpConfirmationEmail(guestData: {
           
           <div class="footer">
             <p>© 2026 Ruth & Arnold - Golden Love</p>
-            <p>contact@ar2k26.com</p>
           </div>
         </body>
       </html>
     `;
 
-    const { data, error } = await client.emails.send({
+    const info = await transporter.sendMail({
       from: fromEmail,
-      to: ['contact@ar2k26.com'],
-      subject: `🎉 Nouvelle réponse RSVP - ${guestData.firstName} ${guestData.lastName}`,
+      to: 'contact@ar2k26.com',
+      subject: `Nouvelle réponse RSVP - ${guestData.firstName} ${guestData.lastName}`,
       html: emailHtml,
     });
 
-    if (error) {
-      console.error('Error sending RSVP confirmation email:', error);
-      throw error;
-    }
-
-    console.log('RSVP confirmation email sent successfully:', data);
-    return data;
+    console.log('RSVP confirmation email sent successfully:', info.messageId);
+    return info;
   } catch (error) {
     console.error('Failed to send RSVP confirmation email:', error);
     throw error;
@@ -158,8 +121,6 @@ export async function sendGuestConfirmationEmail(guestData: {
   availability: string;
 }) {
   try {
-    const { client, fromEmail } = await getUncachableResendClient();
-
     const availabilityText = {
       '19-march': '19 mars uniquement (Mariage civil + Fête de la Dot)',
       '21-march': '21 mars uniquement (Bénédiction nuptiale + Grande fête)',
@@ -295,26 +256,20 @@ export async function sendGuestConfirmationEmail(guestData: {
           
           <div class="footer">
             <p>© 2026 Ruth & Arnold - Golden Love</p>
-            <p>contact@ar2k26.com</p>
           </div>
         </body>
       </html>
     `;
 
-    const { data, error } = await client.emails.send({
+    const info = await transporter.sendMail({
       from: fromEmail,
-      to: [guestData.email],
+      to: guestData.email,
       subject: `Merci ${guestData.firstName} ! Votre réponse a bien été enregistrée - Ruth & Arnold`,
       html: emailHtml,
     });
 
-    if (error) {
-      console.error('Error sending guest confirmation email:', error);
-      throw error;
-    }
-
-    console.log('Guest confirmation email sent successfully:', data);
-    return data;
+    console.log('Guest confirmation email sent successfully:', info.messageId);
+    return info;
   } catch (error) {
     console.error('Failed to send guest confirmation email:', error);
     throw error;
@@ -329,14 +284,9 @@ export async function sendPersonalizedInvitation(recipientData: {
   qrToken?: string;
 }) {
   try {
-    const { client, fromEmail } = await getUncachableResendClient();
-
     const customMessage = recipientData.message || `Nous serions honorés de votre présence à notre mariage.`;
-
-    // Determine domain (use window.location.origin in frontend, here we need env or default)
-    // For local dev assuming localhost:5000 or similar if accessible, otherwise user config
-    const domain = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:3000';
-    const link = recipientData.qrToken ? `${domain}/checkin?token=${recipientData.qrToken}` : `${domain}/invitation/viewer`; // Fallback
+    const domain = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000';
+    const link = recipientData.qrToken ? `${domain}/checkin?token=${recipientData.qrToken}` : `${domain}/invitation/viewer`;
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -445,12 +395,12 @@ export async function sendPersonalizedInvitation(recipientData: {
               <h2 style="color: #C8A96A; text-align: center; margin-top: 0;">Nos dates importantes</h2>
               
               <div class="date-item">
-                <div class="date-title">📅 Jeudi 19 Mars 2026</div>
+                <div class="date-title">Jeudi 19 Mars 2026</div>
                 <p style="margin: 5px 0;">Mariage civil + Fête de la Dot</p>
               </div>
               
               <div class="date-item">
-                <div class="date-title">📅 Samedi 21 Mars 2026</div>
+                <div class="date-title">Samedi 21 Mars 2026</div>
                 <p style="margin: 5px 0;">Bénédiction nuptiale + Grande fête</p>
               </div>
             </div>
@@ -474,26 +424,20 @@ export async function sendPersonalizedInvitation(recipientData: {
           
           <div class="footer">
             <p>© 2026 Ruth & Arnold - Golden Love</p>
-            <p>contact@ar2k26.com</p>
           </div>
         </body>
       </html>
     `;
 
-    const { data, error } = await client.emails.send({
+    const info = await transporter.sendMail({
       from: fromEmail,
-      to: [recipientData.email],
-      subject: `💍 Vous êtes invité(e) à notre mariage - Ruth & Arnold`,
+      to: recipientData.email,
+      subject: `Vous êtes invité(e) à notre mariage - Ruth & Arnold`,
       html: emailHtml,
     });
 
-    if (error) {
-      console.error('Error sending personalized invitation:', error);
-      throw error;
-    }
-
-    console.log('Personalized invitation sent successfully:', data);
-    return data;
+    console.log('Personalized invitation sent successfully:', info.messageId);
+    return info;
   } catch (error) {
     console.error('Failed to send personalized invitation:', error);
     throw error;
