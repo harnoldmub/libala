@@ -274,6 +274,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Resend Confirmation Email - Specific Guest
+  app.post("/api/rsvp/:id/resend-confirmation", isLocallyAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const guest = await storage.getRsvpResponse(id);
+      if (!guest) return res.status(404).json({ message: "Invité non trouvé" });
+
+      if (!guest.email) return res.status(400).json({ message: "Email manquant pour cet invité" });
+
+      if (!guest.availability || guest.availability === 'pending') {
+        return res.status(400).json({ message: "Cet invité n'a pas encore répondu au RSVP" });
+      }
+
+      await sendGuestConfirmationEmail({
+        email: guest.email,
+        firstName: guest.firstName,
+        lastName: guest.lastName,
+        availability: guest.availability
+      });
+
+      res.json({ success: true });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Erreur lors de l'envoi du mail de confirmation" });
+    }
+  });
+
   // WhatsApp Log Route
   app.post("/api/rsvp/:id/whatsapp-log", isLocallyAuthenticated, async (req, res) => {
     try {

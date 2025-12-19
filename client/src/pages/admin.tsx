@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { LogOut, Search, Users, Table2, Download, Mail, Edit, Trash2, BarChart3, FileText, Plus, ArrowUp, ArrowDown, X, TrendingUp, ExternalLink, Eye } from "lucide-react";
+import { LogOut, Search, Users, Table2, Download, Mail, Edit, Trash2, BarChart3, FileText, Plus, ArrowUp, ArrowDown, X, TrendingUp, ExternalLink, Eye, Send, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -382,6 +382,77 @@ export default function Admin() {
     onError: () => {
       toast({ title: "Erreur", description: "Impossible de préparer WhatsApp", variant: "destructive" });
     }
+  });
+
+  const sendInvitationToGuestMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("POST", `/api/rsvp/${id}/send-invitation`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rsvp"] });
+      toast({
+        title: "Invitation envoyée",
+        description: "L'invitation personnalisée a été envoyée par email",
+      });
+    },
+    onError: async (error: any) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Non autorisé",
+          description: "Vous êtes déconnecté. Reconnexion...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 500);
+        return;
+      }
+      let errorMessage = "Impossible d'envoyer l'invitation";
+      try {
+        const errorData = await error.json?.();
+        if (errorData?.message) errorMessage = errorData.message;
+      } catch {}
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resendConfirmationMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("POST", `/api/rsvp/${id}/resend-confirmation`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Confirmation envoyée",
+        description: "Le mail de confirmation a été renvoyé à l'invité",
+      });
+    },
+    onError: async (error: any) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Non autorisé",
+          description: "Vous êtes déconnecté. Reconnexion...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 500);
+        return;
+      }
+      let errorMessage = "Impossible de renvoyer la confirmation";
+      try {
+        const errorData = await error.json?.();
+        if (errorData?.message) errorMessage = errorData.message;
+      } catch {}
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
   });
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -907,19 +978,32 @@ export default function Admin() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setInviteEmail(response.email || "");
-                                  setInviteFirstName(response.firstName);
-                                  setInviteLastName(response.lastName);
-                                  setInviteDialogOpen(true);
-                                }}
-                                title="Envoyer Email"
-                              >
-                                <Mail className="h-4 w-4" />
-                              </Button>
+                              {response.email && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => sendInvitationToGuestMutation.mutate(response.id)}
+                                  disabled={sendInvitationToGuestMutation.isPending}
+                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                  title="Envoyer invitation par email"
+                                  data-testid={`button-send-invitation-email-${response.id}`}
+                                >
+                                  <Send className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {response.email && response.availability && response.availability !== 'pending' && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => resendConfirmationMutation.mutate(response.id)}
+                                  disabled={resendConfirmationMutation.isPending}
+                                  className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                                  title="Renvoyer confirmation RSVP"
+                                  data-testid={`button-resend-confirmation-${response.id}`}
+                                >
+                                  <RefreshCw className="h-4 w-4" />
+                                </Button>
+                              )}
                               {response.phone && (
                                 <Button
                                   variant="ghost"
