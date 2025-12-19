@@ -151,6 +151,172 @@ export async function sendRsvpConfirmationEmail(guestData: {
   }
 }
 
+export async function sendGuestConfirmationEmail(guestData: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  availability: string;
+}) {
+  try {
+    const { client, fromEmail } = await getUncachableResendClient();
+
+    const availabilityText = {
+      '19-march': '19 mars uniquement (Mariage civil + Fête de la Dot)',
+      '21-march': '21 mars uniquement (Bénédiction nuptiale + Grande fête)',
+      'both': 'Les deux dates (19 et 21 mars)',
+      'unavailable': 'Pas disponible'
+    }[guestData.availability] || guestData.availability;
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body {
+              font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              line-height: 1.6;
+              color: #333;
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              background: #fff;
+            }
+            .header {
+              text-align: center;
+              padding: 40px 0;
+              background: linear-gradient(135deg, #f5f5f0 0%, #fff 100%);
+              border-radius: 8px;
+              margin-bottom: 30px;
+            }
+            .header h1 {
+              font-family: 'Playfair Display', serif;
+              color: #C8A96A;
+              margin: 0;
+              font-size: 36px;
+              letter-spacing: 2px;
+            }
+            .content {
+              padding: 20px 0;
+            }
+            .confirmation-box {
+              background: linear-gradient(135deg, #C8A96A 0%, #D4AF37 100%);
+              color: white;
+              padding: 25px;
+              border-radius: 8px;
+              text-align: center;
+              margin: 25px 0;
+            }
+            .confirmation-box h2 {
+              margin: 0 0 10px 0;
+              font-size: 24px;
+            }
+            .info-box {
+              background: #f9f9f9;
+              border-left: 4px solid #C8A96A;
+              padding: 20px;
+              margin: 25px 0;
+            }
+            .dates-section {
+              background: #fff;
+              border: 2px solid #C8A96A;
+              border-radius: 8px;
+              padding: 25px;
+              margin: 30px 0;
+            }
+            .date-item {
+              padding: 12px 0;
+              border-bottom: 1px solid #e0e0e0;
+            }
+            .date-item:last-child {
+              border-bottom: none;
+            }
+            .date-title {
+              color: #C8A96A;
+              font-weight: bold;
+              font-size: 16px;
+            }
+            .footer {
+              text-align: center;
+              padding-top: 30px;
+              border-top: 2px solid #C8A96A;
+              color: #666;
+              font-size: 14px;
+              margin-top: 40px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Golden Love 2026</h1>
+            <p style="color: #666; margin: 15px 0 0 0; font-size: 18px;">Ruth & Arnold</p>
+          </div>
+          
+          <div class="content">
+            <div class="confirmation-box">
+              <h2>Merci ${guestData.firstName} !</h2>
+              <p style="margin: 0;">Votre réponse a bien été enregistrée</p>
+            </div>
+            
+            <p>Cher(e) ${guestData.firstName} ${guestData.lastName},</p>
+            
+            <p>Nous avons bien reçu votre réponse et nous vous remercions chaleureusement d'avoir pris le temps de nous répondre.</p>
+            
+            <div class="info-box">
+              <p style="margin: 0;"><strong>Votre disponibilité :</strong></p>
+              <p style="margin: 10px 0 0 0; font-size: 18px; color: #C8A96A;">${availabilityText}</p>
+            </div>
+            
+            <div class="dates-section">
+              <h3 style="color: #C8A96A; text-align: center; margin-top: 0;">Rappel des dates</h3>
+              
+              <div class="date-item">
+                <div class="date-title">Jeudi 19 Mars 2026</div>
+                <p style="margin: 5px 0; color: #666;">Mariage civil + Fête de la Dot - Bruxelles</p>
+              </div>
+              
+              <div class="date-item">
+                <div class="date-title">Samedi 21 Mars 2026</div>
+                <p style="margin: 5px 0; color: #666;">Bénédiction nuptiale + Grande fête - Bruxelles</p>
+              </div>
+            </div>
+            
+            <p>Nous avons hâte de partager ces moments précieux avec vous !</p>
+            
+            <p style="margin-top: 30px;">
+              Avec toute notre affection,<br>
+              <strong>Ruth & Arnold</strong>
+            </p>
+          </div>
+          
+          <div class="footer">
+            <p>© 2026 Ruth & Arnold - Golden Love</p>
+            <p>contact@ar2k26.com</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const { data, error } = await client.emails.send({
+      from: fromEmail,
+      to: [guestData.email],
+      subject: `Merci ${guestData.firstName} ! Votre réponse a bien été enregistrée - Ruth & Arnold`,
+      html: emailHtml,
+    });
+
+    if (error) {
+      console.error('Error sending guest confirmation email:', error);
+      throw error;
+    }
+
+    console.log('Guest confirmation email sent successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('Failed to send guest confirmation email:', error);
+    throw error;
+  }
+}
+
 export async function sendPersonalizedInvitation(recipientData: {
   email: string;
   firstName: string;

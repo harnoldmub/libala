@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { getSession } from "./replitAuth";
 import { setupLocalAuth, isLocallyAuthenticated } from "./localAuth";
 import { insertRsvpResponseSchema, updateRsvpResponseSchema } from "@shared/schema";
-import { sendRsvpConfirmationEmail, sendPersonalizedInvitation } from "./email";
+import { sendRsvpConfirmationEmail, sendPersonalizedInvitation, sendGuestConfirmationEmail } from "./email";
 import passport from "passport";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -64,6 +64,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }).catch(err => {
         console.error("Failed to send RSVP confirmation email:", err);
       });
+
+      // Send confirmation email to guest if they provided an email (non-blocking)
+      if (response.email) {
+        sendGuestConfirmationEmail({
+          email: response.email,
+          firstName: response.firstName,
+          lastName: response.lastName,
+          availability: response.availability,
+        }).catch(err => {
+          console.error("Failed to send guest confirmation email:", err);
+        });
+      }
 
       res.json(response);
     } catch (error) {
