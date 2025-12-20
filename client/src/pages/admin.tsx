@@ -355,6 +355,50 @@ export default function Admin() {
     },
   });
 
+  const bulkSendInvitationMutation = useMutation({
+    mutationFn: async (ids: number[]) => {
+      const response = await apiRequest("POST", "/api/rsvp/bulk-send-invitation", { ids });
+      return await response.json();
+    },
+    onSuccess: (data: { sent: number; failed: number }) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rsvp"] });
+      toast({
+        title: "Invitations envoyées",
+        description: `${data.sent} envoyées, ${data.failed} échouées`,
+      });
+      setSelectedIds([]);
+    },
+    onError: () => {
+      toast({
+        title: "Erreur",
+        description: "Échec de l'envoi groupé des invitations.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const bulkResendConfirmationMutation = useMutation({
+    mutationFn: async (ids: number[]) => {
+      const response = await apiRequest("POST", "/api/rsvp/bulk-resend-confirmation", { ids });
+      return await response.json();
+    },
+    onSuccess: (data: { sent: number; failed: number }) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rsvp"] });
+      toast({
+        title: "Confirmations envoyées",
+        description: `${data.sent} envoyées, ${data.failed} échouées`,
+      });
+      setSelectedIds([]);
+    },
+    onError: () => {
+      toast({
+        title: "Erreur",
+        description: "Échec de l'envoi groupé des confirmations.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const whatsappMutation = useMutation({
     mutationFn: async (id: number) => {
       const response = await apiRequest("POST", `/api/rsvp/${id}/whatsapp-log`);
@@ -612,15 +656,38 @@ export default function Admin() {
                   </Button>
 
                   {selectedIds.length > 0 && (
-                    <Button
-                      variant="default"
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                      onClick={() => bulkConfirmMutation.mutate(selectedIds)}
-                      disabled={bulkConfirmMutation.isPending}
-                    >
-                      <Users className="h-4 w-4 mr-2" />
-                      Confirmer ({selectedIds.length})
-                    </Button>
+                    <>
+                      <Button
+                        variant="default"
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        onClick={() => bulkConfirmMutation.mutate(selectedIds)}
+                        disabled={bulkConfirmMutation.isPending}
+                        data-testid="button-bulk-confirm"
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        Confirmer ({selectedIds.length})
+                      </Button>
+                      <Button
+                        variant="default"
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        onClick={() => bulkSendInvitationMutation.mutate(selectedIds)}
+                        disabled={bulkSendInvitationMutation.isPending}
+                        data-testid="button-bulk-send-invitation"
+                      >
+                        <Send className="h-4 w-4 mr-2" />
+                        {bulkSendInvitationMutation.isPending ? "Envoi..." : `Invitations (${selectedIds.length})`}
+                      </Button>
+                      <Button
+                        variant="default"
+                        className="bg-orange-600 hover:bg-orange-700 text-white"
+                        onClick={() => bulkResendConfirmationMutation.mutate(selectedIds)}
+                        disabled={bulkResendConfirmationMutation.isPending}
+                        data-testid="button-bulk-resend-confirmation"
+                      >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        {bulkResendConfirmationMutation.isPending ? "Envoi..." : `Confirmations (${selectedIds.length})`}
+                      </Button>
+                    </>
                   )}
 
                   <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>

@@ -179,6 +179,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bulk Send Invitation Route
+  app.post("/api/rsvp/bulk-send-invitation", isLocallyAuthenticated, async (req, res) => {
+    try {
+      const { ids } = req.body;
+      if (!Array.isArray(ids)) {
+        return res.status(400).json({ message: "Liste d'identifiants requise" });
+      }
+
+      let successCount = 0;
+      let failCount = 0;
+      const errors: string[] = [];
+
+      for (const id of ids) {
+        try {
+          let guest = await storage.getRsvpResponse(id);
+          if (!guest) {
+            errors.push(`Invité ${id} non trouvé`);
+            failCount++;
+            continue;
+          }
+          if (!guest.email) {
+            errors.push(`${guest.firstName} ${guest.lastName}: pas d'email`);
+            failCount++;
+            continue;
+          }
+
+          // Generate token if missing
+          let qrToken = guest.qrToken;
+          if (!qrToken) {
+            qrToken = crypto.randomUUID();
+            guest = await storage.updateRsvpResponse(id, {
+              ...guest,
+              qrToken
+            } as any);
+          }
+
+          await sendPersonalizedInvitation({
+            email: guest.email!,
+            firstName: guest.firstName,
+            lastName: guest.lastName,
+            qrToken: qrToken
+          });
+
+          // Update Timestamp
+          await storage.updateRsvpResponse(id, {
+            ...guest,
+            invitationSentAt: new Date()
+          } as any);
+
+          successCount++;
+        } catch (err) {
+          console.error(`Error sending invitation to ${id}:`, err);
+          failCount++;
+        }
+      }
+
+      res.json({ success: true, sent: successCount, failed: failCount, errors });
+    } catch (error) {
+      console.error("Error bulk sending invitations:", error);
+      res.status(500).json({ message: "Erreur lors de l'envoi des invitations" });
+    }
+  });
+
+  // Bulk Resend Confirmation Route
+  app.post("/api/rsvp/bulk-resend-confirmation", isLocallyAuthenticated, async (req, res) => {
+    try {
+      const { ids } = req.body;
+      if (!Array.isArray(ids)) {
+        return res.status(400).json({ message: "Liste d'identifiants requise" });
+      }
+
+      let successCount = 0;
+      let failCount = 0;
+      const errors: string[] = [];
+
+      for (const id of ids) {
+        try {
+          const guest = await storage.getRsvpResponse(id);
+          if (!guest) {
+            errors.push(`Invité ${id} non trouvé`);
+            failCount++;
+            continue;
+          }
+          if (!guest.email) {
+            errors.push(`${guest.firstName} ${guest.lastName}: pas d'email`);
+            failCount++;
+            continue;
+          }
+          if (!guest.availability || guest.availability === 'pending') {
+            errors.push(`${guest.firstName} ${guest.lastName}: n'a pas encore répondu`);
+            failCount++;
+            continue;
+          }
+
+          await sendGuestConfirmationEmail({
+            email: guest.email,
+            firstName: guest.firstName,
+            lastName: guest.lastName,
+            availability: guest.availability
+          });
+
+          successCount++;
+        } catch (err) {
+          console.error(`Error sending confirmation to ${id}:`, err);
+          failCount++;
+        }
+      }
+
+      res.json({ success: true, sent: successCount, failed: failCount, errors });
+    } catch (error) {
+      console.error("Error bulk sending confirmations:", error);
+      res.status(500).json({ message: "Erreur lors de l'envoi des confirmations" });
+    }
+  });
+
   // Check-in Route
   app.get("/api/checkin", async (req, res) => {
     try {
