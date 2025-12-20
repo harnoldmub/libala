@@ -271,7 +271,7 @@ export async function sendPersonalizedInvitation(recipientData: {
 }) {
   try {
     const customMessage = recipientData.message || `Nous serions honorés de votre présence à notre mariage.`;
-    const domain = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000';
+    const domain = process.env.SITE_URL || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000');
     const link = recipientData.qrToken ? `${domain}/checkin?token=${recipientData.qrToken}` : `${domain}/invitation/viewer`;
 
     const emailHtml = `

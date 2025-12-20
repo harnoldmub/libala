@@ -401,11 +401,15 @@ export default function Admin() {
 
   const whatsappMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest("POST", `/api/rsvp/${id}/whatsapp-log`);
-      return await response.json();
+      const [whatsappRes, configRes] = await Promise.all([
+        apiRequest("POST", `/api/rsvp/${id}/whatsapp-log`),
+        fetch("/api/site-config")
+      ]);
+      const whatsappData = await whatsappRes.json();
+      const configData = await configRes.json();
+      return { ...whatsappData, siteUrl: configData.siteUrl, guestId: id };
     },
-    onSuccess: (data: any, variables: number) => {
-      console.log("WhatsApp API response:", data); // Debug log
+    onSuccess: (data: { phone?: string; siteUrl: string; guestId: number }) => {
       if (!data.phone) {
         toast({
           title: "Numéro manquant",
@@ -415,8 +419,7 @@ export default function Admin() {
         return;
       }
 
-      const message = `Bonjour,\nVous êtes invité à Golden Love 2026.\nVoici votre invitation et pass d'accès : ${window.location.origin}/invitation/${variables}`;
-      // Encode and open
+      const message = `Bonjour,\nVous êtes invité à Golden Love 2026.\nVoici votre invitation et pass d'accès : ${data.siteUrl}/invitation/${data.guestId}`;
       const url = `https://wa.me/${data.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
       window.open(url, '_blank');
 

@@ -294,6 +294,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Site Configuration (for frontend to get production URL)
+  app.get("/api/site-config", (req, res) => {
+    const siteUrl = process.env.SITE_URL || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000');
+    res.json({ siteUrl });
+  });
+
   // Check-in Route
   app.get("/api/checkin", async (req, res) => {
     try {
