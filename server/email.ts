@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -6,11 +6,12 @@ const transporter = nodemailer.createTransport({
   secure: false,
   auth: {
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
+    pass: process.env.SMTP_PASS,
+  },
 });
 
-const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@example.com';
+const fromEmail =
+  process.env.SMTP_FROM || process.env.SMTP_USER || "noreply@example.com";
 
 export async function sendRsvpConfirmationEmail(guestData: {
   firstName: string;
@@ -18,12 +19,14 @@ export async function sendRsvpConfirmationEmail(guestData: {
   availability: string;
 }) {
   try {
-    const availabilityText = {
-      '19-march': '19 mars uniquement (Fête de la Dot)',
-      '21-march': '21 mars uniquement (Mariage Civil + Bénédiction nuptiale + Grande fête)',
-      'both': 'Les deux dates (19 et 21 mars)',
-      'unavailable': 'Pas disponible'
-    }[guestData.availability] || guestData.availability;
+    const availabilityText =
+      {
+        "19-march": "19 mars uniquement (Fête de la Dot)",
+        "21-march":
+          "21 mars uniquement (Mariage Civil + Bénédiction nuptiale + Grande fête)",
+        both: "Les deux dates (19 et 21 mars)",
+        unavailable: "Pas disponible",
+      }[guestData.availability] || guestData.availability;
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -80,13 +83,16 @@ export async function sendRsvpConfirmationEmail(guestData: {
             <div class="info-box">
               <p><strong>Invité :</strong> ${guestData.firstName} ${guestData.lastName}</p>
               <p><strong>Disponibilité :</strong> ${availabilityText}</p>
-              <p><strong>Date de réponse :</strong> ${new Date().toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })}</p>
+              <p><strong>Date de réponse :</strong> ${new Date().toLocaleDateString(
+                "fr-FR",
+                {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                },
+              )}</p>
             </div>
             
             <p>Vous pouvez gérer les attributions de tables dans votre espace administrateur.</p>
@@ -101,15 +107,15 @@ export async function sendRsvpConfirmationEmail(guestData: {
 
     const info = await transporter.sendMail({
       from: fromEmail,
-      to: 'contact@ar2k26.com',
+      to: "contact@ar2k26.com",
       subject: `Nouvelle réponse RSVP - ${guestData.firstName} ${guestData.lastName}`,
       html: emailHtml,
     });
 
-    console.log('RSVP confirmation email sent successfully:', info.messageId);
+    console.log("RSVP confirmation email sent successfully:", info.messageId);
     return info;
   } catch (error) {
-    console.error('Failed to send RSVP confirmation email:', error);
+    console.error("Failed to send RSVP confirmation email:", error);
     throw error;
   }
 }
@@ -121,12 +127,14 @@ export async function sendGuestConfirmationEmail(guestData: {
   availability: string;
 }) {
   try {
-    const availabilityText = {
-      '19-march': '19 mars uniquement (Fête de la Dot)',
-      '21-march': '21 mars uniquement (Mariage Civil + Bénédiction nuptiale + Grande fête)',
-      'both': 'Les deux dates (19 et 21 mars)',
-      'unavailable': 'Pas disponible'
-    }[guestData.availability] || guestData.availability;
+    const availabilityText =
+      {
+        "19-march": "19 mars uniquement (Fête de la Dot)",
+        "21-march":
+          "21 mars uniquement (Mariage Civil + Bénédiction nuptiale + Grande fête)",
+        both: "Les deux dates (19 et 21 mars)",
+        unavailable: "Pas disponible",
+      }[guestData.availability] || guestData.availability;
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -254,10 +262,10 @@ export async function sendGuestConfirmationEmail(guestData: {
       html: emailHtml,
     });
 
-    console.log('Guest confirmation email sent successfully:', info.messageId);
+    console.log("Guest confirmation email sent successfully:", info.messageId);
     return info;
   } catch (error) {
-    console.error('Failed to send guest confirmation email:', error);
+    console.error("Failed to send guest confirmation email:", error);
     throw error;
   }
 }
@@ -270,9 +278,17 @@ export async function sendPersonalizedInvitation(recipientData: {
   qrToken?: string;
 }) {
   try {
-    const customMessage = recipientData.message || `Nous serions honorés de votre présence à notre mariage.`;
-    const domain = process.env.SITE_URL || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000');
-    const link = recipientData.qrToken ? `${domain}/checkin?token=${recipientData.qrToken}` : `${domain}/invitation/viewer`;
+    const customMessage =
+      recipientData.message ||
+      `Nous serions honorés de votre présence à notre mariage.`;
+    const domain =
+      process.env.SITE_URL ||
+      (process.env.REPLIT_DEV_DOMAIN
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+        : "http://localhost:5000");
+    const link = recipientData.qrToken
+      ? `${domain}/checkin?token=${recipientData.qrToken}`
+      : `${domain}/invitation/viewer`;
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -382,18 +398,18 @@ export async function sendPersonalizedInvitation(recipientData: {
               
               <div class="date-item">
                 <div class="date-title">Jeudi 19 Mars 2026</div>
-                <p style="margin: 5px 0;">Mariage civil + Fête de la Dot</p>
+                <p style="margin: 5px 0;">Fête de la Dot</p>
               </div>
               
               <div class="date-item">
                 <div class="date-title">Samedi 21 Mars 2026</div>
-                <p style="margin: 5px 0;">Bénédiction nuptiale + Grande fête</p>
+                <p style="margin: 5px 0;">Mariage civil + Bénédiction nuptiale + Grande fête</p>
               </div>
             </div>
             
             <div style="text-align: center; margin: 30px 0;">
               <a href="${link}" class="cta-button">
-                 ${recipientData.qrToken ? 'Accéder à mon Pass / QR Code' : 'Voir les détails'}
+                 ${recipientData.qrToken ? "Accéder à mon Pass / QR Code" : "Voir les détails"}
               </a>
             </div>
 
@@ -422,10 +438,10 @@ export async function sendPersonalizedInvitation(recipientData: {
       html: emailHtml,
     });
 
-    console.log('Personalized invitation sent successfully:', info.messageId);
+    console.log("Personalized invitation sent successfully:", info.messageId);
     return info;
   } catch (error) {
-    console.error('Failed to send personalized invitation:', error);
+    console.error("Failed to send personalized invitation:", error);
     throw error;
   }
 }
