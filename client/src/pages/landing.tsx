@@ -994,6 +994,8 @@ export default function Landing() {
               <div className="space-y-3">
                 <a
                   href="/login"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="block text-sm text-muted-foreground hover:text-primary transition-colors font-sans"
                   data-testid="link-admin-login"
                 >
