@@ -41,3 +41,8 @@ waitForPort = 5000
 
 [agent]
 integrations = ["javascript_database:1.0.0", "javascript_log_in_with_replit:1.0.0", "resend:1.0.0"]
+
+[userenv]
+
+[userenv.production]
+SITE_URL = "https://ar2k26.com"
