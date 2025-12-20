@@ -51,3 +51,7 @@ The design is inspired by luxury wedding platforms, featuring a gold and ivory c
 **CDN Services**: Google Fonts CDN.
 **UI Component Libraries**: Radix UI, Shadcn/ui, Lucide React.
 **Session Storage**: `connect-pg-simple` for PostgreSQL-backed `express-session`.
+
+## Pending Features
+
+**WhatsApp API Integration**: Automatic WhatsApp messaging via API is deferred. Currently uses WhatsApp Web URL method (opens wa.me link). To enable automatic sending, user needs to provide WhatsApp Business API credentials (Twilio, Meta, or other provider) and store them as secrets.
