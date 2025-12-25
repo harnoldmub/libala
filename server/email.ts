@@ -107,7 +107,7 @@ export async function sendRsvpConfirmationEmail(guestData: {
 
     const info = await transporter.sendMail({
       from: fromEmail,
-      to: "contact@ar2k26.com",
+      to: "we@ar2k26.com",
       subject: `Nouvelle réponse RSVP - ${guestData.firstName} ${guestData.lastName}`,
       html: emailHtml,
     });
