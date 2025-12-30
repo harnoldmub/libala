@@ -564,7 +564,10 @@ export default function Admin() {
       (response.email && response.email.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesAvailability =
-      filterAvailability === "all" || response.availability === filterAvailability;
+      filterAvailability === "all" || 
+      response.availability === filterAvailability ||
+      (filterAvailability === "19-march" && response.availability === "both") ||
+      (filterAvailability === "21-march" && response.availability === "both");
 
     return matchesSearch && matchesAvailability;
   });
