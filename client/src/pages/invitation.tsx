@@ -374,18 +374,18 @@ function TimelineSection({ guest }: { guest: Guest }) {
             <h3 className="text-2xl md:text-3xl uppercase tracking-[0.3em] text-[#D4AF37] mb-20 font-light">Programme</h3>
 
             <div className="max-w-4xl mx-auto space-y-20">
-                {/* March 19 - Dot */}
+                {/* March 19 - Mariage coutumier */}
                 {show19 && (
                     <div className="border border-[#D4AF37]/20 p-8 md:p-12">
                         <div className="mb-12">
                             <h4 className="text-xl md:text-2xl font-serif text-[#D4AF37] mb-2">Jeudi 19 Mars 2026</h4>
-                            <p className="text-white text-sm uppercase tracking-wide">Dot & Cérémonie Traditionnelle</p>
+                            <p className="text-white text-sm uppercase tracking-wide">Remise de dot et Mariage coutumier</p>
                         </div>
 
                         <div className="relative max-w-md mx-auto">
                             <div className="absolute left-[60px] top-0 bottom-0 w-[2px] bg-[#D4AF37]/20" />
                             <div className="space-y-12">
-                                <TimelineItem time="19h30" title="Dot" icon={Heart} />
+                                <TimelineItem time="19h30" title="Mariage coutumier" icon={Heart} />
                             </div>
                             <div className="mt-8 text-center bg-[#D4AF37]/5 p-4 border border-[#D4AF37]/20">
                                 <p className="text-white text-lg font-serif mb-2">Yeni Yaşam</p>

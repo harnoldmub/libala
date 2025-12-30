@@ -786,7 +786,7 @@ export default function Landing() {
                     JEUDI 19 MARS
                   </h3>
                   <p className="text-sm text-muted-foreground font-sans">
-                    Dot & Cérémonie
+                    Remise de dot et Mariage coutumier
                   </p>
                 </div>
               </div>
@@ -795,7 +795,7 @@ export default function Landing() {
                   <div className="w-1 bg-primary rounded-full mt-1 flex-shrink-0" />
                   <div>
                     <p className="font-sans font-semibold text-foreground">
-                      Dot
+                      Mariage coutumier
                     </p>
                     <p className="text-sm text-muted-foreground">
                       Bruxelles

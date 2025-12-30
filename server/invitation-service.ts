@@ -38,7 +38,7 @@ export async function generateInvitationPDF(
 
       // Header Date
       const dateText = data.type === '19' ? "19 MARS 2026" : data.type === '21' ? "21 MARS 2026" : "19 & 21 MARS 2026";
-      const titleText = data.type === '19' ? "DOT & TRADITION" : "MARIAGE";
+      const titleText = data.type === '19' ? "MARIAGE COUTUMIER" : "MARIAGE";
 
       doc
         .font("Helvetica-Bold")
@@ -87,7 +87,7 @@ export async function generateInvitationPDF(
       if (data.type === '19') {
         programs = [
           "19h30 • Accueil",
-          "20h00 • Cérémonie de Dot",
+          "20h00 • Mariage coutumier",
           "22h00 • Dîner",
         ];
       } else if (data.type === '21') {
@@ -101,7 +101,7 @@ export async function generateInvitationPDF(
       } else {
         // Fallback or combined
         programs = [
-          "19 MARS • Dot & Cérémonie",
+          "19 MARS • Remise de dot et Mariage coutumier",
           "21 MARS • Civil - 10h",
           "21 MARS • Bénédiction - 12h",
           "21 MARS • Soirée - 19h",

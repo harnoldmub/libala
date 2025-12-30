@@ -21,7 +21,7 @@ export async function sendRsvpConfirmationEmail(guestData: {
   try {
     const availabilityText =
       {
-        "19-march": "19 mars uniquement (Fête de la Dot)",
+        "19-march": "19 mars uniquement (Mariage coutumier)",
         "21-march":
           "21 mars uniquement (Mariage Civil + Bénédiction nuptiale + Grande fête)",
         both: "Les deux dates (19 et 21 mars)",
@@ -129,7 +129,7 @@ export async function sendGuestConfirmationEmail(guestData: {
   try {
     const availabilityText =
       {
-        "19-march": "19 mars uniquement (Fête de la Dot)",
+        "19-march": "19 mars uniquement (Mariage coutumier)",
         "21-march":
           "21 mars uniquement (Mariage Civil + Bénédiction nuptiale + Grande fête)",
         both: "Les deux dates (19 et 21 mars)",
@@ -398,7 +398,7 @@ export async function sendPersonalizedInvitation(recipientData: {
               
               <div class="date-item">
                 <div class="date-title">Jeudi 19 Mars 2026</div>
-                <p style="margin: 5px 0;">Fête de la Dot</p>
+                <p style="margin: 5px 0;">Remise de dot et Mariage coutumier</p>
               </div>
               
               <div class="date-item">
