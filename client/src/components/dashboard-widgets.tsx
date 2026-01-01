@@ -23,8 +23,8 @@ export function DashboardWidgets({ responses }: DashboardWidgetsProps) {
   const stats = {
     total: responses.length,
     both: responses.filter((r) => r.availability === "both").length,
-    march19: responses.filter((r) => r.availability === "19-march").length,
-    march21: responses.filter((r) => r.availability === "21-march").length,
+    march19Only: responses.filter((r) => r.availability === "19-march").length,
+    march21Only: responses.filter((r) => r.availability === "21-march").length,
     unavailable: responses.filter((r) => r.availability === "unavailable").length,
     pending: responses.filter((r) => r.availability === "pending").length,
     assigned: responses.filter((r) => r.tableNumber !== null).length,
@@ -32,11 +32,14 @@ export function DashboardWidgets({ responses }: DashboardWidgetsProps) {
     solo: responses.filter((r) => r.partySize === 1).length,
     couple: responses.filter((r) => r.partySize === 2).length,
   };
+  
+  const totalMarch19 = stats.march19Only + stats.both;
+  const totalMarch21 = stats.march21Only + stats.both;
 
   const availabilityData = [
     { name: "Les deux dates", value: stats.both, color: "hsl(var(--primary))" },
-    { name: "19 mars", value: stats.march19, color: "hsl(var(--chart-2))" },
-    { name: "21 mars", value: stats.march21, color: "hsl(var(--chart-3))" },
+    { name: "19 mars uniquement", value: stats.march19Only, color: "hsl(var(--chart-2))" },
+    { name: "21 mars uniquement", value: stats.march21Only, color: "hsl(var(--chart-3))" },
     { name: "Indisponibles", value: stats.unavailable, color: "hsl(var(--muted-foreground))" },
     { name: "En attente", value: stats.pending, color: "hsl(var(--chart-4))" },
   ];
@@ -75,7 +78,7 @@ export function DashboardWidgets({ responses }: DashboardWidgetsProps) {
     },
     {
       title: "Confirmations",
-      value: stats.total - stats.unavailable,
+      value: stats.total - stats.unavailable - stats.pending,
       description: `${confirmationRate}% taux`,
       icon: CheckCircle,
       color: "text-chart-2",
@@ -83,22 +86,22 @@ export function DashboardWidgets({ responses }: DashboardWidgetsProps) {
       testId: "stat-confirmations",
     },
     {
-      title: "Tables attribuées",
-      value: stats.assigned,
-      description: `${stats.total - stats.assigned} restantes`,
-      icon: Table2,
-      color: "text-chart-3",
-      bgColor: "bg-chart-3/10",
-      testId: "stat-tables-assigned",
+      title: "Présents le 19",
+      value: totalMarch19,
+      description: `${stats.march19Only} seul + ${stats.both} les 2`,
+      icon: Calendar,
+      color: "text-chart-2",
+      bgColor: "bg-chart-2/10",
+      testId: "stat-march19-total",
     },
     {
-      title: "Les deux dates",
-      value: stats.both,
-      description: "Présents 19 & 21",
+      title: "Présents le 21",
+      value: totalMarch21,
+      description: `${stats.march21Only} seul + ${stats.both} les 2`,
       icon: Calendar,
-      color: "text-chart-1",
-      bgColor: "bg-chart-1/10",
-      testId: "stat-both-dates",
+      color: "text-chart-3",
+      bgColor: "bg-chart-3/10",
+      testId: "stat-march21-total",
     },
   ];
 
