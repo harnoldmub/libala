@@ -77,6 +77,7 @@ export const insertRsvpResponseSchema = z.object({
     errorMap: () => ({ message: "Veuillez sélectionner une option" })
   }),
   phone: z.string().optional().nullable().transform(val => !val || val === '' ? null : val),
+  notes: z.string().optional().nullable().transform(val => !val || val === '' ? null : val),
 });
 
 export const updateRsvpResponseSchema = z.object({

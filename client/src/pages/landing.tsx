@@ -25,6 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -286,6 +287,7 @@ export default function Landing() {
       phone: "",
       partySize: 1,
       availability: undefined,
+      notes: "",
     },
   });
 
@@ -654,6 +656,28 @@ export default function Landing() {
                               </SelectItem>
                             </SelectContent>
                           </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="notes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-base font-sans font-semibold text-foreground">
+                            Commentaire (optionnel)
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Régimes alimentaires, allergies, besoins spéciaux..."
+                              className="rounded-lg border-2 border-primary/20 focus:border-primary transition-all hover:border-primary/40 resize-none min-h-[80px]"
+                              data-testid="textarea-notes"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
