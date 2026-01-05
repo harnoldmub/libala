@@ -671,7 +671,7 @@ export default function Landing() {
                           </FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder="Régimes alimentaires, allergies, besoins spéciaux..."
+                              placeholder="Un message pour nous ?"
                               className="rounded-lg border-2 border-primary/20 focus:border-primary transition-all hover:border-primary/40 resize-none min-h-[80px]"
                               data-testid="textarea-notes"
                               {...field}
@@ -768,13 +768,24 @@ export default function Landing() {
 
               <div className="space-y-4 text-sm md:text-base font-sans leading-relaxed text-muted-foreground animate-in fade-in duration-700 animation-delay-400">
                 <p>
-                  Tout a commencé à La Charité, en France, lors d'un anniversaire surprise organisé pour un ami. Ce jour-là, sans que nous en ayons conscience, Dieu tissait déjà les premiers fils de notre histoire. Deux âmes se sont rencontrées, guidées par Sa volonté et Son timing parfait.
+                  Tout a commencé à La Charité, en France, lors d'un
+                  anniversaire surprise organisé pour un ami. Ce jour-là, sans
+                  que nous en ayons conscience, Dieu tissait déjà les premiers
+                  fils de notre histoire. Deux âmes se sont rencontrées, guidées
+                  par Sa volonté et Son timing parfait.
                 </p>
                 <p>
-                  D'abord, il y eut une amitié sincère, faite d'échanges simples, de rires et de respect. Puis, pas à pas, Dieu a fait grandir nos cœurs, transformant cette amitié en un amour véritable, profond et évident.
+                  D'abord, il y eut une amitié sincère, faite d'échanges
+                  simples, de rires et de respect. Puis, pas à pas, Dieu a fait
+                  grandir nos cœurs, transformant cette amitié en un amour
+                  véritable, profond et évident.
                 </p>
                 <p>
-                  Aujourd'hui, nous reconnaissons que cette rencontre n'était pas le fruit du hasard, mais un rendez-vous divin. Reconnaissants pour Son amour et Sa fidélité, nous avançons main dans la main, confiants que Celui qui a commencé cette œuvre continuera de bénir notre union.
+                  Aujourd'hui, nous reconnaissons que cette rencontre n'était
+                  pas le fruit du hasard, mais un rendez-vous divin.
+                  Reconnaissants pour Son amour et Sa fidélité, nous avançons
+                  main dans la main, confiants que Celui qui a commencé cette
+                  œuvre continuera de bénir notre union.
                 </p>
               </div>
 
