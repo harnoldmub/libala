@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { LogOut, Search, Users, Table2, Download, Mail, Edit, Trash2, BarChart3, FileText, Plus, ArrowUp, ArrowDown, X, TrendingUp, ExternalLink, Eye, Send, RefreshCw } from "lucide-react";
+import { LogOut, Search, Users, Table2, Download, Mail, Edit, Trash2, BarChart3, FileText, Plus, ArrowUp, ArrowDown, X, TrendingUp, ExternalLink, Eye, Send, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -150,6 +150,8 @@ export default function Admin() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterAvailability, setFilterAvailability] = useState<string>("all");
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteFirstName, setInviteFirstName] = useState("");
@@ -554,6 +556,11 @@ export default function Admin() {
     }
   };
 
+  // Reset page when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterAvailability]);
+
   // Filter responses
   const filteredResponses = responses.filter((response) => {
     const matchesSearch =
@@ -571,6 +578,18 @@ export default function Admin() {
 
     return matchesSearch && matchesAvailability;
   });
+
+  // Pagination
+  const totalPages = Math.ceil(filteredResponses.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+
+  // Clamp current page when data changes (e.g., after deletion)
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
 
   // Stats
   const stats = {
@@ -871,6 +890,7 @@ export default function Admin() {
                     <TableHead className="font-sans">Personnes</TableHead>
                     <TableHead className="font-sans">Disponibilité</TableHead>
                     <TableHead className="font-sans">Table attribuée</TableHead>
+                    <TableHead className="font-sans">Commentaire</TableHead>
                     <TableHead
                       className="font-sans cursor-pointer hover:bg-muted/50 transition-colors"
                       onClick={() => {
@@ -894,13 +914,13 @@ export default function Admin() {
                 <TableBody>
                   {responsesLoading ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                         Chargement...
                       </TableCell>
                     </TableRow>
                   ) : filteredResponses.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                         Aucun invité trouvé
                       </TableCell>
                     </TableRow>
@@ -922,6 +942,7 @@ export default function Admin() {
                         const comparison = aValue > bValue ? 1 : -1;
                         return sortConfig.direction === 'asc' ? comparison : -comparison;
                       })
+                      .slice(startIndex, endIndex)
                       .map((response) => (
                         <TableRow key={response.id} data-testid={`row-guest-${response.id}`} className={selectedIds.includes(response.id) ? "bg-muted/50" : ""}>
                           <TableCell>
@@ -1042,6 +1063,15 @@ export default function Admin() {
                               )}
                             </div>
                           </TableCell>
+                          <TableCell className="max-w-[200px]">
+                            {response.notes ? (
+                              <span className="text-sm text-muted-foreground truncate block" title={response.notes}>
+                                {response.notes.length > 50 ? `${response.notes.substring(0, 50)}...` : response.notes}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-muted-foreground/50">-</span>
+                            )}
+                          </TableCell>
                           <TableCell className="text-muted-foreground font-sans text-sm">
                             {new Date(response.createdAt!).toLocaleDateString('fr-FR', {
                               day: '2-digit',
@@ -1125,6 +1155,53 @@ export default function Admin() {
                 </TableBody>
               </Table>
             </div>
+
+            {/* Pagination Controls */}
+            {filteredResponses.length > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t">
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-muted-foreground">
+                    Affichage {startIndex + 1}-{Math.min(endIndex, filteredResponses.length)} sur {filteredResponses.length} invités
+                  </span>
+                  <Select value={itemsPerPage.toString()} onValueChange={(value) => { setItemsPerPage(parseInt(value)); setCurrentPage(1); }}>
+                    <SelectTrigger className="w-[100px]" data-testid="select-items-per-page">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="20">20</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    data-testid="button-prev-page"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Précédent
+                  </Button>
+                  <span className="text-sm text-muted-foreground px-2">
+                    Page {currentPage} / {totalPages || 1}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage >= totalPages}
+                    data-testid="button-next-page"
+                  >
+                    Suivant
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </Card>
 
           {/* Delete Dialog */}
