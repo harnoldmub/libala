@@ -1391,6 +1391,18 @@ export default function Admin() {
                       data-testid="input-edit-table"
                     />
                   </div>
+                  <div className="space-y-2 col-span-2">
+                    <Label htmlFor="edit-notes">Commentaire (optionnel)</Label>
+                    <Textarea
+                      id="edit-notes"
+                      placeholder="Régime alimentaire, allergies, besoins spéciaux..."
+                      value={editingResponse.notes ?? ''}
+                      onChange={(e) => setEditingResponse({ ...editingResponse, notes: e.target.value })}
+                      data-testid="input-edit-notes"
+                      className="resize-none"
+                      rows={3}
+                    />
+                  </div>
                 </div>
               )}
               <DialogFooter>
