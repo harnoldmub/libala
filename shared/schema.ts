@@ -108,6 +108,27 @@ export type InsertRsvpResponse = z.infer<typeof insertRsvpResponseSchema>;
 export type UpdateRsvpResponse = z.infer<typeof updateRsvpResponseSchema>;
 export type RsvpResponse = typeof rsvpResponses.$inferSelect;
 
+// Wedding Contributions table
+export const contributions = pgTable("contributions", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  donorName: varchar("donor_name", { length: 255 }).notNull(),
+  amount: integer("amount").notNull(), // Amount in cents
+  currency: varchar("currency", { length: 10 }).notNull().default('eur'),
+  stripeSessionId: varchar("stripe_session_id", { length: 255 }),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
+  status: varchar("status", { length: 50 }).notNull().default('pending'), // 'pending', 'completed', 'failed'
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+export const insertContributionSchema = z.object({
+  donorName: z.string().min(1, "Le nom est requis"),
+  amount: z.number().int().min(100, "Le montant minimum est de 1 euro"), // Min 1 EUR (100 cents)
+});
+
+export type InsertContribution = z.infer<typeof insertContributionSchema>;
+export type Contribution = typeof contributions.$inferSelect;
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   rsvpResponses: many(rsvpResponses),

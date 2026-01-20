@@ -1,11 +1,14 @@
 import {
   users,
   rsvpResponses,
+  contributions,
   type User,
   type UpsertUser,
   type RsvpResponse,
   type InsertRsvpResponse,
   type UpdateRsvpResponse,
+  type Contribution,
+  type InsertContribution,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, ne, sql } from "drizzle-orm";
@@ -136,6 +139,55 @@ export class DatabaseStorage implements IStorage {
       .where(eq(rsvpResponses.id, id))
       .returning();
     return response;
+  }
+
+  // Contribution operations
+  async createContribution(data: InsertContribution & { stripeSessionId: string }): Promise<Contribution> {
+    const [contribution] = await db
+      .insert(contributions)
+      .values({
+        donorName: data.donorName,
+        amount: data.amount,
+        stripeSessionId: data.stripeSessionId,
+      })
+      .returning();
+    return contribution;
+  }
+
+  async getContributionBySessionId(sessionId: string): Promise<Contribution | undefined> {
+    const [contribution] = await db
+      .select()
+      .from(contributions)
+      .where(eq(contributions.stripeSessionId, sessionId));
+    return contribution;
+  }
+
+  async updateContributionStatus(sessionId: string, status: string, paymentIntentId?: string): Promise<Contribution | undefined> {
+    const [contribution] = await db
+      .update(contributions)
+      .set({ 
+        status, 
+        stripePaymentIntentId: paymentIntentId,
+        completedAt: status === 'completed' ? new Date() : null 
+      })
+      .where(eq(contributions.stripeSessionId, sessionId))
+      .returning();
+    return contribution;
+  }
+
+  async getCompletedContributions(): Promise<Contribution[]> {
+    return await db
+      .select()
+      .from(contributions)
+      .where(eq(contributions.status, 'completed'));
+  }
+
+  async getTotalContributions(): Promise<number> {
+    const result = await db
+      .select({ total: sql<number>`COALESCE(SUM(${contributions.amount}), 0)` })
+      .from(contributions)
+      .where(eq(contributions.status, 'completed'));
+    return result[0]?.total ?? 0;
   }
 }
 

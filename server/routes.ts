@@ -4,9 +4,10 @@ import crypto from "crypto";
 import { storage } from "./storage";
 import { getSession } from "./replitAuth";
 import { setupLocalAuth, isLocallyAuthenticated } from "./localAuth";
-import { insertRsvpResponseSchema, updateRsvpResponseSchema } from "@shared/schema";
+import { insertRsvpResponseSchema, updateRsvpResponseSchema, insertContributionSchema } from "@shared/schema";
 import { sendRsvpConfirmationEmail, sendPersonalizedInvitation, sendGuestConfirmationEmail } from "./email";
 import passport from "passport";
+import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Session middleware
@@ -588,6 +589,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error sending invitation:", error);
       res.status(500).json({ message: "Échec de l'envoi de l'invitation" });
+    }
+  });
+
+  // Stripe Contribution Routes
+  
+  // Get Stripe publishable key
+  app.get("/api/stripe/config", async (req, res) => {
+    try {
+      const publishableKey = await getStripePublishableKey();
+      res.json({ publishableKey });
+    } catch (error) {
+      console.error("Error getting Stripe config:", error);
+      res.status(500).json({ message: "Erreur lors de la récupération de la configuration Stripe" });
+    }
+  });
+
+  // Create checkout session for wedding contribution
+  app.post("/api/create-checkout-session", async (req, res) => {
+    try {
+      const { donorName, amount } = req.body;
+      
+      // Validate input
+      const validated = insertContributionSchema.parse({ donorName, amount });
+      
+      const stripe = await getUncachableStripeClient();
+      
+      // Get the base URL for success/cancel redirects
+      const baseUrl = process.env.SITE_URL || `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
+      
+      // Create Stripe Checkout session with price_data for one-time contributions
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [{
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: 'Cagnotte Mariage Ruth & Arnold',
+              description: `Contribution de ${validated.donorName}`,
+            },
+            unit_amount: validated.amount,
+          },
+          quantity: 1,
+        }],
+        mode: 'payment',
+        success_url: `${baseUrl}/contribution/merci?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/#cagnotte`,
+        metadata: {
+          donorName: validated.donorName,
+        },
+      });
+
+      // Store contribution in database with pending status
+      await storage.createContribution({
+        donorName: validated.donorName,
+        amount: validated.amount,
+        stripeSessionId: session.id,
+      });
+
+      res.json({ url: session.url });
+    } catch (error: any) {
+      console.error("Error creating checkout session:", error);
+      if (error.issues) {
+        return res.status(400).json({ message: "Données invalides", details: error.issues });
+      }
+      res.status(500).json({ message: "Erreur lors de la création de la session de paiement" });
+    }
+  });
+
+  // Verify payment and get contribution details (for thank you page)
+  app.get("/api/contribution/verify", async (req, res) => {
+    try {
+      const sessionId = req.query.session_id as string;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID requis" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      
+      if (session.payment_status === 'paid') {
+        // Update contribution status
+        await storage.updateContributionStatus(
+          sessionId, 
+          'completed',
+          session.payment_intent as string
+        );
+      }
+      
+      // Get contribution details
+      const contribution = await storage.getContributionBySessionId(sessionId);
+      
+      res.json({
+        success: session.payment_status === 'paid',
+        donorName: session.metadata?.donorName || contribution?.donorName,
+        amount: session.amount_total,
+        currency: session.currency,
+      });
+    } catch (error) {
+      console.error("Error verifying payment:", error);
+      res.status(500).json({ message: "Erreur lors de la vérification du paiement" });
+    }
+  });
+
+  // Get total contributions (public endpoint for showing on landing page)
+  app.get("/api/contributions/total", async (req, res) => {
+    try {
+      const total = await storage.getTotalContributions();
+      res.json({ total, currency: 'eur' });
+    } catch (error) {
+      console.error("Error getting total contributions:", error);
+      res.status(500).json({ message: "Erreur lors de la récupération du total" });
     }
   });
 
