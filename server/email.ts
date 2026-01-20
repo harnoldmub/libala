@@ -403,6 +403,169 @@ export async function sendContributionNotification(contributionData: {
   }
 }
 
+export async function sendContributorThankYou(contributorData: {
+  email: string;
+  donorName: string;
+  amount: number;
+  currency: string;
+}) {
+  try {
+    const formattedAmount = (contributorData.amount / 100).toFixed(2);
+    const currencySymbol = contributorData.currency === 'eur' ? '€' : contributorData.currency.toUpperCase();
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body {
+              font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              line-height: 1.8;
+              color: #333;
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              background: #fff;
+            }
+            .header {
+              text-align: center;
+              padding: 40px 0;
+              background: linear-gradient(135deg, #f5f5f0 0%, #fff 100%);
+              border-radius: 8px;
+              margin-bottom: 30px;
+            }
+            .header h1 {
+              font-family: 'Playfair Display', serif;
+              color: #C8A96A;
+              margin: 0;
+              font-size: 36px;
+              letter-spacing: 2px;
+            }
+            .content {
+              padding: 20px 0;
+            }
+            .heart-icon {
+              text-align: center;
+              font-size: 48px;
+              margin: 20px 0;
+            }
+            .thank-you-box {
+              background: linear-gradient(135deg, #C8A96A 0%, #D4AF37 100%);
+              color: white;
+              padding: 30px;
+              border-radius: 12px;
+              text-align: center;
+              margin: 25px 0;
+            }
+            .thank-you-box h2 {
+              margin: 0 0 10px 0;
+              font-size: 28px;
+              font-family: 'Playfair Display', serif;
+            }
+            .amount-display {
+              background: rgba(255,255,255,0.2);
+              padding: 15px 25px;
+              border-radius: 8px;
+              display: inline-block;
+              margin-top: 15px;
+            }
+            .amount-display span {
+              font-size: 24px;
+              font-weight: bold;
+            }
+            .message-section {
+              background: #fff8e7;
+              border: 2px solid #C8A96A;
+              border-radius: 12px;
+              padding: 25px;
+              margin: 30px 0;
+              text-align: center;
+            }
+            .signature {
+              text-align: center;
+              margin-top: 30px;
+              padding-top: 20px;
+              border-top: 2px solid #C8A96A;
+            }
+            .signature p {
+              font-family: 'Great Vibes', cursive;
+              font-size: 28px;
+              color: #C8A96A;
+              margin: 10px 0;
+            }
+            .footer {
+              text-align: center;
+              padding-top: 20px;
+              color: #666;
+              font-size: 14px;
+              margin-top: 30px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Golden Love 2026</h1>
+            <p style="color: #666; margin: 15px 0 0 0; font-size: 18px;">Ruth & Arnold</p>
+          </div>
+          
+          <div class="content">
+            <div class="heart-icon">💕</div>
+            
+            <div class="thank-you-box">
+              <h2>Merci infiniment, ${contributorData.donorName} !</h2>
+              <p style="margin: 10px 0 0 0; opacity: 0.95;">Votre générosité nous touche profondément</p>
+              <div class="amount-display">
+                <span>${formattedAmount} ${currencySymbol}</span>
+              </div>
+            </div>
+            
+            <div class="message-section">
+              <p style="font-size: 18px; margin: 0; color: #333;">
+                Cher(e) ${contributorData.donorName},
+              </p>
+              <p style="margin: 15px 0; color: #555;">
+                Du fond du cœur, nous tenons à vous remercier pour votre précieuse contribution à notre cagnotte de mariage.
+              </p>
+              <p style="margin: 15px 0; color: #555;">
+                Votre geste d'amour et de générosité nous aide à construire les plus beaux souvenirs pour notre nouvelle vie ensemble. Chaque contribution est un témoignage de votre affection qui nous accompagnera pour toujours.
+              </p>
+              <p style="margin: 15px 0 0 0; color: #555;">
+                Nous avons hâte de partager ces moments magiques avec vous les 19 et 21 mars 2026 !
+              </p>
+            </div>
+            
+            <div class="signature">
+              <p>Avec tout notre amour,</p>
+              <p style="font-size: 24px; margin-top: 5px;"><strong>Ruth & Arnold</strong></p>
+            </div>
+          </div>
+          
+          <div class="footer">
+            <p>© 2026 Ruth & Arnold - Golden Love</p>
+            <p style="font-size: 12px; color: #999; margin-top: 10px;">
+              Ce message a été envoyé suite à votre contribution sur notre site de mariage.
+            </p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const info = await transporter.sendMail({
+      from: fromEmail,
+      to: contributorData.email,
+      subject: `Merci ${contributorData.donorName} ! 💕 Votre contribution nous touche - Ruth & Arnold`,
+      html: emailHtml,
+    });
+
+    console.log("Contributor thank you email sent successfully:", info.messageId);
+    return info;
+  } catch (error) {
+    console.error("Failed to send contributor thank you email:", error);
+    throw error;
+  }
+}
+
 export async function sendPersonalizedInvitation(recipientData: {
   email: string;
   firstName: string;

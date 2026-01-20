@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { getSession } from "./replitAuth";
 import { setupLocalAuth, isLocallyAuthenticated } from "./localAuth";
 import { insertRsvpResponseSchema, updateRsvpResponseSchema, insertContributionSchema } from "@shared/schema";
-import { sendRsvpConfirmationEmail, sendPersonalizedInvitation, sendGuestConfirmationEmail, sendContributionNotification } from "./email";
+import { sendRsvpConfirmationEmail, sendPersonalizedInvitation, sendGuestConfirmationEmail, sendContributionNotification, sendContributorThankYou } from "./email";
 import passport from "passport";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 
@@ -639,6 +639,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           donorName: validated.donorName,
           message: validated.message || '',
         },
+        // Collect customer email for thank you email
+        customer_creation: 'if_required',
+        billing_address_collection: 'auto',
       });
 
       // Store contribution in database with pending status
@@ -675,22 +678,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const contribution = await storage.getContributionBySessionId(sessionId);
       
       if (session.payment_status === 'paid') {
-        // Only update and send email if not already completed
+        // Only update and send emails if not already completed
         if (contribution && contribution.status !== 'completed') {
-          // Try to send email notification first
+          const donorName = session.metadata?.donorName || contribution.donorName;
+          const amount = session.amount_total || contribution.amount;
+          const currency = session.currency || 'eur';
+          
+          // Try to send email notification to couple
           try {
             await sendContributionNotification({
-              donorName: session.metadata?.donorName || contribution.donorName,
-              amount: session.amount_total || contribution.amount,
-              currency: session.currency || 'eur',
+              donorName,
+              amount,
+              currency,
               message: contribution.message,
             });
           } catch (emailError) {
             console.error("Failed to send contribution notification email:", emailError);
-            // Continue anyway - contribution is still valid even if email fails
           }
           
-          // Update contribution status after email attempt
+          // Try to send thank you email to contributor if we have their email
+          const customerEmail = session.customer_details?.email;
+          if (customerEmail) {
+            try {
+              await sendContributorThankYou({
+                email: customerEmail,
+                donorName,
+                amount,
+                currency,
+              });
+            } catch (emailError) {
+              console.error("Failed to send contributor thank you email:", emailError);
+            }
+          }
+          
+          // Update contribution status after email attempts
           await storage.updateContributionStatus(
             sessionId, 
             'completed',
