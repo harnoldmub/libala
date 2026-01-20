@@ -194,6 +194,7 @@ export default function CagnottePage() {
               <Countdown />
             </div>
 
+            {/* Total collecté - masqué pour l'instant
             {totalData && totalData.total > 0 && (
               <div className="text-center mb-8 py-4 px-6 bg-primary/5 rounded-lg border border-primary/10">
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-1">
@@ -205,6 +206,7 @@ export default function CagnottePage() {
                 </p>
               </div>
             )}
+            */}
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
