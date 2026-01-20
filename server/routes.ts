@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { getSession } from "./replitAuth";
 import { setupLocalAuth, isLocallyAuthenticated } from "./localAuth";
 import { insertRsvpResponseSchema, updateRsvpResponseSchema, insertContributionSchema } from "@shared/schema";
-import { sendRsvpConfirmationEmail, sendPersonalizedInvitation, sendGuestConfirmationEmail } from "./email";
+import { sendRsvpConfirmationEmail, sendPersonalizedInvitation, sendGuestConfirmationEmail, sendContributionNotification } from "./email";
 import passport from "passport";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 
@@ -671,17 +671,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stripe = await getUncachableStripeClient();
       const session = await stripe.checkout.sessions.retrieve(sessionId);
       
-      if (session.payment_status === 'paid') {
-        // Update contribution status
-        await storage.updateContributionStatus(
-          sessionId, 
-          'completed',
-          session.payment_intent as string
-        );
-      }
-      
       // Get contribution details
       const contribution = await storage.getContributionBySessionId(sessionId);
+      
+      if (session.payment_status === 'paid') {
+        // Only update and send email if not already completed
+        if (contribution && contribution.status !== 'completed') {
+          // Try to send email notification first
+          try {
+            await sendContributionNotification({
+              donorName: session.metadata?.donorName || contribution.donorName,
+              amount: session.amount_total || contribution.amount,
+              currency: session.currency || 'eur',
+              message: contribution.message,
+            });
+          } catch (emailError) {
+            console.error("Failed to send contribution notification email:", emailError);
+            // Continue anyway - contribution is still valid even if email fails
+          }
+          
+          // Update contribution status after email attempt
+          await storage.updateContributionStatus(
+            sessionId, 
+            'completed',
+            session.payment_intent as string
+          );
+        }
+      }
       
       res.json({
         success: session.payment_status === 'paid',

@@ -270,6 +270,139 @@ export async function sendGuestConfirmationEmail(guestData: {
   }
 }
 
+export async function sendContributionNotification(contributionData: {
+  donorName: string;
+  amount: number;
+  currency: string;
+  message?: string | null;
+}) {
+  try {
+    const formattedAmount = (contributionData.amount / 100).toFixed(2);
+    const currencySymbol = contributionData.currency === 'eur' ? '€' : contributionData.currency.toUpperCase();
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body {
+              font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              line-height: 1.6;
+              color: #333;
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+            }
+            .header {
+              text-align: center;
+              padding: 30px 0;
+              border-bottom: 2px solid #C8A96A;
+            }
+            .header h1 {
+              font-family: 'Playfair Display', serif;
+              color: #C8A96A;
+              margin: 0;
+              font-size: 32px;
+            }
+            .content {
+              padding: 30px 0;
+            }
+            .amount-box {
+              background: linear-gradient(135deg, #C8A96A 0%, #D4AF37 100%);
+              color: white;
+              padding: 25px;
+              border-radius: 8px;
+              text-align: center;
+              margin: 25px 0;
+            }
+            .amount-box h2 {
+              margin: 0;
+              font-size: 36px;
+            }
+            .info-box {
+              background: #f9f9f9;
+              border-left: 4px solid #C8A96A;
+              padding: 15px;
+              margin: 20px 0;
+            }
+            .message-box {
+              background: #fff8e7;
+              border: 1px solid #C8A96A;
+              border-radius: 8px;
+              padding: 20px;
+              margin: 20px 0;
+              font-style: italic;
+            }
+            .footer {
+              text-align: center;
+              padding-top: 20px;
+              border-top: 1px solid #e0e0e0;
+              color: #666;
+              font-size: 14px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Golden Love 2026</h1>
+            <p style="color: #666; margin: 10px 0 0 0;">Ruth & Arnold</p>
+          </div>
+          
+          <div class="content">
+            <h2 style="color: #333;">Nouvelle contribution reçue !</h2>
+            
+            <div class="amount-box">
+              <p style="margin: 0 0 10px 0; font-size: 14px; opacity: 0.9;">Montant de la contribution</p>
+              <h2>${formattedAmount} ${currencySymbol}</h2>
+            </div>
+            
+            <div class="info-box">
+              <p><strong>Donateur :</strong> ${contributionData.donorName}</p>
+              <p><strong>Date :</strong> ${new Date().toLocaleDateString(
+                "fr-FR",
+                {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                },
+              )}</p>
+            </div>
+            
+            ${contributionData.message ? `
+            <div class="message-box">
+              <p style="margin: 0 0 10px 0; font-weight: bold; color: #C8A96A;">Message du donateur :</p>
+              <p style="margin: 0;">"${contributionData.message}"</p>
+            </div>
+            ` : ''}
+            
+            <p>Félicitations ! Une nouvelle contribution a été effectuée pour votre cagnotte de mariage.</p>
+          </div>
+          
+          <div class="footer">
+            <p>© 2026 Ruth & Arnold - Golden Love</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const info = await transporter.sendMail({
+      from: fromEmail,
+      to: "we@ar2k26.com",
+      subject: `Nouvelle contribution - ${contributionData.donorName} : ${formattedAmount}${currencySymbol}`,
+      html: emailHtml,
+    });
+
+    console.log("Contribution notification email sent successfully:", info.messageId);
+    return info;
+  } catch (error) {
+    console.error("Failed to send contribution notification email:", error);
+    throw error;
+  }
+}
+
 export async function sendPersonalizedInvitation(recipientData: {
   email: string;
   firstName: string;
