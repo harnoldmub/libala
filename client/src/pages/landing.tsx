@@ -40,6 +40,7 @@ import {
 } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { AccommodationSection } from "@/components/accommodation";
+import { ContributionForm } from "@/components/contribution-form";
 import { motion, useScroll, useTransform } from "framer-motion";
 import heroImage from "@assets/IMG_6360_1760648841327.jpg";
 import couplePhoto from "@assets/DSC_8913_1766077508558.jpg";
@@ -939,6 +940,9 @@ export default function Landing() {
       {/* Accommodation Section */}
       <AccommodationSection />
 
+      {/* Contribution Section */}
+      <ContributionForm />
+
       {/* Footer */}
       <footer className="py-16 md:py-20 px-6 border-t border-border bg-background">
         <div className="max-w-7xl mx-auto">
@@ -1018,6 +1022,17 @@ export default function Landing() {
                   data-testid="button-footer-nav-gallery"
                 >
                   Galerie
+                </button>
+                <button
+                  onClick={() =>
+                    document
+                      .getElementById("cagnotte")
+                      ?.scrollIntoView({ behavior: "smooth" })
+                  }
+                  className="block text-sm text-muted-foreground hover:text-primary transition-colors font-sans text-left"
+                  data-testid="button-footer-nav-cagnotte"
+                >
+                  Cagnotte
                 </button>
               </div>
             </div>
