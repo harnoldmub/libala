@@ -608,10 +608,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create checkout session for wedding contribution
   app.post("/api/create-checkout-session", async (req, res) => {
     try {
-      const { donorName, amount } = req.body;
+      const { donorName, amount, message } = req.body;
       
       // Validate input
-      const validated = insertContributionSchema.parse({ donorName, amount });
+      const validated = insertContributionSchema.parse({ donorName, amount, message });
       
       const stripe = await getUncachableStripeClient();
       
@@ -634,9 +634,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }],
         mode: 'payment',
         success_url: `${baseUrl}/contribution/merci?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${baseUrl}/#cagnotte`,
+        cancel_url: `${baseUrl}/cagnotte`,
         metadata: {
           donorName: validated.donorName,
+          message: validated.message || '',
         },
       });
 
@@ -644,6 +645,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createContribution({
         donorName: validated.donorName,
         amount: validated.amount,
+        message: validated.message,
         stripeSessionId: session.id,
       });
 

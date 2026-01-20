@@ -114,6 +114,7 @@ export const contributions = pgTable("contributions", {
   donorName: varchar("donor_name", { length: 255 }).notNull(),
   amount: integer("amount").notNull(), // Amount in cents
   currency: varchar("currency", { length: 10 }).notNull().default('eur'),
+  message: text("message"), // Optional message from donor
   stripeSessionId: varchar("stripe_session_id", { length: 255 }),
   stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
   status: varchar("status", { length: 50 }).notNull().default('pending'), // 'pending', 'completed', 'failed'
@@ -124,6 +125,7 @@ export const contributions = pgTable("contributions", {
 export const insertContributionSchema = z.object({
   donorName: z.string().min(1, "Le nom est requis"),
   amount: z.number().int().min(100, "Le montant minimum est de 1 euro"), // Min 1 EUR (100 cents)
+  message: z.string().optional().nullable().transform(val => !val || val === '' ? null : val),
 });
 
 export type InsertContribution = z.infer<typeof insertContributionSchema>;

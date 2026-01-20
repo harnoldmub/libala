@@ -11,6 +11,7 @@ import Admin from "@/pages/admin";
 import Login from "@/pages/login";
 import Invitation from "@/pages/invitation";
 import CheckIn from "@/pages/checkin";
+import CagnottePage from "@/pages/cagnotte";
 import ContributionMerci from "@/pages/contribution-merci";
 import NotFound from "@/pages/not-found";
 
@@ -31,6 +32,7 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/checkin" component={CheckIn} />
       <Route path="/invitation/:id" component={Invitation} />
+      <Route path="/cagnotte" component={CagnottePage} />
       <Route path="/contribution/merci" component={ContributionMerci} />
       <Route path="/admin">
         {isLoading ? (

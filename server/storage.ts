@@ -148,6 +148,7 @@ export class DatabaseStorage implements IStorage {
       .values({
         donorName: data.donorName,
         amount: data.amount,
+        message: data.message,
         stripeSessionId: data.stripeSessionId,
       })
       .returning();

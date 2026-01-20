@@ -14,7 +14,7 @@ Preferred communication style: Simple, everyday language.
 
 **Framework**: React 18 with TypeScript, using Vite.
 **UI Component System**: Shadcn/ui (based on Radix UI) with Tailwind CSS.
-**Routing**: Wouter for client-side routing (`/`, `/login`, `/admin`).
+**Routing**: Wouter for client-side routing (`/`, `/login`, `/admin`, `/cagnotte`, `/contribution/merci`).
 **State Management**: TanStack Query for server state.
 **Form Handling**: React Hook Form with Zod validation.
 **Styling System**: Tailwind CSS with custom CSS variables for light/dark modes and a gold/ivory palette.
@@ -32,7 +32,7 @@ Preferred communication style: Simple, everyday language.
 
 **Database**: PostgreSQL (via Neon serverless driver).
 **ORM**: Drizzle ORM for type-safe queries.
-**Schema Design**: `sessions`, `users`, and `rsvp_responses` tables storing guest details, availability, and table assignments.
+**Schema Design**: `sessions`, `users`, `rsvp_responses`, and `contributions` tables storing guest details, availability, table assignments, and wedding contributions.
 **Type Safety**: Full type inference from database schema to TypeScript using Drizzle and Zod for runtime validation.
 
 ### UI/UX Decisions
@@ -51,6 +51,15 @@ The design is inspired by luxury wedding platforms, featuring a gold and ivory c
 **CDN Services**: Google Fonts CDN.
 **UI Component Libraries**: Radix UI, Shadcn/ui, Lucide React.
 **Session Storage**: `connect-pg-simple` for PostgreSQL-backed `express-session`.
+**Payment Processing**: Stripe integration via Replit connector for wedding contributions (cagnotte).
+
+## Cagnotte (Wedding Contribution) Feature
+
+**Dedicated Page**: `/cagnotte` - A standalone page with the couple's photo, countdown timer, total collected amount, and contribution form.
+**Message Field**: Contributors can leave an optional message for the couple.
+**Stripe Integration**: Secure payment processing with Stripe Checkout.
+**Thank You Page**: `/contribution/merci` - Displays contribution confirmation and total collected amount.
+**Database**: Contributions stored with donor name, amount (cents), optional message, and Stripe session/payment IDs.
 
 ## Pending Features
 
