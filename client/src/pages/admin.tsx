@@ -38,6 +38,45 @@ import { DashboardWidgets } from "@/components/dashboard-widgets";
 import type { RsvpResponse } from "@shared/schema";
 import logoRA from "@assets/logo-ra.png";
 
+// Wedding tables with poetic names - Golden Love theme
+const WEDDING_TABLES = [
+  { number: 1, name: "Amour Éternel", subtitle: "Un amour scellé pour toujours" },
+  { number: 2, name: "Âmes Sœurs", subtitle: "Deux cœurs, une destinée" },
+  { number: 3, name: "Promesse Dorée", subtitle: "Une parole donnée devant Dieu" },
+  { number: 4, name: "Alliance Sacrée", subtitle: "Ce que Dieu unit, nul ne le sépare" },
+  { number: 5, name: "Coup de Foudre", subtitle: "Quand l'amour commence" },
+  { number: 6, name: "Grâce Divine", subtitle: "L'amour soutenu par la grâce" },
+  { number: 7, name: "Cœurs Unis", subtitle: "Unis dans l'amour et la foi" },
+  { number: 8, name: "Passion d'Or", subtitle: "Un amour précieux et ardent" },
+  { number: 9, name: "Serment Éternel", subtitle: "Fidélité, respect et engagement" },
+  { number: 10, name: "Flamme d'Amour", subtitle: "Un feu qui ne s'éteint jamais" },
+  { number: 11, name: "Harmonie Dorée", subtitle: "Marcher ensemble en paix" },
+  { number: 12, name: "Union Parfaite", subtitle: "Deux vies, un seul chemin" },
+  { number: 13, name: "Destin Doré", subtitle: "Écrits l'un pour l'autre" },
+  { number: 14, name: "Éclat de Bonheur", subtitle: "La joie d'aimer et d'être aimé" },
+  { number: 15, name: "Joyau Précieux", subtitle: "Un amour de grande valeur" },
+  { number: 16, name: "Couronne d'Amour", subtitle: "Un amour honoré et célébré" },
+  { number: 17, name: "Lien Sacré", subtitle: "Attachés par l'amour et la foi" },
+  { number: 18, name: "Origine Divine", subtitle: "Un amour voulu par Dieu" },
+  { number: 19, name: "Héritage d'Amour", subtitle: "Un amour transmis et béni" },
+  { number: 20, name: "Lumière Éternelle", subtitle: "Un amour qui éclaire le chemin" },
+  { number: 21, name: "Cantique d'Amour", subtitle: "Un amour chanté devant Dieu" },
+  { number: 22, name: "Main dans la Main", subtitle: "Marcher ensemble toute une vie" },
+  { number: 23, name: "Promesse Céleste", subtitle: "Un engagement venu du ciel" },
+  { number: 24, name: "Trésor du Cœur", subtitle: "Là où est ton trésor, là est ton cœur" },
+  { number: 25, name: "Éternelle Allégresse", subtitle: "La joie scellée par l'amour" },
+  { number: 26, name: "Souffle d'Or", subtitle: "Quand Dieu insuffle l'amour" },
+  { number: 27, name: "Chemin de Grâce", subtitle: "Guidés par la foi et l'amour" },
+  { number: 28, name: "Amour Triomphant", subtitle: "L'amour qui surmonte tout" },
+  { number: 29, name: "Scellement Divin", subtitle: "Une union bénie pour toujours" },
+  { number: 30, name: "Rayon de Gloire", subtitle: "Un amour qui reflète la gloire de Dieu" },
+];
+
+// Helper function to get table info by number
+const getTableInfo = (tableNumber: number) => {
+  return WEDDING_TABLES.find(t => t.number === tableNumber);
+};
+
 const ImportGuestForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [text, setText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -990,11 +1029,18 @@ export default function Admin() {
                             <div className="flex items-center gap-2">
                               {response.tableNumber ? (
                                 <>
-                                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-orange-50 text-orange-700 border border-orange-200">
-                                    <Table2 className="h-3.5 w-3.5" />
-                                    <span className="font-sans text-xs font-semibold" data-testid={`text-table-${response.id}`}>
-                                      Table {response.tableNumber}
-                                    </span>
+                                  <div className="flex flex-col gap-0.5 px-2 py-1 rounded-md bg-orange-50 text-orange-700 border border-orange-200">
+                                    <div className="flex items-center gap-1.5">
+                                      <Table2 className="h-3.5 w-3.5" />
+                                      <span className="font-sans text-xs font-semibold" data-testid={`text-table-${response.id}`}>
+                                        Table {response.tableNumber}
+                                      </span>
+                                    </div>
+                                    {getTableInfo(response.tableNumber) && (
+                                      <span className="text-[10px] text-orange-600 italic pl-5">
+                                        {getTableInfo(response.tableNumber)?.name}
+                                      </span>
+                                    )}
                                   </div>
                                   <Button
                                     variant="ghost"
@@ -1019,44 +1065,50 @@ export default function Admin() {
                                       Attribuer
                                     </Button>
                                   </DialogTrigger>
-                                  <DialogContent className="max-w-sm">
+                                  <DialogContent className="max-w-md">
                                     <DialogHeader>
-                                      <DialogTitle>Attribuer une table - {response.firstName} {response.lastName}</DialogTitle>
+                                      <DialogTitle>Attribuer une table</DialogTitle>
+                                      <DialogDescription>
+                                        Choisissez une table pour {response.firstName} {response.lastName}
+                                      </DialogDescription>
                                     </DialogHeader>
                                     <div className="space-y-4">
                                       <div>
-                                        <Label htmlFor={`table-input-${response.id}`}>Numéro de table</Label>
-                                        <Input
-                                          id={`table-input-${response.id}`}
-                                          type="number"
-                                          min="1"
-                                          placeholder="Ex: 1, 2, 3..."
-                                          data-testid={`input-table-number-${response.id}`}
-                                          onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                              const value = parseInt((e.target as HTMLInputElement).value);
-                                              if (value > 0) {
-                                                updateTableMutation.mutate({ id: response.id, tableNumber: value });
-                                                (e.target as HTMLInputElement).value = '';
-                                              }
+                                        <Label>Sélectionner une table</Label>
+                                        <Select
+                                          onValueChange={(value) => {
+                                            const tableNumber = parseInt(value);
+                                            if (tableNumber > 0) {
+                                              updateTableMutation.mutate({ id: response.id, tableNumber });
                                             }
                                           }}
-                                        />
+                                        >
+                                          <SelectTrigger 
+                                            className="w-full mt-2" 
+                                            data-testid={`select-table-${response.id}`}
+                                          >
+                                            <SelectValue placeholder="Choisir une table..." />
+                                          </SelectTrigger>
+                                          <SelectContent className="max-h-[300px]">
+                                            {WEDDING_TABLES.map((table) => (
+                                              <SelectItem 
+                                                key={table.number} 
+                                                value={table.number.toString()}
+                                                data-testid={`option-table-${table.number}`}
+                                              >
+                                                <div className="flex flex-col py-1">
+                                                  <span className="font-semibold">
+                                                    Table {table.number} - {table.name}
+                                                  </span>
+                                                  <span className="text-xs text-muted-foreground italic">
+                                                    {table.subtitle}
+                                                  </span>
+                                                </div>
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
                                       </div>
-                                      <Button
-                                        onClick={() => {
-                                          const input = document.getElementById(`table-input-${response.id}`) as HTMLInputElement;
-                                          const value = parseInt(input.value);
-                                          if (value > 0) {
-                                            updateTableMutation.mutate({ id: response.id, tableNumber: value });
-                                          }
-                                        }}
-                                        disabled={updateTableMutation.isPending}
-                                        className="w-full"
-                                        data-testid={`button-confirm-table-${response.id}`}
-                                      >
-                                        {updateTableMutation.isPending ? "Enregistrement..." : "Enregistrer"}
-                                      </Button>
                                     </div>
                                   </DialogContent>
                                 </Dialog>
