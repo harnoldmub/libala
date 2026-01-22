@@ -17,9 +17,10 @@ import type { RsvpResponse } from "@shared/schema";
 
 interface DashboardWidgetsProps {
   responses: RsvpResponse[];
+  onFilterChange?: (filter: string) => void;
 }
 
-export function DashboardWidgets({ responses }: DashboardWidgetsProps) {
+export function DashboardWidgets({ responses, onFilterChange }: DashboardWidgetsProps) {
   // Filter responses by availability
   const availableFor19 = responses.filter((r) => r.availability === "both" || r.availability === "19-march");
   const availableFor21 = responses.filter((r) => r.availability === "both" || r.availability === "21-march");
@@ -87,6 +88,8 @@ export function DashboardWidgets({ responses }: DashboardWidgetsProps) {
       color: "text-primary",
       bgColor: "bg-primary/10",
       testId: "stat-total-guests",
+      filter: "all",
+      clickable: true,
     },
     {
       title: "Confirmations",
@@ -96,6 +99,8 @@ export function DashboardWidgets({ responses }: DashboardWidgetsProps) {
       color: "text-chart-2",
       bgColor: "bg-chart-2/10",
       testId: "stat-confirmations",
+      filter: null,
+      clickable: false,
     },
     {
       title: "Présents le 19",
@@ -105,6 +110,8 @@ export function DashboardWidgets({ responses }: DashboardWidgetsProps) {
       color: "text-chart-2",
       bgColor: "bg-chart-2/10",
       testId: "stat-march19-total",
+      filter: "19-march",
+      clickable: true,
     },
     {
       title: "Présents le 21",
@@ -114,6 +121,8 @@ export function DashboardWidgets({ responses }: DashboardWidgetsProps) {
       color: "text-chart-3",
       bgColor: "bg-chart-3/10",
       testId: "stat-march21-total",
+      filter: "21-march",
+      clickable: true,
     },
   ];
 
@@ -123,15 +132,24 @@ export function DashboardWidgets({ responses }: DashboardWidgetsProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat, idx) => {
           const Icon = stat.icon;
+          const isClickable = stat.clickable && onFilterChange;
           return (
             <Card
               key={idx}
-              className="p-6 hover-elevate transition-all duration-300"
+              className={`p-6 transition-all duration-300 ${isClickable ? 'cursor-pointer hover:ring-2 hover:ring-primary/50 hover:shadow-lg' : ''}`}
+              onClick={() => {
+                if (isClickable && stat.filter) {
+                  onFilterChange(stat.filter);
+                }
+              }}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <p className="text-sm font-sans text-muted-foreground mb-1">
                     {stat.title}
+                    {isClickable && (
+                      <span className="ml-2 text-[10px] text-primary opacity-70">(cliquer pour filtrer)</span>
+                    )}
                   </p>
                   <p
                     className="text-3xl font-bold font-serif text-foreground mb-1"

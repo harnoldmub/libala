@@ -678,7 +678,7 @@ export default function Admin() {
       <div className="container mx-auto px-6 py-8">
         {/* Dashboard Sections */}
         <div className="space-y-8">
-          <DashboardWidgets responses={responses} />
+          <DashboardWidgets responses={responses} onFilterChange={setFilterAvailability} />
 
           {/* Guest Management Section */}
           <Card className="flex flex-col">
