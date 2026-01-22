@@ -20,6 +20,10 @@ interface DashboardWidgetsProps {
 }
 
 export function DashboardWidgets({ responses }: DashboardWidgetsProps) {
+  // Filter responses by availability
+  const availableFor19 = responses.filter((r) => r.availability === "both" || r.availability === "19-march");
+  const availableFor21 = responses.filter((r) => r.availability === "both" || r.availability === "21-march");
+  
   const stats = {
     total: responses.length,
     both: responses.filter((r) => r.availability === "both").length,
@@ -31,6 +35,14 @@ export function DashboardWidgets({ responses }: DashboardWidgetsProps) {
     totalGuests: responses.reduce((sum, r) => sum + r.partySize, 0),
     solo: responses.filter((r) => r.partySize === 1).length,
     couple: responses.filter((r) => r.partySize === 2).length,
+    // Stats for March 19
+    guests19: availableFor19.reduce((sum, r) => sum + r.partySize, 0),
+    solo19: availableFor19.filter((r) => r.partySize === 1).length,
+    couple19: availableFor19.filter((r) => r.partySize === 2).length,
+    // Stats for March 21
+    guests21: availableFor21.reduce((sum, r) => sum + r.partySize, 0),
+    solo21: availableFor21.filter((r) => r.partySize === 1).length,
+    couple21: availableFor21.filter((r) => r.partySize === 2).length,
   };
   
   const totalMarch19 = stats.march19Only + stats.both;
@@ -87,8 +99,8 @@ export function DashboardWidgets({ responses }: DashboardWidgetsProps) {
     },
     {
       title: "Présents le 19",
-      value: totalMarch19,
-      description: `${stats.march19Only} seul + ${stats.both} les 2`,
+      value: stats.guests19,
+      description: `${stats.solo19} solo + ${stats.couple19} couples`,
       icon: Calendar,
       color: "text-chart-2",
       bgColor: "bg-chart-2/10",
@@ -96,8 +108,8 @@ export function DashboardWidgets({ responses }: DashboardWidgetsProps) {
     },
     {
       title: "Présents le 21",
-      value: totalMarch21,
-      description: `${stats.march21Only} seul + ${stats.both} les 2`,
+      value: stats.guests21,
+      description: `${stats.solo21} solo + ${stats.couple21} couples`,
       icon: Calendar,
       color: "text-chart-3",
       bgColor: "bg-chart-3/10",
