@@ -206,6 +206,18 @@ export default function Admin() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
+  // Add guest dialog state
+  const [addGuestDialogOpen, setAddGuestDialogOpen] = useState(false);
+  const [newGuest, setNewGuest] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    partySize: 1,
+    availability: "21-march",
+    notes: "",
+  });
+
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -543,6 +555,42 @@ export default function Admin() {
     },
   });
 
+  // Create new guest mutation
+  const createGuestMutation = useMutation({
+    mutationFn: async (data: typeof newGuest) => {
+      return await apiRequest("POST", "/api/rsvp", {
+        ...data,
+        email: data.email || null,
+        phone: data.phone || null,
+        notes: data.notes || null,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/rsvp"] });
+      toast({
+        title: "Succès",
+        description: "Invité ajouté avec succès",
+      });
+      setAddGuestDialogOpen(false);
+      setNewGuest({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        partySize: 1,
+        availability: "21-march",
+        notes: "",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible d'ajouter l'invité",
+        variant: "destructive",
+      });
+    },
+  });
+
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const toggleSelectAll = () => {
@@ -689,6 +737,155 @@ export default function Admin() {
                   <p className="text-sm text-muted-foreground mt-1">Gérez votre liste d'invités, les réponses et les plans de table</p>
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto flex-wrap">
+                  <Dialog open={addGuestDialogOpen} onOpenChange={setAddGuestDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="default" className="flex-1 sm:flex-none" data-testid="button-add-guest">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Ajouter invité
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>Ajouter un invité</DialogTitle>
+                        <DialogDescription>
+                          Remplissez les informations pour ajouter un nouvel invité.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="add-firstname">Prénom *</Label>
+                            <Input
+                              id="add-firstname"
+                              value={newGuest.firstName}
+                              onChange={(e) => setNewGuest({ ...newGuest, firstName: e.target.value })}
+                              placeholder="Prénom de l'invité"
+                              data-testid="input-add-firstname"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="add-lastname">Nom *</Label>
+                            <Input
+                              id="add-lastname"
+                              value={newGuest.lastName}
+                              onChange={(e) => setNewGuest({ ...newGuest, lastName: e.target.value })}
+                              placeholder="Nom de l'invité"
+                              data-testid="input-add-lastname"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="add-email">Email</Label>
+                          <Input
+                            id="add-email"
+                            type="email"
+                            value={newGuest.email}
+                            onChange={(e) => setNewGuest({ ...newGuest, email: e.target.value })}
+                            placeholder="email@exemple.com"
+                            data-testid="input-add-email"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="add-phone">Téléphone (pour WhatsApp)</Label>
+                          <Input
+                            id="add-phone"
+                            value={newGuest.phone}
+                            onChange={(e) => setNewGuest({ ...newGuest, phone: e.target.value })}
+                            placeholder="+33 6 12 34 56 78"
+                            data-testid="input-add-phone"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="add-partysize">Nombre de personnes *</Label>
+                            <Select
+                              value={newGuest.partySize.toString()}
+                              onValueChange={(value) => setNewGuest({ ...newGuest, partySize: parseInt(value) })}
+                            >
+                              <SelectTrigger data-testid="select-add-partysize">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">Solo (1 personne)</SelectItem>
+                                <SelectItem value="2">Couple (2 personnes)</SelectItem>
+                                <SelectItem value="3">Groupe (3 personnes)</SelectItem>
+                                <SelectItem value="4">Groupe (4 personnes)</SelectItem>
+                                <SelectItem value="5">Groupe (5 personnes)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="add-availability">Disponibilité *</Label>
+                            <Select
+                              value={newGuest.availability}
+                              onValueChange={(value) => setNewGuest({ ...newGuest, availability: value })}
+                            >
+                              <SelectTrigger data-testid="select-add-availability">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="19-march">19 mars seulement</SelectItem>
+                                <SelectItem value="21-march">21 mars seulement</SelectItem>
+                                <SelectItem value="both">Les deux dates</SelectItem>
+                                <SelectItem value="unavailable">Non disponible</SelectItem>
+                                <SelectItem value="pending">En attente</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="add-notes">Commentaire (optionnel)</Label>
+                          <Textarea
+                            id="add-notes"
+                            placeholder="Régime alimentaire, allergies, besoins spéciaux..."
+                            value={newGuest.notes}
+                            onChange={(e) => setNewGuest({ ...newGuest, notes: e.target.value })}
+                            data-testid="input-add-notes"
+                            className="resize-none"
+                            rows={3}
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setAddGuestDialogOpen(false);
+                            setNewGuest({
+                              firstName: "",
+                              lastName: "",
+                              email: "",
+                              phone: "",
+                              partySize: 1,
+                              availability: "21-march",
+                              notes: "",
+                            });
+                          }}
+                          data-testid="button-cancel-add"
+                        >
+                          Annuler
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            if (!newGuest.firstName || !newGuest.lastName) {
+                              toast({
+                                title: "Erreur",
+                                description: "Le prénom et le nom sont requis",
+                                variant: "destructive",
+                              });
+                              return;
+                            }
+                            createGuestMutation.mutate(newGuest);
+                          }}
+                          disabled={createGuestMutation.isPending}
+                          data-testid="button-confirm-add"
+                        >
+                          {createGuestMutation.isPending ? "Ajout..." : "Ajouter l'invité"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="secondary" className="flex-1 sm:flex-none">
