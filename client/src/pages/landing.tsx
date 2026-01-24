@@ -595,12 +595,6 @@ export default function Landing() {
                                 <SelectItem value="1" data-testid="option-solo">
                                   Solo (1 personne)
                                 </SelectItem>
-                                <SelectItem
-                                  value="2"
-                                  data-testid="option-couple"
-                                >
-                                  Couple (2 personnes)
-                                </SelectItem>
                               </SelectContent>
                             </Select>
                           </FormControl>
@@ -633,20 +627,16 @@ export default function Landing() {
                               <SelectItem
                                 value="19-march"
                                 data-testid="option-19-march"
+                                disabled
+                                className="text-muted-foreground"
                               >
-                                19 mars seulement
+                                19 mars seulement — COMPLET
                               </SelectItem>
                               <SelectItem
                                 value="21-march"
                                 data-testid="option-21-march"
                               >
                                 21 mars seulement
-                              </SelectItem>
-                              <SelectItem
-                                value="both"
-                                data-testid="option-both"
-                              >
-                                Les deux dates
                               </SelectItem>
                               <SelectItem
                                 value="unavailable"
