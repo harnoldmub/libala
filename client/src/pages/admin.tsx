@@ -1373,8 +1373,8 @@ export default function Admin() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => window.open(`/invitation/${response.id}`, '_blank')}
-                                title="Voir l'invitation"
+                                onClick={() => window.open(`/api/invitations/${response.id}/pdf`, '_blank')}
+                                title="Télécharger l'invitation PDF"
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
