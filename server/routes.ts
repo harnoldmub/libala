@@ -217,6 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           await sendPersonalizedInvitation({
+            id: guest.id,
             email: guest.email!,
             firstName: guest.firstName,
             lastName: guest.lastName,
@@ -377,6 +378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       await sendPersonalizedInvitation({
+        id: guest.id,
         email: guest.email,
         firstName: guest.firstName,
         lastName: guest.lastName,
@@ -746,7 +748,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate invitation PDF
+  // GET invitation PDF (public link for email sharing)
+  app.get("/api/invitations/:id/pdf", async (req, res) => {
+    try {
+      const { generateInvitationPDF } = await import("./invitation-service");
+      const id = parseInt(req.params.id);
+
+      const response = await storage.getRsvpResponse(id);
+      if (!response) {
+        return res.status(404).json({ message: "Invitation non trouvée" });
+      }
+
+      const pdfBuffer = await generateInvitationPDF({
+        id: response.id,
+        firstName: response.firstName,
+        lastName: response.lastName,
+        tableNumber: response.tableNumber,
+      });
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `inline; filename="invitation-${response.firstName}-${response.lastName}.pdf"`
+      );
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error("Error getting invitation PDF:", error);
+      res.status(500).json({ message: "Erreur lors de la récupération de l'invitation" });
+    }
+  });
+
+  // Generate invitation PDF (admin)
   app.post("/api/invitation/generate/:id", isLocallyAuthenticated, async (req, res) => {
     try {
       const { generateInvitationPDF } = await import("./invitation-service");

@@ -1,5 +1,6 @@
-import PDFDocument from "pdfkit";
-import QRCode from "qrcode";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import * as fs from "fs";
+import * as path from "path";
 
 export interface InvitationData {
   id: number;
@@ -9,171 +10,63 @@ export interface InvitationData {
   type?: '19' | '21';
 }
 
+// Coordinates for text placement on the PDF template
+// These may need fine-tuning based on the actual PDF layout
+const POS_NAME = { x: 297.5, y: 735 }; // Center-top area for guest name
+const POS_TABLE = { x: 297.5, y: 115 }; // "Votre table" area near bottom
+
 export async function generateInvitationPDF(
   data: InvitationData
 ): Promise<Buffer> {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const doc = new PDFDocument({
-        size: "A5",
-        margin: 30,
-      });
-
-      const buffers: Buffer[] = [];
-      doc.on("data", (chunk: Buffer) => buffers.push(chunk));
-      doc.on("end", () => {
-        try {
-          resolve(Buffer.concat(buffers));
-        } catch (e) {
-          reject(e);
-        }
-      });
-      doc.on("error", (err: any) => reject(err));
-
-      // PAGE 1: Save the Date
-      doc.fillColor("#f5f1e8").rect(0, 0, doc.page.width, doc.page.height).fill();
-      doc.fillColor("#8b7355").rect(0, 0, doc.page.width, 3).fill();
-
-      const centerX = doc.page.width / 2;
-
-      // Header Date
-      const dateText = data.type === '19' ? "19 MARS 2026" : data.type === '21' ? "21 MARS 2026" : "19 & 21 MARS 2026";
-      const titleText = data.type === '19' ? "MARIAGE COUTUMIER" : "MARIAGE";
-
-      doc
-        .font("Helvetica-Bold")
-        .fontSize(32)
-        .fillColor("#8b7355")
-        .text(titleText, 30, 80, { width: doc.page.width - 60, align: "center" });
-
-      doc
-        .font("Helvetica")
-        .fontSize(14)
-        .fillColor("#8b7355")
-        .text(dateText, centerX - 50, 140, { width: 100, align: "center" });
-
-      doc
-        .font("Helvetica-Oblique")
-        .fontSize(16)
-        .fillColor("#8b7355")
-        .text("Ruth & Arnold", centerX - 40, 180, { width: 80, align: "center" });
-
-      doc
-        .font("Helvetica")
-        .fontSize(9)
-        .fillColor("#8b7355")
-        .text(`Cher(e) ${data.firstName} ${data.lastName.toUpperCase()}`, 30, doc.page.height - 50, {
-          width: doc.page.width - 60,
-          align: "center",
-        });
-
-      // PAGE 2: Program & QR Code
-      doc.addPage();
-      doc
-        .fillColor("#f5f1e8")
-        .rect(0, 0, doc.page.width, doc.page.height)
-        .fill();
-      doc.fillColor("#8b7355").rect(0, 0, doc.page.width, 3).fill();
-
-      doc
-        .font("Helvetica-Bold")
-        .fontSize(13)
-        .fillColor("#8b7355")
-        .text("PROGRAMME", 30, 30, { width: doc.page.width - 60, align: "center" });
-
-      let yPos = 55;
-      let programs: string[] = [];
-
-      if (data.type === '19') {
-        programs = [
-          "19h30 • Accueil",
-          "20h00 • Mariage coutumier",
-          "22h00 • Dîner",
-        ];
-      } else if (data.type === '21') {
-        programs = [
-          "10h00 • Cérémonie Civile",
-          "12h00 • Bénédiction Nuptiale",
-          "15h00 • Photos & Cocktail",
-          "19h00 • Réception & Dîner",
-          "22h00 • Soirée Dansante"
-        ];
-      } else {
-        // Fallback or combined
-        programs = [
-          "19 MARS • Remise de dot et Mariage coutumier",
-          "21 MARS • Civil - 10h",
-          "21 MARS • Bénédiction - 12h",
-          "21 MARS • Soirée - 19h",
-        ];
-      }
-
-      programs.forEach((prog) => {
-        doc
-          .font("Helvetica")
-          .fontSize(8)
-          .fillColor("#8b7355")
-          .text(prog, 30, yPos, { width: doc.page.width - 60 });
-        yPos += 16;
-      });
-
-      yPos += 20;
-      doc
-        .font("Helvetica-Bold")
-        .fontSize(10)
-        .fillColor("#8b7355")
-        .text("Accès Événement", 30, yPos, { width: doc.page.width - 60, align: "center" });
-
-      const locationText = data.type === '19' ? "Yeni Yaşam - 19 Mars" : "21 Mars - Bruxelles";
-      doc
-        .font("Helvetica")
-        .fontSize(8)
-        .text(locationText, 30, yPos + 12, { width: doc.page.width - 60, align: "center" });
-
-      // Generate QR code
-      const qrPayload = data.type ? `${data.id}-${data.type}` : data.id.toString();
-      const qrDataUrl = await QRCode.toDataURL(qrPayload, {
-        errorCorrectionLevel: "H",
-        type: "image/png",
-        width: 150,
-        margin: 1,
-        color: { dark: "#8b7355", light: "#f5f1e8" },
-      });
-
-      const qrBuffer = Buffer.from(
-        qrDataUrl.replace(/^data:image\/png;base64,/, ""),
-        "base64"
-      );
-
-      const qrX = centerX - 35;
-      const qrY = yPos + 35;
-      doc.image(qrBuffer, qrX, qrY, { width: 70, height: 70 });
-
-      if (data.tableNumber && data.type !== '19') {
-        doc
-          .font("Helvetica-Bold")
-          .fontSize(11)
-          .fillColor("#8b7355")
-          .text(`Table ${data.tableNumber}`, centerX - 25, qrY + 75, {
-            width: 50,
-            align: "center",
-          });
-      }
-
-      doc
-        .font("Helvetica-Oblique")
-        .fontSize(7)
-        .fillColor("#999")
-        .text(
-          "Merci de présenter ce code à l'entrée",
-          30,
-          doc.page.height - 30,
-          { width: doc.page.width - 60, align: "center" }
-        );
-
-      doc.end();
-    } catch (error) {
-      reject(error);
-    }
-  });
+  try {
+    // Load the template PDF
+    const templatePath = path.join(process.cwd(), "templates", "invitation.pdf");
+    const templateBytes = fs.readFileSync(templatePath);
+    const pdfDoc = await PDFDocument.load(templateBytes);
+    
+    // Embed fonts
+    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const helveticaBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    
+    // Get the first page
+    const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
+    const { width, height } = firstPage.getSize();
+    
+    // Full name
+    const fullName = `${data.firstName} ${data.lastName.toUpperCase()}`;
+    
+    // Draw the guest name (centered)
+    const nameSize = 16;
+    const nameWidth = helveticaBoldFont.widthOfTextAtSize(fullName, nameSize);
+    firstPage.drawText(fullName, {
+      x: (width - nameWidth) / 2,
+      y: POS_NAME.y,
+      size: nameSize,
+      font: helveticaBoldFont,
+      color: rgb(0.545, 0.451, 0.333), // Gold/brown color #8b7355
+    });
+    
+    // Table number or "à communiquer"
+    const tableText = data.tableNumber 
+      ? `Table ${data.tableNumber}` 
+      : "Table à communiquer";
+    
+    const tableSize = 14;
+    const tableWidth = helveticaFont.widthOfTextAtSize(tableText, tableSize);
+    firstPage.drawText(tableText, {
+      x: (width - tableWidth) / 2,
+      y: POS_TABLE.y,
+      size: tableSize,
+      font: helveticaFont,
+      color: rgb(0.545, 0.451, 0.333), // Gold/brown color
+    });
+    
+    // Save the PDF
+    const pdfBytes = await pdfDoc.save();
+    return Buffer.from(pdfBytes);
+  } catch (error) {
+    console.error("Error generating invitation PDF:", error);
+    throw error;
+  }
 }

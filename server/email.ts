@@ -567,6 +567,7 @@ export async function sendContributorThankYou(contributorData: {
 }
 
 export async function sendPersonalizedInvitation(recipientData: {
+  id?: number;
   email: string;
   firstName: string;
   lastName: string;
@@ -585,6 +586,9 @@ export async function sendPersonalizedInvitation(recipientData: {
     const link = recipientData.qrToken
       ? `${domain}/checkin?token=${recipientData.qrToken}`
       : `${domain}/invitation/viewer`;
+    const pdfLink = recipientData.id 
+      ? `${domain}/api/invitations/${recipientData.id}/pdf` 
+      : null;
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -703,8 +707,16 @@ export async function sendPersonalizedInvitation(recipientData: {
               </div>
             </div>
             
+            ${pdfLink ? `
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${link}" class="cta-button">
+              <a href="${pdfLink}" class="cta-button" style="background: #C8A96A;">
+                Télécharger mon invitation PDF
+              </a>
+            </div>
+            ` : ''}
+            
+            <div style="text-align: center; margin: 20px 0;">
+              <a href="${link}" class="cta-button" style="background: transparent; border: 2px solid #C8A96A; color: #C8A96A;">
                  ${recipientData.qrToken ? "Accéder à mon Pass / QR Code" : "Voir les détails"}
               </a>
             </div>
