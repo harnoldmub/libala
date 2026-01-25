@@ -82,6 +82,15 @@ const ImportGuestForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  const parseAvailability = (value: string): string => {
+    const lower = value.toLowerCase().trim();
+    if (lower.includes('19') && lower.includes('21') || lower === 'both' || lower === 'les deux') return 'both';
+    if (lower.includes('19') || lower === '19-march') return '19-march';
+    if (lower.includes('21') || lower === '21-march') return '21-march';
+    if (lower.includes('non') || lower === 'unavailable' || lower === 'indisponible') return 'unavailable';
+    return 'pending';
+  };
+
   const handleSubmit = async () => {
     if (!text.trim()) return;
 
@@ -89,21 +98,18 @@ const ImportGuestForm = ({ onSuccess }: { onSuccess: () => void }) => {
     try {
       const rows = text.split(/\n/).map(row => row.trim()).filter(row => row);
       const guests = rows.map(row => {
-        // Tab separated for Excel, or loose parsing
-        let parts = row.split(/\t/);
-        if (parts.length < 2) {
-          // Fallback: try splitting by last number? No, unsafe.
-          // Assume "Name" only implies count=1
-          parts = [row, "1"];
-        }
+        const parts = row.split(/\t/);
+        
+        const fullName = (parts[0] || "").trim();
+        const email = (parts[1] || "").trim();
+        const phone = (parts[2] || "").trim();
+        const count = parseInt(parts[3]?.trim()) || 1;
+        const availability = parseAvailability(parts[4] || "");
+        const notes = (parts[5] || "").trim();
 
-        const fullName = parts[0].trim();
-        const count = parseInt(parts[1]?.trim()) || 1;
-
-        // Split name: Last word is LastName, rest is FirstName
         const nameParts = fullName.split(" ");
         let firstName = fullName;
-        let lastName = "."; // Default if only one name
+        let lastName = ".";
 
         if (nameParts.length > 1) {
           lastName = nameParts.pop() || "";
@@ -113,19 +119,13 @@ const ImportGuestForm = ({ onSuccess }: { onSuccess: () => void }) => {
         return {
           firstName,
           lastName,
-          partySize: Math.min(Math.max(count, 1), 2), // Cap at 2 based on schema constraint? Schema says max 2.
-          // What if family? Schema says 1 or 2. If > 2, maybe we need to insert multiple?
-          // Or split into multiple couples?
-          // Let's stick to schema constraints for now. If > 2, we might fail.
-          // Let's cap at 2 for safety or let validation fail.
-          email: `${firstName.toLowerCase().replace(/\s+/g, '')}.${lastName.toLowerCase().replace(/\s+/g, '')}@import.placeholder`,
-          // generating placeholder because logic requires email if not optional? 
-          // we made it optional. So send undefined?
-          // check bulk route: email: guest.email || null
+          email: email || null,
+          phone: phone || null,
+          partySize: Math.min(Math.max(count, 1), 5),
+          availability,
+          notes: notes || null,
         };
       });
-      // Correct partySize logic: if > 2, user might want to know.
-      // But for bulk import, let's just import.
 
       const response = await fetch("/api/rsvp/bulk", {
         method: "POST",
@@ -166,17 +166,20 @@ const ImportGuestForm = ({ onSuccess }: { onSuccess: () => void }) => {
       <div className="space-y-2">
         <Label>Données Excel (Copier-Coller)</Label>
         <Textarea
-          placeholder={`Nom\tNombre\nJean Dupont\t2\nAlice\t1`}
+          placeholder={`Nom\tEmail\tTéléphone\tNombre\tDisponibilité\tCommentaire\nJean Dupont\tjean@email.com\t+33612345678\t2\t21\tAllergies\nAlice Martin\talice@email.com\t\t1\t19-21\t`}
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={10}
           className="font-mono text-xs"
+          data-testid="textarea-import"
         />
-        <p className="text-xs text-muted-foreground">
-          Format: "Nom Complet" [Tabulation] "Nombre de personnes". Un invité par ligne.
-        </p>
+        <div className="text-xs text-muted-foreground space-y-1">
+          <p className="font-medium">Colonnes (séparées par tabulation) :</p>
+          <p>1. Nom Complet* | 2. Email | 3. Téléphone | 4. Nb personnes | 5. Disponibilité | 6. Commentaire</p>
+          <p className="text-muted-foreground/70">Disponibilité: "19", "21", "19-21" ou "les deux", "non" ou vide (en attente)</p>
+        </div>
       </div>
-      <Button onClick={handleSubmit} disabled={isSubmitting} className="w-full">
+      <Button onClick={handleSubmit} disabled={isSubmitting} className="w-full" data-testid="button-import-submit">
         {isSubmitting ? "Importation..." : "Importer"}
       </Button>
     </div>

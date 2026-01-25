@@ -507,11 +507,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (const guest of guests) {
         try {
-          // Default values for bulk import
           const guestData = {
-            ...guest,
+            firstName: guest.firstName,
+            lastName: guest.lastName,
             email: guest.email || null,
-            availability: 'pending', // Default to pending
+            phone: guest.phone || null,
+            partySize: guest.partySize || 1,
+            availability: guest.availability || 'pending',
+            notes: guest.notes || null,
           };
 
           await storage.createRsvpResponse(guestData);
