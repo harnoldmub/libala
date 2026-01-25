@@ -12,10 +12,10 @@ export interface InvitationData {
 }
 
 // Coordinates for text placement on the PDF template (306x1451 points - tall mobile format)
-// Name goes at very top where "Mme, Mlle, M., Couple" placeholder is (~96% from bottom)
-const POS_NAME_Y = 1395; // Near very top of page
-// Table goes in blank area below "Votre table" line (~50% from bottom)
-const POS_TABLE_Y = 720; // Between "Votre table" line and plate icon
+// Name goes just below "Mme, Mlle, M., Couple" placeholder
+const POS_NAME_Y = 1355; // 40 pts below header line
+// Table goes just below "Votre table" line
+const POS_TABLE_Y = 680; // 40 pts below table header
 
 export async function generateInvitationPDF(
   data: InvitationData
