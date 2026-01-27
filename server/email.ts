@@ -753,3 +753,129 @@ export async function sendPersonalizedInvitation(recipientData: {
     throw error;
   }
 }
+
+// Email for when availability is changed from "both" to "21-march" only
+export async function sendDateChangeApologyEmail(guestData: {
+  email: string;
+  firstName: string;
+  lastName: string;
+}) {
+  try {
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body {
+              font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              line-height: 1.8;
+              color: #333;
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              background-color: #faf8f5;
+            }
+            .container {
+              background: linear-gradient(135deg, #fffef9 0%, #faf5eb 100%);
+              border-radius: 12px;
+              padding: 40px;
+              box-shadow: 0 4px 20px rgba(200, 169, 106, 0.15);
+            }
+            .header {
+              text-align: center;
+              padding-bottom: 25px;
+              border-bottom: 2px solid #C8A96A;
+              margin-bottom: 30px;
+            }
+            .header h1 {
+              font-family: 'Playfair Display', Georgia, serif;
+              color: #C8A96A;
+              font-size: 28px;
+              margin: 0;
+              font-weight: 400;
+            }
+            .content {
+              padding: 20px 0;
+            }
+            .content p {
+              margin: 15px 0;
+              font-size: 16px;
+              color: #555;
+            }
+            .highlight {
+              background: linear-gradient(135deg, #C8A96A 0%, #d4b87a 100%);
+              color: white;
+              padding: 20px 25px;
+              border-radius: 10px;
+              text-align: center;
+              margin: 25px 0;
+            }
+            .highlight strong {
+              font-size: 20px;
+              display: block;
+              margin-bottom: 5px;
+            }
+            .footer {
+              text-align: center;
+              padding-top: 25px;
+              border-top: 1px solid #e8e0d0;
+              margin-top: 30px;
+              color: #888;
+              font-size: 14px;
+            }
+            .signature {
+              font-family: 'Great Vibes', cursive;
+              font-size: 24px;
+              color: #C8A96A;
+              margin-top: 20px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Ruth & Arnold</h1>
+            </div>
+            <div class="content">
+              <p>Cher(e) ${guestData.firstName} ${guestData.lastName},</p>
+              
+              <p>Nous vous remercions sincèrement d'avoir répondu à notre invitation et d'avoir exprimé votre souhait d'être présent(e) aux deux dates de notre mariage.</p>
+              
+              <p>Cependant, en raison du <strong>nombre de places limité</strong> pour la cérémonie du 19 mars, nous avons dû faire des choix difficiles pour l'organisation.</p>
+              
+              <p>Nous vous prions de bien vouloir nous excuser pour ce changement. Nous comptons sur votre compréhension, car comme mentionné dans notre invitation initiale, ces informations nous servaient principalement à mieux nous organiser.</p>
+              
+              <div class="highlight">
+                <strong>Nous vous attendons avec joie</strong>
+                Le 21 mars 2026<br>
+                Mariage Civil + Bénédiction Nuptiale + Grande Fête
+              </div>
+              
+              <p>Votre présence à cette journée exceptionnelle compte énormément pour nous, et nous avons hâte de célébrer ce moment unique avec vous.</p>
+              
+              <p>Avec toute notre affection,</p>
+              <p class="signature">Ruth & Arnold</p>
+            </div>
+            <div class="footer">
+              <p>21 Mars 2026 • Bruxelles, Belgique</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const info = await transporter.sendMail({
+      from: `"Ruth & Arnold - Mariage 2026" <${fromEmail}>`,
+      to: guestData.email,
+      subject: `Information importante concernant notre mariage - Ruth & Arnold`,
+      html: emailHtml,
+    });
+
+    console.log("Date change apology email sent successfully:", info.messageId);
+    return info;
+  } catch (error) {
+    console.error("Failed to send date change apology email:", error);
+    throw error;
+  }
+}

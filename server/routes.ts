@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { getSession } from "./replitAuth";
 import { setupLocalAuth, isLocallyAuthenticated } from "./localAuth";
 import { insertRsvpResponseSchema, updateRsvpResponseSchema, insertContributionSchema } from "@shared/schema";
-import { sendRsvpConfirmationEmail, sendPersonalizedInvitation, sendGuestConfirmationEmail, sendContributionNotification, sendContributorThankYou } from "./email";
+import { sendRsvpConfirmationEmail, sendPersonalizedInvitation, sendGuestConfirmationEmail, sendContributionNotification, sendContributorThankYou, sendDateChangeApologyEmail } from "./email";
 import passport from "passport";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 
@@ -130,9 +130,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       console.log("PUT /api/rsvp/:id - Request body:", JSON.stringify(req.body, null, 2));
+      
+      // Get the current guest data before update to detect availability changes
+      const currentGuest = await storage.getRsvpResponse(id);
+      const previousAvailability = currentGuest?.availability;
+      
       const validated = updateRsvpResponseSchema.parse(req.body);
       console.log("PUT /api/rsvp/:id - Validated data:", JSON.stringify(validated, null, 2));
       const response = await storage.updateRsvpResponse(id, validated);
+      
+      // Check if availability changed from "both" to "21-march" only
+      const newAvailability = validated.availability;
+      if (previousAvailability === 'both' && newAvailability === '21-march') {
+        // Send apology email if the guest has an email
+        if (response && response.email) {
+          try {
+            await sendDateChangeApologyEmail({
+              email: response.email,
+              firstName: response.firstName,
+              lastName: response.lastName,
+            });
+            console.log(`Date change apology email sent to ${response.email}`);
+          } catch (emailError) {
+            console.error("Failed to send date change apology email:", emailError);
+            // Don't fail the update if email fails
+          }
+        }
+      }
+      
       res.json(response);
     } catch (error) {
       console.error("Error updating RSVP:", error);
