@@ -773,6 +773,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get live contribution data (for live display during wedding)
+  app.get("/api/contributions/live", async (req, res) => {
+    try {
+      const total = await storage.getTotalContributions();
+      const latest = await storage.getLatestContribution();
+      const recent = await storage.getRecentContributions(10);
+      res.json({ 
+        total, 
+        currency: 'eur',
+        latest: latest || null,
+        recent
+      });
+    } catch (error) {
+      console.error("Error getting live contributions:", error);
+      res.status(500).json({ message: "Erreur lors de la récupération des contributions" });
+    }
+  });
+
   // GET invitation PDF (public link for email sharing)
   app.get("/api/invitations/:id/pdf", async (req, res) => {
     try {

@@ -190,6 +190,25 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contributions.status, 'completed'));
     return result[0]?.total ?? 0;
   }
+
+  async getRecentContributions(limit: number = 10): Promise<Contribution[]> {
+    return await db
+      .select()
+      .from(contributions)
+      .where(eq(contributions.status, 'completed'))
+      .orderBy(sql`${contributions.completedAt} DESC NULLS LAST`)
+      .limit(limit);
+  }
+
+  async getLatestContribution(): Promise<Contribution | undefined> {
+    const result = await db
+      .select()
+      .from(contributions)
+      .where(eq(contributions.status, 'completed'))
+      .orderBy(sql`${contributions.completedAt} DESC NULLS LAST`)
+      .limit(1);
+    return result[0];
+  }
 }
 
 export const storage = new DatabaseStorage();
