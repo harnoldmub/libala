@@ -13,7 +13,9 @@ import {
   MessageCircle,
   Link2,
   Check,
+  Gift,
 } from "lucide-react";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -922,6 +924,60 @@ export default function Landing() {
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Cagnotte Section */}
+      <section
+        id="cagnotte"
+        className="py-24 md:py-32 lg:py-40 px-6 bg-gradient-to-b from-muted/30 to-background"
+      >
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="animate-in fade-in slide-in-from-top-4 duration-700">
+            <Heart className="w-12 h-12 mx-auto text-primary mb-6" />
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-light text-foreground mb-6 tracking-wide">
+              CAGNOTTE DE MARIAGE
+            </h2>
+            <div className="h-px w-24 bg-primary mx-auto mb-8" />
+          </div>
+          
+          <div className="animate-in fade-in duration-700 animation-delay-200">
+            <p className="text-muted-foreground font-sans leading-relaxed mb-8 max-w-2xl mx-auto">
+              Votre présence est notre plus beau cadeau. Cependant, si vous souhaitez contribuer 
+              à notre nouvelle vie ensemble, vous pouvez participer à notre cagnotte. 
+              Chaque geste compte et nous touche profondément.
+            </p>
+          </div>
+          
+          <div className="animate-in fade-in zoom-in duration-700 animation-delay-300">
+            <Card className="p-8 md:p-12 bg-card/50 backdrop-blur border-primary/20">
+              <div className="flex flex-col items-center gap-6">
+                <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center">
+                  <Gift className="w-10 h-10 text-primary" />
+                </div>
+                
+                <div>
+                  <h3 className="text-2xl font-serif text-foreground mb-2">
+                    Participez à notre bonheur
+                  </h3>
+                  <p className="text-muted-foreground text-sm font-sans">
+                    Paiement sécurisé via Stripe
+                  </p>
+                </div>
+                
+                <Link href="/cagnotte">
+                  <Button 
+                    size="lg" 
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg font-sans tracking-wide"
+                    data-testid="button-contribute"
+                  >
+                    <Heart className="w-5 h-5 mr-2" />
+                    Contribuer à la cagnotte
+                  </Button>
+                </Link>
+              </div>
+            </Card>
           </div>
         </div>
       </section>
