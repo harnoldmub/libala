@@ -13,6 +13,7 @@ import Invitation from "@/pages/invitation";
 import CheckIn from "@/pages/checkin";
 import CagnottePage from "@/pages/cagnotte";
 import ContributionMerci from "@/pages/contribution-merci";
+import LiveContributions from "@/pages/live-contributions";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -33,6 +34,7 @@ function Router() {
       <Route path="/checkin" component={CheckIn} />
       <Route path="/invitation/:id" component={Invitation} />
       <Route path="/cagnotte" component={CagnottePage} />
+      <Route path="/cagnotte/live" component={LiveContributions} />
       <Route path="/contribution/merci" component={ContributionMerci} />
       <Route path="/admin">
         {isLoading ? (
