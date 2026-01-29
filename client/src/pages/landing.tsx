@@ -597,6 +597,9 @@ export default function Landing() {
                                 <SelectItem value="1" data-testid="option-solo">
                                   Solo (1 personne)
                                 </SelectItem>
+                                <SelectItem value="2" data-testid="option-couple">
+                                  Couple (2 personnes)
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                           </FormControl>
