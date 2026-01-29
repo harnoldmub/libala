@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Gift, Heart, CreditCard, Loader2, ArrowLeft, QrCode } from "lucide-react";
-import QRCode from "qrcode";
+import { Gift, Heart, CreditCard, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -95,32 +94,10 @@ function Countdown() {
 export default function CagnottePage() {
   const { toast } = useToast();
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
-  const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const { data: totalData } = useQuery<{ total: number; currency: string }>({
     queryKey: ["/api/contributions/total"],
   });
-
-  useEffect(() => {
-    const generateQR = async () => {
-      const url = "https://ar2k26.com/cagnotte";
-      try {
-        const dataUrl = await QRCode.toDataURL(url, {
-          width: 200,
-          margin: 2,
-          color: {
-            dark: "#1a1a2e",
-            light: "#ffffff",
-          },
-        });
-        setQrCodeUrl(dataUrl);
-      } catch (err) {
-        console.error("Error generating QR code:", err);
-      }
-    };
-    generateQR();
-  }, []);
 
   const form = useForm<ContributionFormValues>({
     resolver: zodResolver(contributionFormSchema),
@@ -201,32 +178,7 @@ export default function CagnottePage() {
       </div>
 
       <div className="relative z-10 px-6 -mt-8 md:-mt-12">
-        <div className="max-w-5xl mx-auto flex flex-col lg:flex-row gap-6">
-          {qrCodeUrl && (
-            <div className="hidden lg:flex flex-col items-center justify-start pt-8">
-              <Card className="p-6 shadow-lg text-center">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <QrCode className="h-5 w-5 text-primary" />
-                  <h3 className="text-sm font-sans uppercase tracking-wider text-foreground">
-                    Scannez pour contribuer
-                  </h3>
-                </div>
-                <div className="bg-white p-3 rounded-lg border border-primary/20 inline-block">
-                  <img 
-                    src={qrCodeUrl} 
-                    alt="QR Code Cagnotte" 
-                    className="w-48 h-48"
-                    data-testid="img-qr-code"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-4 max-w-[200px]">
-                  ar2k26.com/cagnotte
-                </p>
-              </Card>
-            </div>
-          )}
-          
-          <div className="flex-1 max-w-2xl mx-auto lg:mx-0">
+        <div className="max-w-2xl mx-auto">
           <Card className="p-6 md:p-8 shadow-lg">
             <div className="text-center mb-8">
               <Gift className="h-10 w-10 mx-auto mb-4 text-primary" />
@@ -378,7 +330,6 @@ export default function CagnottePage() {
               </form>
             </Form>
           </Card>
-          </div>
         </div>
       </div>
 

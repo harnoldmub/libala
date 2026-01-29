@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Heart, Gift, Sparkles, Trophy, Crown } from "lucide-react";
+import { Heart, Gift, Sparkles, Trophy, Crown, QrCode } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import QRCode from "qrcode";
 import logoRA from "@assets/logo-ra.png";
 import type { Contribution } from "@shared/schema";
 
@@ -24,6 +25,7 @@ function formatAmount(cents: number): string {
 export default function LiveContributions() {
   const [showPopup, setShowPopup] = useState(false);
   const [newContribution, setNewContribution] = useState<Contribution | null>(null);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
   const lastContributionId = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -31,6 +33,26 @@ export default function LiveContributions() {
     queryKey: ["/api/contributions/live"],
     refetchInterval: 5000,
   });
+
+  useEffect(() => {
+    const generateQR = async () => {
+      const url = "https://ar2k26.com/cagnotte";
+      try {
+        const dataUrl = await QRCode.toDataURL(url, {
+          width: 280,
+          margin: 2,
+          color: {
+            dark: "#1a1a2e",
+            light: "#ffffff",
+          },
+        });
+        setQrCodeUrl(dataUrl);
+      } catch (err) {
+        console.error("Error generating QR code:", err);
+      }
+    };
+    generateQR();
+  }, []);
 
   useEffect(() => {
     if (liveData?.latest && liveData.latest.id !== lastContributionId.current) {
@@ -86,6 +108,30 @@ export default function LiveContributions() {
       </div>
 
       <div className="relative z-10 h-full flex">
+        {qrCodeUrl && (
+          <div className="w-72 border-r border-yellow-400/20 bg-black/20 backdrop-blur-sm flex flex-col items-center justify-center p-6">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <QrCode className="w-6 h-6 text-yellow-400" />
+                <h3 className="text-sm text-yellow-300/80 font-light tracking-widest uppercase">
+                  Scannez pour contribuer
+                </h3>
+              </div>
+              <div className="bg-white p-4 rounded-2xl shadow-lg shadow-yellow-400/20 inline-block">
+                <img 
+                  src={qrCodeUrl} 
+                  alt="QR Code Cagnotte" 
+                  className="w-48 h-48"
+                  data-testid="img-qr-code"
+                />
+              </div>
+              <p className="text-yellow-100/60 text-sm mt-4 font-light">
+                ar2k26.com/cagnotte
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="flex-1 flex flex-col items-center justify-center p-8">
           <div className="text-center mb-8">
             <img
