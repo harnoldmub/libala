@@ -135,22 +135,45 @@ export default function LiveContributions() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.1 }}
-                    className="flex items-center justify-between bg-white/5 backdrop-blur-sm border border-yellow-400/20 rounded-xl px-4 py-3"
+                    className={`relative flex items-center justify-between backdrop-blur-sm border rounded-xl px-4 py-3 overflow-hidden ${
+                      idx < 3 
+                        ? 'bg-gradient-to-r from-yellow-500/10 via-yellow-400/5 to-yellow-500/10 border-yellow-400/40' 
+                        : 'bg-white/5 border-yellow-400/20'
+                    }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                        idx === 0 ? 'bg-gradient-to-br from-yellow-300 to-yellow-500 text-yellow-900' :
-                        idx === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-gray-800' :
-                        idx === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-700 text-amber-100' :
-                        'bg-white/10 text-yellow-100/60'
-                      }`}>
+                    {idx < 3 && (
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-300/30 to-transparent"
+                        animate={{
+                          x: ['-100%', '200%'],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          repeatDelay: 1 + idx * 0.5,
+                          ease: "easeInOut",
+                        }}
+                        style={{ width: '50%' }}
+                      />
+                    )}
+                    <div className="flex items-center gap-3 relative z-10">
+                      <motion.div 
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                          idx === 0 ? 'bg-gradient-to-br from-yellow-300 to-yellow-500 text-yellow-900 shadow-lg shadow-yellow-400/50' :
+                          idx === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-gray-800 shadow-lg shadow-gray-300/50' :
+                          idx === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-700 text-amber-100 shadow-lg shadow-amber-500/50' :
+                          'bg-white/10 text-yellow-100/60'
+                        }`}
+                        animate={idx < 3 ? { scale: [1, 1.1, 1] } : {}}
+                        transition={{ duration: 2, repeat: Infinity, delay: idx * 0.3 }}
+                      >
                         {idx === 0 ? <Crown className="w-4 h-4" /> : idx + 1}
-                      </div>
-                      <p className="text-base font-medium text-white" data-testid={`text-top-donor-${idx}`}>
+                      </motion.div>
+                      <p className={`text-base font-medium ${idx < 3 ? 'text-yellow-100' : 'text-white'}`} data-testid={`text-top-donor-${idx}`}>
                         {contribution.donorName}
                       </p>
                     </div>
-                    <div className="text-xl font-bold text-yellow-400" data-testid={`text-top-amount-${idx}`}>
+                    <div className={`text-xl font-bold relative z-10 ${idx < 3 ? 'text-yellow-300' : 'text-yellow-400'}`} data-testid={`text-top-amount-${idx}`}>
                       {formatAmount(contribution.amount)}
                     </div>
                   </motion.div>
