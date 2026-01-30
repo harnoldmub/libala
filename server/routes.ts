@@ -560,13 +560,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // CSV export route
+  // CSV export route with filtering support
   app.get("/api/rsvp/export/csv", isLocallyAuthenticated, async (req, res) => {
     try {
-      const responses = await storage.getAllRsvpResponses();
+      const searchQuery = (req.query.search as string) || '';
+      const availabilityFilter = (req.query.availability as string) || '';
+      
+      let responses = await storage.getAllRsvpResponses();
 
-      // Create CSV content
-      const headers = ['ID', 'Prénom', 'Nom', 'Disponibilité', 'Numéro de table', 'Date de réponse'];
+      // Apply search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        responses = responses.filter(r => 
+          r.firstName.toLowerCase().includes(query) ||
+          r.lastName.toLowerCase().includes(query) ||
+          (r.email && r.email.toLowerCase().includes(query))
+        );
+      }
+
+      // Apply availability filter
+      if (availabilityFilter) {
+        responses = responses.filter(r => {
+          if (availabilityFilter === '19-march') {
+            return r.availability === '19-march' || r.availability === 'both';
+          }
+          if (availabilityFilter === '21-march') {
+            return r.availability === '21-march' || r.availability === 'both';
+          }
+          return r.availability === availabilityFilter;
+        });
+      }
+
+      // Create CSV content with Personne column
+      const headers = ['ID', 'Prénom', 'Nom', 'Personne', 'Disponibilité', 'Numéro de table', 'Date de réponse'];
       const csvRows = [headers.join(',')];
 
       responses.forEach(response => {
@@ -581,6 +607,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           response.id,
           `"${response.firstName}"`,
           `"${response.lastName}"`,
+          response.partySize || 1,
           `"${availabilityText}"`,
           response.tableNumber || '',
           response.createdAt ? new Date(response.createdAt).toLocaleDateString('fr-FR') : ''

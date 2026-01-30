@@ -613,7 +613,11 @@ export default function Admin() {
   };
 
   const handleExportCSV = () => {
-    window.open('/api/rsvp/export/csv', '_blank');
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('search', searchQuery);
+    if (filterAvailability && filterAvailability !== 'all') params.set('availability', filterAvailability);
+    const queryString = params.toString();
+    window.open(`/api/rsvp/export/csv${queryString ? '?' + queryString : ''}`, '_blank');
   };
 
   const handleSendInvitation = () => {
