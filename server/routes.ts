@@ -626,6 +626,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Dot invitation guest page - get guest data and matching PDF
+  app.get("/api/dot/guest/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "ID invalide" });
+      }
+
+      const response = await storage.getRsvpResponse(id);
+      if (!response) {
+        return res.status(404).json({ message: "Invité non trouvé" });
+      }
+
+      // Find matching PDF in invitations_dot folder
+      const fs = await import('fs');
+      const path = await import('path');
+      const dotFolder = path.join(process.cwd(), 'client', 'public', 'invitations_dot');
+      
+      let pdfUrl: string | null = null;
+      
+      if (fs.existsSync(dotFolder)) {
+        const files = fs.readdirSync(dotFolder);
+        const firstName = response.firstName.replace(/\s+/g, '_');
+        const lastName = response.lastName.replace(/\s+/g, '_');
+        const isCouple = response.partySize >= 2;
+        
+        // Try to find matching PDF (Couple or Solo)
+        const possibleNames = isCouple 
+          ? [
+              `Invitation_Couple_${firstName}_${lastName}.pdf`,
+              `Invitation_Couple_${lastName}.pdf`,
+              `Invitation_Couple_${firstName}.pdf`,
+            ]
+          : [
+              `Invitation_${firstName}_${lastName}.pdf`,
+              `Invitation_${lastName}.pdf`,
+              `Invitation_${firstName}.pdf`,
+            ];
+        
+        // Case-insensitive search
+        for (const possible of possibleNames) {
+          const found = files.find(f => 
+            f.toLowerCase() === possible.toLowerCase() ||
+            f.toLowerCase().includes(lastName.toLowerCase())
+          );
+          if (found) {
+            pdfUrl = `/invitations_dot/${found}`;
+            break;
+          }
+        }
+        
+        // Fallback: search by last name only
+        if (!pdfUrl) {
+          const prefix = isCouple ? 'Invitation_Couple_' : 'Invitation_';
+          const found = files.find(f => 
+            f.startsWith(prefix) && 
+            f.toLowerCase().includes(lastName.toLowerCase())
+          );
+          if (found) {
+            pdfUrl = `/invitations_dot/${found}`;
+          }
+        }
+      }
+
+      res.json({
+        id: response.id,
+        firstName: response.firstName,
+        lastName: response.lastName,
+        availability: response.availability,
+        partySize: response.partySize || 1,
+        pdfUrl,
+      });
+    } catch (error) {
+      console.error("Error fetching dot guest:", error);
+      res.status(500).json({ message: "Erreur lors de la récupération de l'invité" });
+    }
+  });
+
   // Send invitation email route (Legacy or Generic)
   app.post("/api/send-invitation", isLocallyAuthenticated, async (req, res) => {
     try {
