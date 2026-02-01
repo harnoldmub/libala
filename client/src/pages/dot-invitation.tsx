@@ -1,6 +1,5 @@
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Download, Calendar, Heart, Users, Clock } from "lucide-react";
 import logoRA from "@/assets/logo-ra.png";
@@ -29,18 +28,18 @@ export default function GuestInvitationPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0f23] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-yellow-400" />
+      <div className="min-h-screen bg-[#0a0a12] flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-amber-400" />
       </div>
     );
   }
 
   if (error || !guest) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0f23] flex items-center justify-center p-4">
-        <Card className="p-8 text-center max-w-md bg-white/10 backdrop-blur border-yellow-400/20">
-          <p className="text-yellow-100">Invitation non trouvée</p>
-        </Card>
+      <div className="min-h-screen bg-[#0a0a12] flex items-center justify-center p-4">
+        <div className="text-center">
+          <p className="text-amber-200 text-lg">Invitation non trouvée</p>
+        </div>
       </div>
     );
   }
@@ -56,103 +55,113 @@ export default function GuestInvitationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0f23] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0a0a12] flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Stars background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(30)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-yellow-300/20 rounded-full animate-pulse"
+            className="absolute w-1 h-1 bg-amber-300/30 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
+              animation: `pulse ${2 + Math.random() * 2}s infinite`,
+              animationDelay: `${Math.random() * 2}s`,
             }}
           />
         ))}
       </div>
 
-      <Card className="relative z-10 max-w-lg w-full bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border-2 border-yellow-400/30 shadow-2xl shadow-yellow-400/10 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent" />
+      {/* Main card */}
+      <div className="relative z-10 w-full max-w-md">
+        {/* Gold border effect */}
+        <div className="absolute -inset-[2px] bg-gradient-to-b from-amber-400 via-amber-500/50 to-amber-400 rounded-2xl" />
         
-        <div className="p-8 text-center">
-          <img
-            src={logoRA}
-            alt="Ruth & Arnold"
-            className="w-20 h-20 mx-auto mb-4 opacity-90"
-          />
+        <div className="relative bg-[#0d0d18] rounded-2xl p-8 text-center">
+          {/* Logo */}
+          <div className="mb-6">
+            <img
+              src={logoRA}
+              alt="Ruth & Arnold"
+              className="w-24 h-24 mx-auto"
+            />
+          </div>
           
-          <h1 className="text-2xl md:text-3xl font-serif text-yellow-300 mb-2">
+          {/* Title */}
+          <h1 className="text-3xl font-serif text-amber-400 mb-1">
             Ruth & Arnold
           </h1>
-          
-          <p className="text-yellow-100/60 text-sm tracking-widest uppercase mb-6">
+          <p className="text-amber-200/60 text-sm tracking-[0.3em] uppercase mb-8">
             Vos Invitations
           </p>
 
-          <div className="bg-white/5 rounded-xl p-6 mb-6 border border-yellow-400/10">
-            <div className="flex items-center justify-center gap-2 mb-3">
+          {/* Guest info box */}
+          <div className="bg-[#151520] rounded-xl p-5 mb-8 border border-amber-500/20">
+            <div className="flex items-center justify-center gap-2 mb-2">
               {isCouple ? (
-                <Users className="w-5 h-5 text-yellow-400" />
+                <Users className="w-4 h-4 text-amber-400" />
               ) : (
-                <Heart className="w-5 h-5 text-yellow-400" />
+                <Heart className="w-4 h-4 text-amber-400" />
               )}
-              <span className="text-yellow-100/80 text-sm">
+              <span className="text-amber-200/70 text-xs uppercase tracking-wider">
                 {isCouple ? "Invitation Couple" : "Invitation Personnelle"}
               </span>
             </div>
             
-            <h2 className="text-xl md:text-2xl font-serif text-white mb-1">
+            <h2 className="text-2xl font-serif text-white">
               {guest.firstName} {guest.lastName}
             </h2>
-            
-            <p className="text-yellow-100/50 text-sm">
+            <p className="text-amber-200/50 text-sm mt-1">
               {isCouple ? "2 personnes" : "1 personne"}
             </p>
           </div>
 
-          <div className="space-y-3">
+          {/* Buttons */}
+          <div className="space-y-4">
             {showMarch19 && (
               <div>
-                <p className="text-yellow-100/70 text-xs mb-2 uppercase tracking-wider">
+                <p className="text-amber-300/80 text-xs mb-2 uppercase tracking-widest">
                   Cérémonie de la Dot
                 </p>
                 {guest.pdfUrl ? (
                   <Button
                     onClick={handleDownloadDot}
-                    className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-medium py-6 text-base"
+                    className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold h-14 text-base rounded-xl"
                     data-testid="button-download-19"
                   >
                     <Calendar className="w-5 h-5 mr-3" />
-                    Invitation du 19 Mars 2026
+                    19 Mars 2026
                     <Download className="w-4 h-4 ml-3" />
                   </Button>
                 ) : (
                   <Button
                     disabled
-                    className="w-full bg-gray-600/50 text-gray-400 font-medium py-6 text-base cursor-not-allowed"
+                    className="w-full bg-gray-800 text-gray-500 font-medium h-14 text-base rounded-xl cursor-not-allowed border border-gray-700"
                     data-testid="button-download-19-disabled"
                   >
                     <Calendar className="w-5 h-5 mr-3" />
-                    Invitation du 19 Mars 2026
-                    <Clock className="w-4 h-4 ml-3" />
+                    19 Mars 2026
+                    <span className="ml-3 text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded">
+                      Bientôt
+                    </span>
                   </Button>
                 )}
               </div>
             )}
 
             {showMarch21 && (
-              <div className="mt-4">
-                <p className="text-yellow-100/70 text-xs mb-2 uppercase tracking-wider">
+              <div>
+                <p className="text-amber-300/80 text-xs mb-2 uppercase tracking-widest">
                   Mariage Civil & Religieux
                 </p>
                 <Button
                   disabled
-                  className="w-full bg-gray-600/50 text-gray-400 font-medium py-6 text-base cursor-not-allowed"
+                  className="w-full bg-gray-800 text-gray-500 font-medium h-14 text-base rounded-xl cursor-not-allowed border border-gray-700"
                   data-testid="button-download-21"
                 >
                   <Calendar className="w-5 h-5 mr-3" />
-                  Invitation du 21 Mars 2026
-                  <span className="ml-3 text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded">
+                  21 Mars 2026
+                  <span className="ml-3 text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded">
                     Coming soon
                   </span>
                 </Button>
@@ -160,21 +169,20 @@ export default function GuestInvitationPage() {
             )}
 
             {!showMarch19 && !showMarch21 && (
-              <div className="text-yellow-100/60 text-sm py-4">
+              <div className="text-amber-200/60 text-sm py-4">
                 Aucune invitation disponible pour le moment
               </div>
             )}
           </div>
 
-          <div className="mt-8 pt-6 border-t border-yellow-400/10">
-            <p className="text-yellow-100/40 text-xs">
-              Merci de télécharger vos invitations personnalisées
+          {/* Footer */}
+          <div className="mt-8 pt-6 border-t border-amber-500/10">
+            <p className="text-amber-200/40 text-xs">
+              Téléchargez vos invitations personnalisées
             </p>
           </div>
         </div>
-
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent" />
-      </Card>
+      </div>
     </div>
   );
 }
