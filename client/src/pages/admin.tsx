@@ -1377,9 +1377,9 @@ export default function Admin() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => window.open(`/dot/${response.id}`, '_blank')}
-                                title="Voir l'invitation Dot"
-                                data-testid={`button-view-dot-${response.id}`}
+                                onClick={() => window.open(`/guest/${response.id}`, '_blank')}
+                                title="Voir les invitations"
+                                data-testid={`button-view-invitation-${response.id}`}
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>

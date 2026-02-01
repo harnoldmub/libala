@@ -14,7 +14,7 @@ import CheckIn from "@/pages/checkin";
 import CagnottePage from "@/pages/cagnotte";
 import ContributionMerci from "@/pages/contribution-merci";
 import LiveContributions from "@/pages/live-contributions";
-import DotInvitation from "@/pages/dot-invitation";
+import GuestInvitation from "@/pages/dot-invitation";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -37,7 +37,7 @@ function Router() {
       <Route path="/cagnotte" component={CagnottePage} />
       <Route path="/cagnotte/live" component={LiveContributions} />
       <Route path="/contribution/merci" component={ContributionMerci} />
-      <Route path="/dot/:guestId" component={DotInvitation} />
+      <Route path="/guest/:guestId" component={GuestInvitation} />
       <Route path="/admin">
         {isLoading ? (
           <div className="min-h-screen flex items-center justify-center">

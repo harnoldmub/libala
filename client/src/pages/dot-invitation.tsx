@@ -2,7 +2,7 @@ import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Download, Calendar, Heart, Users } from "lucide-react";
+import { Loader2, Download, Calendar, Heart, Users, Clock } from "lucide-react";
 import logoRA from "@/assets/logo-ra.png";
 
 interface GuestData {
@@ -14,13 +14,13 @@ interface GuestData {
   pdfUrl: string | null;
 }
 
-export default function DotInvitationPage() {
+export default function GuestInvitationPage() {
   const { guestId } = useParams<{ guestId: string }>();
 
   const { data: guest, isLoading, error } = useQuery<GuestData>({
-    queryKey: ["/api/dot/guest", guestId],
+    queryKey: ["/api/invitation/guest", guestId],
     queryFn: async () => {
-      const res = await fetch(`/api/dot/guest/${guestId}`);
+      const res = await fetch(`/api/invitation/guest/${guestId}`);
       if (!res.ok) throw new Error("Invité non trouvé");
       return res.json();
     },
@@ -49,7 +49,7 @@ export default function DotInvitationPage() {
   const showMarch21 = guest.availability === "21-march" || guest.availability === "both";
   const isCouple = guest.partySize >= 2;
 
-  const handleDownload = () => {
+  const handleDownloadDot = () => {
     if (guest.pdfUrl) {
       window.open(guest.pdfUrl, "_blank");
     }
@@ -86,7 +86,7 @@ export default function DotInvitationPage() {
           </h1>
           
           <p className="text-yellow-100/60 text-sm tracking-widest uppercase mb-6">
-            Cérémonie de la Dot
+            Vos Invitations
           </p>
 
           <div className="bg-white/5 rounded-xl p-6 mb-6 border border-yellow-400/10">
@@ -111,40 +111,64 @@ export default function DotInvitationPage() {
           </div>
 
           <div className="space-y-3">
-            {showMarch19 && guest.pdfUrl && (
-              <Button
-                onClick={handleDownload}
-                className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-medium py-6 text-base"
-                data-testid="button-download-19"
-              >
-                <Calendar className="w-5 h-5 mr-3" />
-                Invitation du 19 Mars 2026
-                <Download className="w-4 h-4 ml-3" />
-              </Button>
+            {showMarch19 && (
+              <div>
+                <p className="text-yellow-100/70 text-xs mb-2 uppercase tracking-wider">
+                  Cérémonie de la Dot
+                </p>
+                {guest.pdfUrl ? (
+                  <Button
+                    onClick={handleDownloadDot}
+                    className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-medium py-6 text-base"
+                    data-testid="button-download-19"
+                  >
+                    <Calendar className="w-5 h-5 mr-3" />
+                    Invitation du 19 Mars 2026
+                    <Download className="w-4 h-4 ml-3" />
+                  </Button>
+                ) : (
+                  <Button
+                    disabled
+                    className="w-full bg-gray-600/50 text-gray-400 font-medium py-6 text-base cursor-not-allowed"
+                    data-testid="button-download-19-disabled"
+                  >
+                    <Calendar className="w-5 h-5 mr-3" />
+                    Invitation du 19 Mars 2026
+                    <Clock className="w-4 h-4 ml-3" />
+                  </Button>
+                )}
+              </div>
             )}
 
-            {showMarch21 && guest.pdfUrl && (
-              <Button
-                onClick={handleDownload}
-                className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-medium py-6 text-base"
-                data-testid="button-download-21"
-              >
-                <Calendar className="w-5 h-5 mr-3" />
-                Invitation du 21 Mars 2026
-                <Download className="w-4 h-4 ml-3" />
-              </Button>
+            {showMarch21 && (
+              <div className="mt-4">
+                <p className="text-yellow-100/70 text-xs mb-2 uppercase tracking-wider">
+                  Mariage Civil & Religieux
+                </p>
+                <Button
+                  disabled
+                  className="w-full bg-gray-600/50 text-gray-400 font-medium py-6 text-base cursor-not-allowed"
+                  data-testid="button-download-21"
+                >
+                  <Calendar className="w-5 h-5 mr-3" />
+                  Invitation du 21 Mars 2026
+                  <span className="ml-3 text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded">
+                    Coming soon
+                  </span>
+                </Button>
+              </div>
             )}
 
-            {!guest.pdfUrl && (
+            {!showMarch19 && !showMarch21 && (
               <div className="text-yellow-100/60 text-sm py-4">
-                L'invitation PDF n'est pas encore disponible
+                Aucune invitation disponible pour le moment
               </div>
             )}
           </div>
 
           <div className="mt-8 pt-6 border-t border-yellow-400/10">
             <p className="text-yellow-100/40 text-xs">
-              Merci de télécharger votre invitation personnalisée
+              Merci de télécharger vos invitations personnalisées
             </p>
           </div>
         </div>

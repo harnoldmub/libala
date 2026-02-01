@@ -626,8 +626,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Dot invitation guest page - get guest data and matching PDF
-  app.get("/api/dot/guest/:id", async (req, res) => {
+  // Guest invitation page - get guest data and matching PDF
+  app.get("/api/invitation/guest/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
