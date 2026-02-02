@@ -702,16 +702,16 @@ export async function sendPersonalizedInvitation(recipientData: {
               <p class="greeting">Cher(e) ${recipientData.firstName} ${recipientData.lastName},</p>
               
               <p class="message">
-                Voici vos invitations officielles pour notre mariage.<br><br>
+                Voici votre invitation officielle pour notre mariage.<br><br>
                 Nous serions profondément honorés de votre présence<br>
                 pour partager avec nous ces moments de joie et de bonheur.
               </p>
               
               ${invitationPageLink ? `
               <div class="cta-section">
-                <p class="cta-text">Pour accéder à vos invitations personnalisées :</p>
+                <p class="cta-text">Pour accéder à votre invitation personnalisée :</p>
                 <a href="${invitationPageLink}" class="cta-button">
-                  Accéder à mes invitations
+                  Accéder à mon invitation
                 </a>
               </div>
               ` : ''}
