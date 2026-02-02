@@ -648,44 +648,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (fs.existsSync(dotFolder)) {
         const files = fs.readdirSync(dotFolder);
-        const firstName = response.firstName.replace(/\s+/g, '_');
-        const lastName = response.lastName.replace(/\s+/g, '_');
+        // Replace spaces with underscores for matching
+        const firstName = response.firstName.replace(/\s+/g, '_').toLowerCase();
+        const lastName = response.lastName.replace(/\s+/g, '_').toLowerCase();
         const isCouple = response.partySize >= 2;
         
-        // Try to find matching PDF (Couple or Solo)
-        const possibleNames = isCouple 
-          ? [
-              `Invitation_Couple_${firstName}_${lastName}.pdf`,
-              `Invitation_Couple_${lastName}.pdf`,
-              `Invitation_Couple_${firstName}.pdf`,
-            ]
-          : [
-              `Invitation_${firstName}_${lastName}.pdf`,
-              `Invitation_${lastName}.pdf`,
-              `Invitation_${firstName}.pdf`,
-            ];
+        // Build expected filename pattern (all lowercase for comparison)
+        const expectedSolo = `invitation_${firstName}_${lastName}.pdf`;
+        const expectedCouple = `invitation_couple_${firstName}_${lastName}.pdf`;
         
-        // Case-insensitive search
-        for (const possible of possibleNames) {
-          const found = files.find(f => 
-            f.toLowerCase() === possible.toLowerCase() ||
-            f.toLowerCase().includes(lastName.toLowerCase())
-          );
-          if (found) {
-            pdfUrl = `/invitations_dot/${found}`;
-            break;
+        // Search with case-insensitive comparison
+        for (const file of files) {
+          const fileLower = file.toLowerCase();
+          
+          if (isCouple) {
+            // For couples, try couple format first
+            if (fileLower === expectedCouple) {
+              pdfUrl = `/invitations_dot/${file}`;
+              break;
+            }
+          } else {
+            // For solo, try solo format
+            if (fileLower === expectedSolo) {
+              pdfUrl = `/invitations_dot/${file}`;
+              break;
+            }
           }
         }
         
-        // Fallback: search by last name only
+        // Fallback: search by first name and last name in filename
         if (!pdfUrl) {
-          const prefix = isCouple ? 'Invitation_Couple_' : 'Invitation_';
-          const found = files.find(f => 
-            f.startsWith(prefix) && 
-            f.toLowerCase().includes(lastName.toLowerCase())
-          );
-          if (found) {
-            pdfUrl = `/invitations_dot/${found}`;
+          const prefix = isCouple ? 'invitation_couple_' : 'invitation_';
+          for (const file of files) {
+            const fileLower = file.toLowerCase();
+            if (fileLower.startsWith(prefix) && 
+                fileLower.includes(firstName) && 
+                fileLower.includes(lastName)) {
+              pdfUrl = `/invitations_dot/${file}`;
+              break;
+            }
+          }
+        }
+        
+        // Last fallback: search by last name only
+        if (!pdfUrl) {
+          const prefix = isCouple ? 'invitation_couple_' : 'invitation_';
+          for (const file of files) {
+            const fileLower = file.toLowerCase();
+            if (fileLower.startsWith(prefix) && fileLower.includes(lastName)) {
+              pdfUrl = `/invitations_dot/${file}`;
+              break;
+            }
           }
         }
       }
