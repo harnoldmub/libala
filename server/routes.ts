@@ -249,10 +249,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             qrToken: qrToken
           });
 
-          // Update Timestamp
+          // Update Timestamp and set status to confirmed
           await storage.updateRsvpResponse(id, {
             ...guest,
-            invitationSentAt: new Date()
+            invitationSentAt: new Date(),
+            status: 'confirmed'
           } as any);
 
           successCount++;
@@ -410,10 +411,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         qrToken: qrToken
       });
 
-      // Update Timestamp
+      // Update Timestamp and set status to confirmed
       await storage.updateRsvpResponse(id, {
         ...guest,
-        invitationSentAt: new Date()
+        invitationSentAt: new Date(),
+        status: 'confirmed'
       } as any);
 
       res.json({ success: true });
