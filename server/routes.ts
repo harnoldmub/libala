@@ -644,32 +644,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const path = await import('path');
       const dotFolder = path.join(process.cwd(), 'client', 'public', 'invitations_dot');
       
+      // Helper function to normalize text (remove accents and lowercase)
+      const normalizeText = (text: string): string => {
+        return text
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') // Remove diacritics/accents
+          .replace(/\s+/g, '_')
+          .toLowerCase();
+      };
+      
       let pdfUrl: string | null = null;
       
       if (fs.existsSync(dotFolder)) {
         const files = fs.readdirSync(dotFolder);
-        // Replace spaces with underscores for matching
-        const firstName = response.firstName.replace(/\s+/g, '_').toLowerCase();
-        const lastName = response.lastName.replace(/\s+/g, '_').toLowerCase();
+        // Normalize names for matching (remove accents, spaces -> underscores, lowercase)
+        const firstName = normalizeText(response.firstName);
+        const lastName = normalizeText(response.lastName);
         const isCouple = response.partySize >= 2;
         
         // Build expected filename pattern (all lowercase for comparison)
         const expectedSolo = `invitation_${firstName}_${lastName}.pdf`;
         const expectedCouple = `invitation_couple_${firstName}_${lastName}.pdf`;
         
-        // Search with case-insensitive comparison
+        // Search with normalized comparison (removes accents from both sides)
         for (const file of files) {
-          const fileLower = file.toLowerCase();
+          const fileNormalized = normalizeText(file);
           
           if (isCouple) {
             // For couples, try couple format first
-            if (fileLower === expectedCouple) {
+            if (fileNormalized === expectedCouple) {
               pdfUrl = `/invitations_dot/${file}`;
               break;
             }
           } else {
             // For solo, try solo format
-            if (fileLower === expectedSolo) {
+            if (fileNormalized === expectedSolo) {
               pdfUrl = `/invitations_dot/${file}`;
               break;
             }
@@ -680,22 +689,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!pdfUrl) {
           const prefix = isCouple ? 'invitation_couple_' : 'invitation_';
           for (const file of files) {
-            const fileLower = file.toLowerCase();
-            if (fileLower.startsWith(prefix) && 
-                fileLower.includes(firstName) && 
-                fileLower.includes(lastName)) {
+            const fileNormalized = normalizeText(file);
+            if (fileNormalized.startsWith(prefix) && 
+                fileNormalized.includes(firstName) && 
+                fileNormalized.includes(lastName)) {
               pdfUrl = `/invitations_dot/${file}`;
               break;
             }
           }
         }
         
-        // Last fallback: search by last name only
+        // Last fallback: search by last name only with first name check to avoid wrong matches
         if (!pdfUrl) {
           const prefix = isCouple ? 'invitation_couple_' : 'invitation_';
           for (const file of files) {
-            const fileLower = file.toLowerCase();
-            if (fileLower.startsWith(prefix) && fileLower.includes(lastName)) {
+            const fileNormalized = normalizeText(file);
+            // Must match both first name and last name to avoid getting wrong person's PDF
+            if (fileNormalized.startsWith(prefix) && 
+                fileNormalized.includes(firstName) && 
+                fileNormalized.includes(lastName)) {
               pdfUrl = `/invitations_dot/${file}`;
               break;
             }

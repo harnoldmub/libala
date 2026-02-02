@@ -121,7 +121,7 @@ export default function GuestInvitationPage() {
             {showMarch19 && (
               <div>
                 <p className="text-amber-300/80 text-xs mb-2 uppercase tracking-widest">
-                  Cérémonie de la Dot
+                  Soirée de la DOT
                 </p>
                 {guest.pdfUrl ? (
                   <Button
