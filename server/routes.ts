@@ -593,8 +593,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create CSV content with Personne column
-      const headers = ['ID', 'Prénom', 'Nom', 'Personne', 'Disponibilité', 'Numéro de table', 'Date de réponse'];
+      // Create CSV content with Personne and Statut columns
+      const headers = ['ID', 'Prénom', 'Nom', 'Personne', 'Statut', 'Disponibilité', 'Numéro de table', 'Date de réponse'];
       const csvRows = [headers.join(',')];
 
       responses.forEach(response => {
@@ -605,11 +605,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'unavailable': 'Pas disponible'
         }[response.availability] || response.availability;
 
+        const statusText = {
+          'pending': 'En attente',
+          'confirmed': 'Confirmé',
+          'cancelled': 'Annulé'
+        }[response.status || 'pending'] || response.status || 'En attente';
+
         const row = [
           response.id,
           `"${response.firstName}"`,
           `"${response.lastName}"`,
           response.partySize || 1,
+          `"${statusText}"`,
           `"${availabilityText}"`,
           response.tableNumber || '',
           response.createdAt ? new Date(response.createdAt).toLocaleDateString('fr-FR') : ''
