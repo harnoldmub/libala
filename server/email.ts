@@ -583,12 +583,12 @@ export async function sendPersonalizedInvitation(recipientData: {
       (process.env.REPLIT_DEV_DOMAIN
         ? `https://${process.env.REPLIT_DEV_DOMAIN}`
         : "http://localhost:5000");
+    const invitationPageLink = recipientData.id 
+      ? `${domain}/guest/${recipientData.id}`
+      : null;
     const link = recipientData.qrToken
       ? `${domain}/checkin?token=${recipientData.qrToken}`
       : `${domain}/invitation/viewer`;
-    const pdfLink = recipientData.id 
-      ? `${domain}/api/invitations/${recipientData.id}/pdf` 
-      : null;
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -707,11 +707,14 @@ export async function sendPersonalizedInvitation(recipientData: {
               </div>
             </div>
             
-            ${pdfLink ? `
+            ${invitationPageLink ? `
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${pdfLink}" class="cta-button" style="background: #C8A96A;">
-                Télécharger mon invitation PDF
+              <a href="${invitationPageLink}" class="cta-button" style="background: linear-gradient(135deg, #C8A96A 0%, #B8956A 100%); color: white; font-size: 16px; padding: 18px 50px;">
+                Accéder à mes invitations
               </a>
+              <p style="color: #888; font-size: 13px; margin-top: 10px;">
+                Téléchargez vos invitations personnalisées pour chaque cérémonie
+              </p>
             </div>
             ` : ''}
             
