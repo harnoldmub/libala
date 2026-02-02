@@ -644,9 +644,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const path = await import('path');
       const dotFolder = path.join(process.cwd(), 'client', 'public', 'invitations_dot');
       
-      // Helper function to normalize text (remove accents and lowercase)
+      // Helper function to normalize text (trim, remove accents, lowercase)
       const normalizeText = (text: string): string => {
         return text
+          .trim() // Remove leading/trailing whitespace
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '') // Remove diacritics/accents
           .replace(/\s+/g, '_')
@@ -662,57 +663,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const lastName = normalizeText(response.lastName);
         const isCouple = response.partySize >= 2;
         
-        // Build expected filename pattern (all lowercase for comparison)
+        // Build expected filename patterns (all lowercase for comparison)
         const expectedSolo = `invitation_${firstName}_${lastName}.pdf`;
         const expectedCouple = `invitation_couple_${firstName}_${lastName}.pdf`;
         
-        // Search with normalized comparison (removes accents from both sides)
+        console.log(`Looking for PDF: firstName="${firstName}", lastName="${lastName}", isCouple=${isCouple}`);
+        console.log(`Expected patterns: solo="${expectedSolo}", couple="${expectedCouple}"`);
+        
+        // Try exact match first (prioritize based on partySize)
         for (const file of files) {
           const fileNormalized = normalizeText(file);
           
-          if (isCouple) {
-            // For couples, try couple format first
-            if (fileNormalized === expectedCouple) {
+          // Try the expected format first
+          if (isCouple && fileNormalized === expectedCouple) {
+            pdfUrl = `/invitations_dot/${file}`;
+            console.log(`Found exact couple match: ${file}`);
+            break;
+          }
+          if (!isCouple && fileNormalized === expectedSolo) {
+            pdfUrl = `/invitations_dot/${file}`;
+            console.log(`Found exact solo match: ${file}`);
+            break;
+          }
+        }
+        
+        // Fallback 1: Try the OTHER format (in case partySize is wrong)
+        if (!pdfUrl) {
+          for (const file of files) {
+            const fileNormalized = normalizeText(file);
+            if (isCouple && fileNormalized === expectedSolo) {
               pdfUrl = `/invitations_dot/${file}`;
+              console.log(`Found solo match for couple: ${file}`);
               break;
             }
-          } else {
-            // For solo, try solo format
-            if (fileNormalized === expectedSolo) {
+            if (!isCouple && fileNormalized === expectedCouple) {
               pdfUrl = `/invitations_dot/${file}`;
+              console.log(`Found couple match for solo: ${file}`);
               break;
             }
           }
         }
         
-        // Fallback: search by first name and last name in filename
+        // Fallback 2: Search by firstName AND lastName anywhere in filename
         if (!pdfUrl) {
-          const prefix = isCouple ? 'invitation_couple_' : 'invitation_';
           for (const file of files) {
             const fileNormalized = normalizeText(file);
-            if (fileNormalized.startsWith(prefix) && 
-                fileNormalized.includes(firstName) && 
-                fileNormalized.includes(lastName)) {
+            if (fileNormalized.includes(firstName) && fileNormalized.includes(lastName)) {
               pdfUrl = `/invitations_dot/${file}`;
+              console.log(`Found by name match: ${file}`);
               break;
             }
           }
         }
         
-        // Last fallback: search by last name only with first name check to avoid wrong matches
+        // Fallback 3: Search by lastName only (careful - might match wrong person)
         if (!pdfUrl) {
-          const prefix = isCouple ? 'invitation_couple_' : 'invitation_';
           for (const file of files) {
             const fileNormalized = normalizeText(file);
-            // Must match both first name and last name to avoid getting wrong person's PDF
-            if (fileNormalized.startsWith(prefix) && 
-                fileNormalized.includes(firstName) && 
-                fileNormalized.includes(lastName)) {
+            if (fileNormalized.includes(lastName) && lastName.length > 3) {
               pdfUrl = `/invitations_dot/${file}`;
+              console.log(`Found by lastName only: ${file}`);
               break;
             }
           }
         }
+        
+        console.log(`Final PDF result: ${pdfUrl || 'NOT FOUND'}`);
       }
 
       res.json({
