@@ -656,7 +656,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Helper function to normalize text (trim, remove accents, lowercase)
       const normalizeText = (text: string): string => {
         return text
-          .trim() // Remove leading/trailing whitespace
+          .trim()
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '') // Remove diacritics/accents
           .replace(/\s+/g, '_')
@@ -667,71 +667,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (fs.existsSync(dotFolder)) {
         const files = fs.readdirSync(dotFolder);
-        // Normalize names for matching (remove accents, spaces -> underscores, lowercase)
-        const firstName = normalizeText(response.firstName);
-        const lastName = normalizeText(response.lastName);
+        
+        // Build the expected filename following the exact naming convention:
+        // 1. Base name: "{firstName} {lastName}"
+        // 2. If partySize = 2 and "Couple" not already in firstName: add "Couple " prefix
+        // 3. Replace spaces with underscores
+        // 4. Add "Invitation_" prefix and ".pdf" suffix
+        
+        const firstNameRaw = response.firstName.trim();
+        const lastNameRaw = response.lastName.trim();
         const isCouple = response.partySize >= 2;
+        const hasCouplePrefixAlready = firstNameRaw.toLowerCase().startsWith('couple');
         
-        // Build expected filename patterns (all lowercase for comparison)
-        const expectedSolo = `invitation_${firstName}_${lastName}.pdf`;
-        const expectedCouple = `invitation_couple_${firstName}_${lastName}.pdf`;
+        let baseName: string;
+        if (isCouple && !hasCouplePrefixAlready) {
+          // Add "Couple" prefix for couples that don't have it
+          baseName = `Couple ${firstNameRaw} ${lastNameRaw}`;
+        } else {
+          // Solo or couple with "Couple" already in name
+          baseName = `${firstNameRaw} ${lastNameRaw}`;
+        }
         
-        console.log(`Looking for PDF: firstName="${firstName}", lastName="${lastName}", isCouple=${isCouple}`);
-        console.log(`Expected patterns: solo="${expectedSolo}", couple="${expectedCouple}"`);
+        // Build expected filename (normalize for comparison)
+        const expectedFilename = `invitation_${normalizeText(baseName)}.pdf`;
         
-        // Try exact match first (prioritize based on partySize)
+        console.log(`Guest: "${firstNameRaw} ${lastNameRaw}", partySize=${response.partySize}, hasCouple=${hasCouplePrefixAlready}`);
+        console.log(`Expected filename: ${expectedFilename}`);
+        
+        // Try exact match first
         for (const file of files) {
           const fileNormalized = normalizeText(file);
-          
-          // Try the expected format first
-          if (isCouple && fileNormalized === expectedCouple) {
+          if (fileNormalized === expectedFilename) {
             pdfUrl = `/invitations_dot/${file}`;
-            console.log(`Found exact couple match: ${file}`);
-            break;
-          }
-          if (!isCouple && fileNormalized === expectedSolo) {
-            pdfUrl = `/invitations_dot/${file}`;
-            console.log(`Found exact solo match: ${file}`);
+            console.log(`Found exact match: ${file}`);
             break;
           }
         }
         
-        // Fallback 1: Try the OTHER format (in case partySize is wrong)
-        if (!pdfUrl) {
+        // Fallback 1: Try without Couple prefix (in case partySize is wrong in DB)
+        if (!pdfUrl && isCouple && !hasCouplePrefixAlready) {
+          const fallbackName = `invitation_${normalizeText(`${firstNameRaw} ${lastNameRaw}`)}.pdf`;
           for (const file of files) {
             const fileNormalized = normalizeText(file);
-            if (isCouple && fileNormalized === expectedSolo) {
+            if (fileNormalized === fallbackName) {
               pdfUrl = `/invitations_dot/${file}`;
-              console.log(`Found solo match for couple: ${file}`);
-              break;
-            }
-            if (!isCouple && fileNormalized === expectedCouple) {
-              pdfUrl = `/invitations_dot/${file}`;
-              console.log(`Found couple match for solo: ${file}`);
+              console.log(`Found fallback (no Couple): ${file}`);
               break;
             }
           }
         }
         
-        // Fallback 2: Search by firstName AND lastName anywhere in filename
-        if (!pdfUrl) {
+        // Fallback 2: Try with Couple prefix (in case partySize is wrong in DB)
+        if (!pdfUrl && !isCouple) {
+          const fallbackName = `invitation_${normalizeText(`Couple ${firstNameRaw} ${lastNameRaw}`)}.pdf`;
           for (const file of files) {
             const fileNormalized = normalizeText(file);
-            if (fileNormalized.includes(firstName) && fileNormalized.includes(lastName)) {
+            if (fileNormalized === fallbackName) {
               pdfUrl = `/invitations_dot/${file}`;
-              console.log(`Found by name match: ${file}`);
+              console.log(`Found fallback (with Couple): ${file}`);
               break;
             }
           }
         }
         
-        // Fallback 3: Search by lastName only (careful - might match wrong person)
+        // Fallback 3: Search by firstName AND lastName anywhere in filename
         if (!pdfUrl) {
+          const firstNameNorm = normalizeText(firstNameRaw);
+          const lastNameNorm = normalizeText(lastNameRaw);
           for (const file of files) {
             const fileNormalized = normalizeText(file);
-            if (fileNormalized.includes(lastName) && lastName.length > 3) {
+            if (fileNormalized.includes(firstNameNorm) && fileNormalized.includes(lastNameNorm)) {
               pdfUrl = `/invitations_dot/${file}`;
-              console.log(`Found by lastName only: ${file}`);
+              console.log(`Found by name search: ${file}`);
               break;
             }
           }
