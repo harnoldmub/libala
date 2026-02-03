@@ -1,7 +1,8 @@
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, Download, Calendar, Heart, Users, Clock } from "lucide-react";
+import { Loader2, Download, Calendar, Heart, Users, Clock, Gift } from "lucide-react";
 import logoRA from "@/assets/logo-ra.png";
 
 interface GuestData {
@@ -11,6 +12,55 @@ interface GuestData {
   availability: string;
   partySize: number;
   pdfUrl: string | null;
+}
+
+function Countdown({ targetDate }: { targetDate: Date }) {
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      const difference = targetDate.getTime() - now.getTime();
+
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  return (
+    <div className="flex gap-2 justify-center items-center">
+      {[
+        { value: timeLeft.days, label: "J" },
+        { value: timeLeft.hours, label: "H" },
+        { value: timeLeft.minutes, label: "M" },
+        { value: timeLeft.seconds, label: "S" },
+      ].map((item, idx) => (
+        <div key={idx} className="flex flex-col items-center">
+          <div className="w-12 h-12 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
+            <span className="text-lg font-bold text-amber-400">
+              {item.value.toString().padStart(2, "0")}
+            </span>
+          </div>
+          <span className="text-[10px] text-amber-200/50 mt-1">
+            {item.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function GuestInvitationPage() {
@@ -47,6 +97,21 @@ export default function GuestInvitationPage() {
   const showMarch19 = guest.availability === "19-march" || guest.availability === "both";
   const showMarch21 = guest.availability === "21-march" || guest.availability === "both";
   const isCouple = guest.partySize >= 2;
+
+  // Determine the countdown target date based on availability
+  const getCountdownDate = () => {
+    if (guest.availability === "19-march") {
+      return new Date("2026-03-19T00:00:00");
+    } else if (guest.availability === "21-march") {
+      return new Date("2026-03-21T00:00:00");
+    } else {
+      // For "both", show countdown to the first date (19 March)
+      return new Date("2026-03-19T00:00:00");
+    }
+  };
+
+  const countdownDate = getCountdownDate();
+  const countdownLabel = guest.availability === "21-march" ? "21 Mars 2026" : "19 Mars 2026";
 
   const handleDownloadDot = () => {
     if (guest.pdfUrl) {
@@ -96,7 +161,7 @@ export default function GuestInvitationPage() {
           </p>
 
           {/* Guest info box */}
-          <div className="bg-[#151520] rounded-xl p-5 mb-8 border border-amber-500/20">
+          <div className="bg-[#151520] rounded-xl p-5 mb-6 border border-amber-500/20">
             <div className="flex items-center justify-center gap-2 mb-2">
               {isCouple ? (
                 <Users className="w-4 h-4 text-amber-400" />
@@ -114,6 +179,15 @@ export default function GuestInvitationPage() {
             <p className="text-amber-200/50 text-sm mt-1">
               {isCouple ? "2 personnes" : "1 personne"}
             </p>
+          </div>
+
+          {/* Countdown */}
+          <div className="mb-8">
+            <p className="text-amber-200/60 text-xs uppercase tracking-widest mb-3">
+              <Clock className="w-3 h-3 inline mr-1" />
+              Compte à rebours - {countdownLabel}
+            </p>
+            <Countdown targetDate={countdownDate} />
           </div>
 
           {/* Buttons */}
@@ -175,8 +249,33 @@ export default function GuestInvitationPage() {
             )}
           </div>
 
-          {/* Footer */}
+          {/* Cagnotte section */}
           <div className="mt-8 pt-6 border-t border-amber-500/10">
+            <div className="bg-gradient-to-r from-amber-500/5 via-amber-400/10 to-amber-500/5 rounded-xl p-4 border border-amber-500/20">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Gift className="w-4 h-4 text-amber-400" />
+                <span className="text-amber-300 text-xs uppercase tracking-wider font-medium">
+                  Cadeau de Mariage
+                </span>
+              </div>
+              <p className="text-amber-200/70 text-xs mb-3 leading-relaxed">
+                Votre présence est notre plus beau cadeau. Si vous souhaitez nous gâter, nous préférons une participation à notre cagnotte.
+              </p>
+              <a
+                href="https://ar2k26.com/cagnotte"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 text-sm font-medium transition-colors"
+                data-testid="link-cagnotte"
+              >
+                <Heart className="w-3 h-3" />
+                Contribuer à la cagnotte
+              </a>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-6 pt-4 border-t border-amber-500/10">
             <p className="text-amber-200/40 text-xs">
               Téléchargez vos invitations personnalisées
             </p>

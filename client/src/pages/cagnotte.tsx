@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Gift, Heart, CreditCard, Loader2, ArrowLeft } from "lucide-react";
+import { Gift, Heart, CreditCard, Loader2, ArrowLeft, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import type { Contribution } from "@shared/schema";
 import {
   Form,
   FormControl,
@@ -91,12 +92,80 @@ function Countdown() {
   );
 }
 
+interface LiveData {
+  total: number;
+  currency: string;
+  recent: Contribution[];
+}
+
+function AnimatedMessages({ messages }: { messages: Contribution[] }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+
+  const messagesWithContent = messages.filter(m => m.message && m.message.trim());
+
+  useEffect(() => {
+    if (messagesWithContent.length === 0) return;
+
+    const interval = setInterval(() => {
+      setIsVisible(false);
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % messagesWithContent.length);
+        setIsVisible(true);
+      }, 500);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [messagesWithContent.length]);
+
+  if (messagesWithContent.length === 0) return null;
+
+  const current = messagesWithContent[currentIndex];
+
+  return (
+    <div className="py-6 px-4 bg-primary/5 rounded-lg border border-primary/10 mb-8">
+      <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-4">
+        <MessageCircle className="h-4 w-4 text-primary" />
+        <span>Messages de nos contributeurs</span>
+      </div>
+      <div 
+        className={`text-center transition-all duration-500 ${
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+        }`}
+      >
+        <p className="text-lg italic text-foreground/80 mb-2">
+          "{current.message}"
+        </p>
+        <p className="text-sm text-primary font-medium">
+          — {current.donorName}
+        </p>
+      </div>
+      {messagesWithContent.length > 1 && (
+        <div className="flex justify-center gap-1 mt-4">
+          {messagesWithContent.map((_, idx) => (
+            <div
+              key={idx}
+              className={`w-2 h-2 rounded-full transition-colors ${
+                idx === currentIndex ? 'bg-primary' : 'bg-primary/20'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function CagnottePage() {
   const { toast } = useToast();
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
 
   const { data: totalData } = useQuery<{ total: number; currency: string }>({
     queryKey: ["/api/contributions/total"],
+  });
+
+  const { data: liveData } = useQuery<LiveData>({
+    queryKey: ["/api/contributions/live"],
   });
 
   const form = useForm<ContributionFormValues>({
@@ -194,16 +263,8 @@ export default function CagnottePage() {
               <Countdown />
             </div>
 
-            {totalData && totalData.total > 0 && (
-              <div className="text-center mb-8 py-4 px-6 bg-primary/5 rounded-lg border border-primary/10">
-                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-1">
-                  <Heart className="h-4 w-4 text-primary" />
-                  <span>Total collecté</span>
-                </div>
-                <p className="text-2xl md:text-3xl font-serif font-bold text-primary" data-testid="text-total-collected">
-                  {formatAmount(totalData.total)}
-                </p>
-              </div>
+            {liveData && liveData.recent && liveData.recent.length > 0 && (
+              <AnimatedMessages messages={liveData.recent} />
             )}
 
             <Form {...form}>

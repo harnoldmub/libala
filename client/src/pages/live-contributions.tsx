@@ -170,7 +170,7 @@ export default function LiveContributions() {
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Trophy className="w-6 h-6 text-yellow-400" />
                 <h2 className="text-lg text-yellow-300/80 font-light tracking-widest">
-                  TOP 5 CONTRIBUTIONS
+                  NOS GÉNÉREUX DONATEURS
                 </h2>
                 <Trophy className="w-6 h-6 text-yellow-400" />
               </div>
@@ -202,9 +202,9 @@ export default function LiveContributions() {
                         style={{ width: '50%' }}
                       />
                     )}
-                    <div className="flex items-center gap-3 relative z-10">
+                    <div className="flex items-center gap-3 relative z-10 flex-1 min-w-0">
                       <motion.div 
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
                           idx === 0 ? 'bg-gradient-to-br from-yellow-300 to-yellow-500 text-yellow-900 shadow-lg shadow-yellow-400/50' :
                           idx === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-gray-800 shadow-lg shadow-gray-300/50' :
                           idx === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-700 text-amber-100 shadow-lg shadow-amber-500/50' :
@@ -215,13 +215,18 @@ export default function LiveContributions() {
                       >
                         {idx === 0 ? <Crown className="w-4 h-4" /> : idx + 1}
                       </motion.div>
-                      <p className={`text-base font-medium ${idx < 3 ? 'text-yellow-100' : 'text-white'}`} data-testid={`text-top-donor-${idx}`}>
-                        {contribution.donorName}
-                      </p>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-base font-medium ${idx < 3 ? 'text-yellow-100' : 'text-white'}`} data-testid={`text-top-donor-${idx}`}>
+                          {contribution.donorName}
+                        </p>
+                        {contribution.message && (
+                          <p className="text-xs text-yellow-100/50 truncate italic">
+                            "{contribution.message}"
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div className={`text-xl font-bold relative z-10 ${idx < 3 ? 'text-yellow-300' : 'text-yellow-400'}`} data-testid={`text-top-amount-${idx}`}>
-                      {formatAmount(contribution.amount)}
-                    </div>
+                    <Heart className={`w-5 h-5 relative z-10 flex-shrink-0 ${idx < 3 ? 'text-yellow-300' : 'text-yellow-400'}`} />
                   </motion.div>
                 ))}
               </div>
@@ -263,13 +268,10 @@ export default function LiveContributions() {
                           {contribution.donorName}
                         </p>
                         {contribution.message && (
-                          <p className="text-xs text-yellow-100/50 truncate">
+                          <p className="text-xs text-yellow-100/50 truncate italic">
                             "{contribution.message}"
                           </p>
                         )}
-                      </div>
-                      <div className="text-lg font-bold text-yellow-400 flex-shrink-0">
-                        {formatAmount(contribution.amount)}
                       </div>
                     </div>
                   ))}
@@ -337,25 +339,26 @@ export default function LiveContributions() {
                   {newContribution.donorName}
                 </motion.p>
                 
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="text-6xl md:text-7xl font-bold text-yellow-400 mb-4"
-                  data-testid="popup-donor-amount"
-                >
-                  {formatAmount(newContribution.amount)}
-                </motion.div>
-
-                {newContribution.message && (
+                {newContribution.message ? (
                   <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.7 }}
-                    className="text-xl text-yellow-100/80 italic"
+                    transition={{ delay: 0.5 }}
+                    className="text-2xl md:text-3xl text-yellow-100/90 italic max-w-md"
                   >
                     "{newContribution.message}"
                   </motion.p>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="flex items-center justify-center gap-2 text-yellow-400"
+                  >
+                    <Heart className="w-8 h-8" fill="currentColor" />
+                    <span className="text-2xl font-light">Merci pour votre générosité</span>
+                    <Heart className="w-8 h-8" fill="currentColor" />
+                  </motion.div>
                 )}
               </div>
             </motion.div>
