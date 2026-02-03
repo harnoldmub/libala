@@ -597,7 +597,10 @@ export default function Landing() {
                                 <SelectItem value="1" data-testid="option-solo">
                                   Solo (1 personne)
                                 </SelectItem>
-                                <SelectItem value="2" data-testid="option-couple">
+                                <SelectItem
+                                  value="2"
+                                  data-testid="option-couple"
+                                >
                                   Couple (2 personnes)
                                 </SelectItem>
                               </SelectContent>
@@ -864,7 +867,7 @@ export default function Landing() {
                     <p className="text-sm text-muted-foreground">
                       Rhode-Saint-Genèse
                       <br />
-                      10h00
+                      11h00
                     </p>
                   </div>
                 </div>
@@ -875,7 +878,7 @@ export default function Landing() {
                       Bénédiction
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Bruxelles
+                      Braine-l'Alleud
                       <br />
                       13h00
                     </p>
@@ -944,22 +947,23 @@ export default function Landing() {
             </h2>
             <div className="h-px w-24 bg-primary mx-auto mb-8" />
           </div>
-          
+
           <div className="animate-in fade-in duration-700 animation-delay-200">
             <p className="text-muted-foreground font-sans leading-relaxed mb-8 max-w-2xl mx-auto">
-              Votre présence est notre plus beau cadeau. Cependant, si vous souhaitez contribuer 
-              à notre nouvelle vie ensemble, vous pouvez participer à notre cagnotte. 
-              Chaque geste compte et nous touche profondément.
+              Votre présence est notre plus beau cadeau. Cependant, si vous
+              souhaitez contribuer à notre nouvelle vie ensemble, vous pouvez
+              participer à notre cagnotte. Chaque geste compte et nous touche
+              profondément.
             </p>
           </div>
-          
+
           <div className="animate-in fade-in zoom-in duration-700 animation-delay-300">
             <Card className="p-8 md:p-12 bg-card/50 backdrop-blur border-primary/20">
               <div className="flex flex-col items-center gap-6">
                 <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center">
                   <Gift className="w-10 h-10 text-primary" />
                 </div>
-                
+
                 <div>
                   <h3 className="text-2xl font-serif text-foreground mb-2">
                     Participez à notre bonheur
@@ -968,10 +972,10 @@ export default function Landing() {
                     Paiement sécurisé via Stripe
                   </p>
                 </div>
-                
+
                 <Link href="/cagnotte">
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg font-sans tracking-wide"
                     data-testid="button-contribute"
                   >
