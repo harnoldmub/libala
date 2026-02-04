@@ -1,11 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Gift, Heart, CreditCard, Loader2, ArrowLeft, MessageCircle } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { Gift, Heart, CreditCard, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import type { Contribution } from "@shared/schema";
 import {
   Form,
   FormControl,
@@ -92,66 +91,71 @@ function Countdown() {
   );
 }
 
-interface LiveData {
-  total: number;
-  currency: string;
-  recent: Contribution[];
-}
+const funMessages = [
+  "💍 Saviez-vous que Ruth a dit OUI en 0.3 secondes ? Un record olympique !",
+  "🎯 Arnold a demandé Ruth en mariage 47 fois... avant qu'elle ne dise oui à la 48ème !",
+  "💕 Leur histoire d'amour a commencé par un 'swipe right'. Merci Tinder... euh non, merci le destin !",
+  "🎵 Leur chanson préférée ? 'Can't Help Falling in Love'... et leur facture Spotify le prouve !",
+  "🍕 Fun fact : Ils ont mangé 127 pizzas ensemble avant de se fiancer. C'est l'amour vrai !",
+  "✨ Ruth + Arnold = R&A = Rire & Amour (coïncidence ? On ne pense pas !)",
+  "🎪 Leur premier rendez-vous ? Un escape game. Spoiler : ils se sont échappés... ensemble !",
+  "💫 Ils se sont rencontrés un mardi. Depuis, c'est leur jour préféré de la semaine !",
+  "🎬 Leur film culte ? 'The Notebook'. Oui, Arnold pleure à chaque fois !",
+  "☕ 2 cafés par jour x 365 jours x 3 ans = 2190 cafés partagés. Ça, c'est de l'amour !",
+  "🌟 Arnold a appris à danser juste pour Ruth. Résultat : 2 pieds écrasés, 1 cœur conquis !",
+  "🎨 Ruth dit qu'Arnold est son chef-d'œuvre. Arnold dit que Ruth est son inspiration !",
+  "🚗 Leur premier road trip ? Perdu pendant 3h, mais trouvé l'amour pour toujours !",
+  "🎁 Le meilleur cadeau qu'ils se sont fait ? Leur présence mutuelle chaque jour !",
+  "🌈 Après la pluie, le beau temps. Après le célibat, Ruth & Arnold !",
+  "💝 Leur secret ? Rire ensemble même dans les moments difficiles !",
+  "🎊 Mariage = Fête + Amour + Engagement + Vous = La recette parfaite !",
+  "🥂 Votre contribution = Leur sourire x 1000. Merci d'être là !",
+  "✈️ Destination lune de miel ? C'est top secret... même eux ne savent pas encore !",
+  "💌 Chaque contribution compte, comme chaque jour compte dans leur histoire !"
+];
 
-function AnimatedMessages({ messages }: { messages: Contribution[] }) {
+function AnimatedFunMessages() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
-  const messagesWithContent = messages.filter(m => m.message && m.message.trim());
-
   useEffect(() => {
-    if (messagesWithContent.length === 0) return;
-
     const interval = setInterval(() => {
       setIsVisible(false);
       setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % messagesWithContent.length);
+        setCurrentIndex((prev) => (prev + 1) % funMessages.length);
         setIsVisible(true);
       }, 500);
-    }, 5000);
+    }, 6000); // Change message every 6 seconds
 
     return () => clearInterval(interval);
-  }, [messagesWithContent.length]);
-
-  if (messagesWithContent.length === 0) return null;
-
-  const current = messagesWithContent[currentIndex];
+  }, []);
 
   return (
-    <div className="py-6 px-4 bg-primary/5 rounded-lg border border-primary/10 mb-8">
-      <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-4">
-        <MessageCircle className="h-4 w-4 text-primary" />
-        <span>Messages de nos contributeurs</span>
+    <div className="py-8 px-6 bg-gradient-to-br from-primary/10 via-primary/5 to-background rounded-xl border border-primary/20 mb-8 shadow-sm">
+      <div className="flex items-center justify-center gap-2 text-sm font-medium text-primary/80 mb-6">
+        <Heart className="h-4 w-4 animate-pulse" />
+        <span className="uppercase tracking-wider">Le saviez-vous ?</span>
+        <Heart className="h-4 w-4 animate-pulse" />
       </div>
-      <div 
-        className={`text-center transition-all duration-500 ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-        }`}
+      <div
+        className={`text-center transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+          }`}
       >
-        <p className="text-lg italic text-foreground/80 mb-2">
-          "{current.message}"
-        </p>
-        <p className="text-sm text-primary font-medium">
-          — {current.donorName}
+        <p className="text-lg md:text-xl font-medium text-foreground/90 leading-relaxed px-4">
+          {funMessages[currentIndex]}
         </p>
       </div>
-      {messagesWithContent.length > 1 && (
-        <div className="flex justify-center gap-1 mt-4">
-          {messagesWithContent.map((_, idx) => (
-            <div
-              key={idx}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                idx === currentIndex ? 'bg-primary' : 'bg-primary/20'
+      <div className="flex justify-center gap-1.5 mt-6">
+        {funMessages.map((_, idx) => (
+          <div
+            key={idx}
+            className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex
+              ? 'bg-primary w-8'
+              : 'bg-primary/20 w-1.5'
               }`}
-            />
-          ))}
-        </div>
-      )}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -159,14 +163,6 @@ function AnimatedMessages({ messages }: { messages: Contribution[] }) {
 export default function CagnottePage() {
   const { toast } = useToast();
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
-
-  const { data: totalData } = useQuery<{ total: number; currency: string }>({
-    queryKey: ["/api/contributions/total"],
-  });
-
-  const { data: liveData } = useQuery<LiveData>({
-    queryKey: ["/api/contributions/live"],
-  });
 
   const form = useForm<ContributionFormValues>({
     resolver: zodResolver(contributionFormSchema),
@@ -263,9 +259,7 @@ export default function CagnottePage() {
               <Countdown />
             </div>
 
-            {liveData && liveData.recent && liveData.recent.length > 0 && (
-              <AnimatedMessages messages={liveData.recent} />
-            )}
+            <AnimatedFunMessages />
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -294,7 +288,7 @@ export default function CagnottePage() {
                   <FormLabel className="text-sm font-sans uppercase tracking-wider text-foreground block">
                     Montant de votre contribution *
                   </FormLabel>
-                  
+
                   <div className="flex flex-wrap gap-2">
                     {suggestedAmounts.map((amount) => (
                       <Button
