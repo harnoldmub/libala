@@ -20,13 +20,13 @@ const funMessages = {
     "💸 Chaque euro nous rapproche un peu plus de la lune de miel 🌴",
     "🍕 Promis, cet argent ne servira pas que pour les pizzas.",
     "🛋️ Merci de soutenir l'amour… et notre futur canapé.",
-    "📸 Ce don augmente vos chances d'être invité à l'anniversaire de mariage 😉",
+    "😉 Ce don augmente vos chances d'être invité à l'anniversaire de mariage 😉",
     "💕 L'amour, c'est beau. L'amour + une cagnotte, c'est encore mieux.",
     "🚀 Un petit geste pour vous, un grand pas pour notre voyage.",
     "🌙 Spoiler : on pensera à vous pendant la lune de miel 💕",
     "🎯 Ce bouton n'a jamais fait autant plaisir à deux personnes.",
     "🏖️ Ce don finance notre futur débat : plage ou montagne ?",
-    "🍝 Grâce à vous, on pourra manger autre chose que des pâtes",
+    "🍝 Grâce à vous, on pourra manger autre chose que des pâtes 🍝",
     "💰 Oui, ceci est un investissement émotionnel.",
     "✈️ L'amour ne s'achète pas… mais le voyage de noces, si.",
     "😅 Merci, ce don nous évite de vendre un rein.",
@@ -34,15 +34,15 @@ const funMessages = {
   romantic: [
     "💍 Merci de faire partie de notre histoire",
     "✨ Un petit geste qui restera longtemps dans nos souvenirs.",
-    "❤️ Votre contribution compte plus que vous ne l'imaginez",
+    "❤️ Votre contribution compte plus que vous ne l'imaginez ❤️",
     "💎 Entourés de vous, on se sent déjà riches.",
     "🌟 Merci d'ajouter un peu plus de magie à ce jour.",
   ],
   complicity: [
-    "😉 Si tu lis ça, c'est que tu comptes beaucoup pour nous",
+    "😉 Si tu lis ça, c'est que tu comptes beaucoup pour nous 😉",
     "👋 On espère te voir très vite… et pas seulement sur cette page !",
     "🙏 Merci de soutenir ce grand jour à ta façon.",
-    "🥂 On promet de trinquer à ta santé",
+    "🥂 On promet de trinquer à ta santé 🥂",
     "💝 Ce mariage ne serait pas pareil sans toi.",
   ],
   liveEvent: [
@@ -61,9 +61,6 @@ const dynamicMessageTemplates = [
   "{name} prouve que l'amour se mesure aussi en euros 😄",
   "Merci {name} ! Une valise de plus est presque bouclée 🧳",
   "{amount} de plus… et toujours autant d'amour 💖",
-  "🌟 {name} vient de contribuer {amount} ! Vous êtes incroyables !",
-  "💝 Grâce à {name}, on se rapproche du rêve !",
-  "🎯 {name} : {amount} de bonheur ajouté à notre cagnotte !",
 ];
 
 function FunMessageBanner({

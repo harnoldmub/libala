@@ -91,27 +91,32 @@ function Countdown() {
   );
 }
 
+
 const funMessages = [
   "💍 Saviez-vous que Ruth a dit OUI en 0.3 secondes ? Un record olympique !",
-  "🎯 Arnold a demandé Ruth en mariage 47 fois... avant qu'elle ne dise oui à la 48ème !",
-  "💕 Leur histoire d'amour a commencé par un 'swipe right'. Merci Tinder... euh non, merci le destin !",
-  "🎵 Leur chanson préférée ? 'Can't Help Falling in Love'... et leur facture Spotify le prouve !",
-  "🍕 Fun fact : Ils ont mangé 127 pizzas ensemble avant de se fiancer. C'est l'amour vrai !",
-  "✨ Ruth + Arnold = R&A = Rire & Amour (coïncidence ? On ne pense pas !)",
-  "🎪 Leur premier rendez-vous ? Un escape game. Spoiler : ils se sont échappés... ensemble !",
-  "💫 Ils se sont rencontrés un mardi. Depuis, c'est leur jour préféré de la semaine !",
-  "🎬 Leur film culte ? 'The Notebook'. Oui, Arnold pleure à chaque fois !",
-  "☕ 2 cafés par jour x 365 jours x 3 ans = 2190 cafés partagés. Ça, c'est de l'amour !",
-  "🌟 Arnold a appris à danser juste pour Ruth. Résultat : 2 pieds écrasés, 1 cœur conquis !",
-  "🎨 Ruth dit qu'Arnold est son chef-d'œuvre. Arnold dit que Ruth est son inspiration !",
-  "🚗 Leur premier road trip ? Perdu pendant 3h, mais trouvé l'amour pour toujours !",
-  "🎁 Le meilleur cadeau qu'ils se sont fait ? Leur présence mutuelle chaque jour !",
-  "🌈 Après la pluie, le beau temps. Après le célibat, Ruth & Arnold !",
-  "💝 Leur secret ? Rire ensemble même dans les moments difficiles !",
-  "🎊 Mariage = Fête + Amour + Engagement + Vous = La recette parfaite !",
-  "🥂 Votre contribution = Leur sourire x 1000. Merci d'être là !",
-  "✈️ Destination lune de miel ? C'est top secret... même eux ne savent pas encore !",
-  "💌 Chaque contribution compte, comme chaque jour compte dans leur histoire !"
+  "💸 Chaque euro nous rapproche un peu plus de la lune de miel 🌴",
+  "🍕 Promis, cet argent ne servira pas que pour les pizzas.",
+  "🛋️ Merci de soutenir l'amour… et notre futur canapé.",
+  "😉 Ce don augmente vos chances d'être invité à l'anniversaire de mariage",
+  "💕 L'amour, c'est beau. L'amour + une cagnotte, c'est encore mieux.",
+  "🚀 Un petit geste pour vous, un grand pas pour notre voyage.",
+  "🌙 Spoiler : on pensera à vous pendant la lune de miel 💕",
+  "🎯 Ce bouton n'a jamais fait autant plaisir à deux personnes.",
+  "🏖️ Ce don finance notre futur débat : plage ou montagne ?",
+  "🍝 Grâce à vous, on pourra manger autre chose que des pâtes",
+  "💰 Oui, ceci est un investissement émotionnel.",
+  "✈️ L'amour ne s'achète pas… mais le voyage de noces, si.",
+  "😅 Merci, ce don nous évite de vendre un rein.",
+  "💍 Merci de faire partie de notre histoire",
+  "✨ Un petit geste qui restera longtemps dans nos souvenirs.",
+  "❤️ Votre contribution compte plus que vous ne l'imaginez",
+  "💎 Entourés de vous, on se sent déjà riches.",
+  "🌟 Merci d'ajouter un peu plus de magie à ce jour.",
+  "😉 Si tu lis ça, c'est que tu comptes beaucoup pour nous",
+  "👋 On espère te voir très vite… et pas seulement sur cette page !",
+  "🙏 Merci de soutenir ce grand jour à ta façon.",
+  "🥂 On promet de trinquer à ta santé",
+  "💝 Ce mariage ne serait pas pareil sans toi."
 ];
 
 function AnimatedFunMessages() {
