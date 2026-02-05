@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     Calendar,
     Heart,
@@ -15,7 +15,7 @@ import {
     Check,
     Gift,
 } from "lucide-react";
-import { useParams, Redirect } from "wouter";
+import { useParams, Redirect, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -105,8 +105,16 @@ function Countdown({ weddingDate }: { weddingDate: string }) {
 }
 
 export default function InvitationPage() {
-    const { slug } = useParams();
+    const params = useParams();
+    const [, setLocation] = useLocation();
+
+    // Extract slug from either /:slug or /preview/:slug
+    const slug = params.slug || (window.location.pathname.startsWith('/preview/')
+        ? window.location.pathname.split('/')[2]
+        : window.location.pathname.split('/')[1]);
+
     const { data: wedding, isLoading } = useWedding(slug);
+    const queryClient = useQueryClient();
     const { toast } = useToast();
     const [isSubmitted, setIsSubmitted] = useState(false);
 

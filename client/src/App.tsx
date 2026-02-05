@@ -103,6 +103,23 @@ function Router() {
         )}
       </Route>
 
+      {/* Preview Routes (Draft Access) */}
+      <Route path="/preview/:slug/:page*">
+        {(params) => (
+          <PublicLayout>
+            <Switch>
+              <Route path="/preview/:slug" component={InvitationPage} />
+              <Route path="/preview/:slug/rsvp" component={InvitationPage} />
+              <Route path="/preview/:slug/cagnotte" component={CagnottePage} />
+              <Route path="/preview/:slug/live" component={LiveContributions} />
+              <Route path="/preview/:slug/checkin" component={CheckIn} />
+              <Route path="/preview/:slug/guest/:guestId" component={GuestInvitation} />
+              <Route component={NotFound} />
+            </Switch>
+          </PublicLayout>
+        )}
+      </Route>
+
       {/* Guest Public Routes (Slug-based) */}
       <Route path="/:slug/:page*">
         {(params) => (

@@ -15,6 +15,7 @@ export default function WelcomePage() {
     if (isLoading || !wedding) return <div className="animate-pulse h-screen bg-muted" />;
 
     const publicUrl = `http://localhost:3000/${wedding.slug}`;
+    const previewUrl = `http://localhost:3000/preview/${wedding.slug}`;
 
     const handlePublishToggle = async () => {
         try {
@@ -74,14 +75,33 @@ export default function WelcomePage() {
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
+                    {/* Preview URL (Always accessible) */}
+                    <Card className="glass-morphism border-white/10 overflow-hidden group hover:border-orange-500/50 transition-all duration-500 rounded-[2rem]">
+                        <CardHeader>
+                            <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <EyeOff className="h-6 w-6 text-orange-400" />
+                            </div>
+                            <CardTitle className="text-2xl font-serif text-white">Lien de prévisualisation</CardTitle>
+                            <CardDescription className="text-white/40">Accessible même en brouillon</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-xs font-mono text-white/60 break-all">
+                                {previewUrl}
+                            </div>
+                            <Button asChild className="w-full rounded-full h-12 bg-orange-600 hover:bg-orange-700 text-white font-bold border-none transition-all">
+                                <a href={previewUrl} target="_blank" rel="noopener noreferrer">Prévisualiser</a>
+                            </Button>
+                        </CardContent>
+                    </Card>
+
                     {/* Public Site Link */}
                     <Card className="glass-morphism border-white/10 overflow-hidden group hover:border-primary/50 transition-all duration-500 rounded-[2rem]">
                         <CardHeader>
                             <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                 <ExternalLink className="h-6 w-6 text-primary" />
                             </div>
-                            <CardTitle className="text-2xl font-serif text-white">Voir mon site</CardTitle>
-                            <CardDescription className="text-white/40">Visitez votre invitation publique</CardDescription>
+                            <CardTitle className="text-2xl font-serif text-white">Lien public</CardTitle>
+                            <CardDescription className="text-white/40">{wedding.isPublished ? "Site en ligne" : "Publier pour activer"}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-xs font-mono text-white/60 break-all">
