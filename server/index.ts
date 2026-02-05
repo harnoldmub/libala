@@ -2,8 +2,35 @@ import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
 
 const app = express();
+
+// Security Hardening
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      "img-src": ["'self'", "data:", "https://res.cloudinary.com", "https://images.unsplash.com", "https://*.stripe.com"],
+      "script-src": ["'self'", "'unsafe-inline'", "https://*.stripe.com"],
+      "frame-src": ["'self'", "https://*.stripe.com"],
+      "font-src": ["'self'", "https://fonts.gstatic.com"],
+    },
+  },
+}));
+
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100, // Limit each IP to 100 requests per windowMs
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  skip: (req) => req.path.startsWith('/api/live'), // Don't rate limit SSE
+});
+
+app.use("/api", limiter);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

@@ -32,7 +32,7 @@ interface Guest {
     lastName: string;
     tableNumber: number;
     partySize: number;
-    availability: '19-march' | '21-march' | 'both' | 'unavailable' | 'pending';
+    availability: 'confirmed' | 'declined' | 'pending';
 }
 
 // --- Icons / Assets ---
@@ -82,7 +82,7 @@ export default function Invitation() {
             <AudioParentsSection />
 
             {/* 6. Event Details (Ceremony/Reception) */}
-            {(guest.availability === 'both' || guest.availability === '21-march' || guest.availability === 'pending') && (
+            {(guest.availability === 'confirmed' || guest.availability === 'pending') && (
                 <EventDetailsSection />
             )}
 
@@ -366,8 +366,8 @@ function EventDetailsSection() {
 }
 
 function TimelineSection({ guest }: { guest: Guest }) {
-    const show19 = guest.availability === 'both' || guest.availability === '19-march' || guest.availability === 'pending';
-    const show21 = guest.availability === 'both' || guest.availability === '21-march' || guest.availability === 'pending';
+    const show19 = guest.availability === 'confirmed' || guest.availability === 'pending';
+    const show21 = guest.availability === 'confirmed' || guest.availability === 'pending';
 
     return (
         <section className="py-24 bg-[#0a0a0a] px-6 text-center overflow-hidden">
@@ -588,7 +588,7 @@ function AccessPassSection({ guest }: { guest: Guest }) {
                 </div>
 
                 <div className="flex gap-4 mt-12 flex-wrap justify-center">
-                    {(guest.availability === 'both' || guest.availability === '19-march' || guest.availability === 'pending') && (
+                    {(guest.availability === 'confirmed' || guest.availability === 'pending') && (
                         <button
                             onClick={() => handleDownload('19')}
                             className="bg-[#D4AF37] text-black px-8 py-4 rounded-sm uppercase tracking-[0.2em] text-xs font-bold hover:bg-white transition-colors flex items-center gap-3"
@@ -598,7 +598,7 @@ function AccessPassSection({ guest }: { guest: Guest }) {
                         </button>
                     )}
 
-                    {(guest.availability === 'both' || guest.availability === '21-march' || guest.availability === 'pending') && (
+                    {(guest.availability === 'confirmed' || guest.availability === 'pending') && (
                         <button
                             onClick={() => handleDownload('21')}
                             className="bg-white text-black px-8 py-4 rounded-sm uppercase tracking-[0.2em] text-xs font-bold hover:bg-[#D4AF37] transition-colors flex items-center gap-3"

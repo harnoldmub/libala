@@ -1,9 +1,11 @@
 import nodemailer from "nodemailer";
+import { type Wedding, type EmailLog } from "@shared/schema";
+import { storage } from "./storage";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: 587,
-  secure: false,
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: process.env.SMTP_SECURE === 'true',
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -13,18 +15,46 @@ const transporter = nodemailer.createTransport({
 const fromEmail =
   process.env.SMTP_FROM || process.env.SMTP_USER || "noreply@example.com";
 
-export async function sendRsvpConfirmationEmail(guestData: {
+async function logEmail(
+  weddingId: string,
+  recipient: string,
+  subject: string,
+  type: string,
+  status: 'sent' | 'failed',
+  errorMessage?: string,
+  payload?: any
+) {
+  try {
+    await storage.createEmailLog({
+      weddingId,
+      to: recipient,
+      subject,
+      type,
+      status,
+      providerId: null,
+      payload: payload || {},
+      guestId: payload?.guestId || null,
+    });
+  } catch (err) {
+    console.error("Failed to log email to database:", err);
+  }
+}
+
+export async function sendRsvpConfirmationEmail(wedding: Wedding, guestData: {
   firstName: string;
   lastName: string;
   availability: string;
 }) {
+  const type = 'rsvp_received_admin';
+  const subject = `Nouvelle réponse RSVP - ${guestData.firstName} ${guestData.lastName}`;
+  const recipient = wedding.config.seo.title.includes('Ruth') ? "we@ar2k26.com" : wedding.ownerId; // Fallback or logic
+
   try {
     const availabilityText =
       {
-        "19-march": "19 mars uniquement (Mariage coutumier)",
-        "21-march":
-          "21 mars uniquement (Mariage Civil + Bénédiction nuptiale + Grande fête)",
-        both: "Les deux dates (19 et 21 mars)",
+        "19-march": "19 mars uniquement",
+        "21-march": "21 mars uniquement",
+        both: "Les deux dates",
         unavailable: "Pas disponible",
       }[guestData.availability] || guestData.availability;
 
@@ -34,72 +64,24 @@ export async function sendRsvpConfirmationEmail(guestData: {
         <head>
           <meta charset="utf-8">
           <style>
-            body {
-              font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-              line-height: 1.6;
-              color: #333;
-              max-width: 600px;
-              margin: 0 auto;
-              padding: 20px;
-            }
-            .header {
-              text-align: center;
-              padding: 30px 0;
-              border-bottom: 2px solid #C8A96A;
-            }
-            .header h1 {
-              font-family: 'Playfair Display', serif;
-              color: #C8A96A;
-              margin: 0;
-              font-size: 32px;
-            }
-            .content {
-              padding: 30px 0;
-            }
-            .info-box {
-              background: #f9f9f9;
-              border-left: 4px solid #C8A96A;
-              padding: 15px;
-              margin: 20px 0;
-            }
-            .footer {
-              text-align: center;
-              padding-top: 20px;
-              border-top: 1px solid #e0e0e0;
-              color: #666;
-              font-size: 14px;
-            }
+            body { font-family: sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { text-align: center; padding: 30px 0; border-bottom: 2px solid ${wedding.config.theme.primaryColor}; }
+            .header h1 { color: ${wedding.config.theme.primaryColor}; margin: 0; }
+            .content { padding: 30px 0; }
+            .info-box { background: #f9f9f9; border-left: 4px solid ${wedding.config.theme.primaryColor}; padding: 15px; margin: 20px 0; }
           </style>
         </head>
         <body>
           <div class="header">
-            <h1>Golden Love 2026</h1>
-            <p style="color: #666; margin: 10px 0 0 0;">Ruth & Arnold</p>
+            <h1>${wedding.title}</h1>
           </div>
-          
           <div class="content">
-            <h2 style="color: #333;">Nouvelle réponse RSVP reçue</h2>
-            
+            <h2>Nouvelle réponse RSVP reçue</h2>
             <div class="info-box">
               <p><strong>Invité :</strong> ${guestData.firstName} ${guestData.lastName}</p>
               <p><strong>Disponibilité :</strong> ${availabilityText}</p>
-              <p><strong>Date de réponse :</strong> ${new Date().toLocaleDateString(
-                "fr-FR",
-                {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                },
-              )}</p>
             </div>
-            
-            <p>Vous pouvez gérer les attributions de tables dans votre espace administrateur.</p>
-          </div>
-          
-          <div class="footer">
-            <p>© 2026 Ruth & Arnold - Golden Love</p>
+            <p>Gérez vos invités dans votre tableau de bord.</p>
           </div>
         </body>
       </html>
@@ -107,32 +89,34 @@ export async function sendRsvpConfirmationEmail(guestData: {
 
     const info = await transporter.sendMail({
       from: fromEmail,
-      to: "we@ar2k26.com",
-      subject: `Nouvelle réponse RSVP - ${guestData.firstName} ${guestData.lastName}`,
+      to: recipient,
+      subject,
       html: emailHtml,
     });
 
-    console.log("RSVP confirmation email sent successfully:", info.messageId);
+    await logEmail(wedding.id, recipient, subject, type, 'sent', undefined, guestData);
     return info;
   } catch (error) {
-    console.error("Failed to send RSVP confirmation email:", error);
+    await logEmail(wedding.id, recipient, subject, type, 'failed', (error as Error).message, guestData);
     throw error;
   }
 }
 
-export async function sendGuestConfirmationEmail(guestData: {
+export async function sendGuestConfirmationEmail(wedding: Wedding, guestData: {
   email: string;
   firstName: string;
   lastName: string;
   availability: string;
 }) {
+  const type = 'rsvp_confirmation_guest';
+  const subject = `Merci ${guestData.firstName} ! Votre réponse a bien été enregistrée - ${wedding.title}`;
+
   try {
     const availabilityText =
       {
-        "19-march": "19 mars uniquement (Mariage coutumier)",
-        "21-march":
-          "21 mars uniquement (Mariage Civil + Bénédiction nuptiale + Grande fête)",
-        both: "Les deux dates (19 et 21 mars)",
+        "19-march": "19 mars uniquement",
+        "21-march": "21 mars uniquement",
+        both: "Les deux dates",
         unavailable: "Pas disponible",
       }[guestData.availability] || guestData.availability;
 
@@ -142,114 +126,23 @@ export async function sendGuestConfirmationEmail(guestData: {
         <head>
           <meta charset="utf-8">
           <style>
-            body {
-              font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-              line-height: 1.6;
-              color: #333;
-              max-width: 600px;
-              margin: 0 auto;
-              padding: 20px;
-              background: #fff;
-            }
-            .header {
-              text-align: center;
-              padding: 40px 0;
-              background: linear-gradient(135deg, #f5f5f0 0%, #fff 100%);
-              border-radius: 8px;
-              margin-bottom: 30px;
-            }
-            .header h1 {
-              font-family: 'Playfair Display', serif;
-              color: #C8A96A;
-              margin: 0;
-              font-size: 36px;
-              letter-spacing: 2px;
-            }
-            .content {
-              padding: 20px 0;
-            }
-            .confirmation-box {
-              background: linear-gradient(135deg, #C8A96A 0%, #D4AF37 100%);
-              color: white;
-              padding: 25px;
-              border-radius: 8px;
-              text-align: center;
-              margin: 25px 0;
-            }
-            .confirmation-box h2 {
-              margin: 0 0 10px 0;
-              font-size: 24px;
-            }
-            .info-box {
-              background: #f9f9f9;
-              border-left: 4px solid #C8A96A;
-              padding: 20px;
-              margin: 25px 0;
-            }
-            .dates-section {
-              background: #fff;
-              border: 2px solid #C8A96A;
-              border-radius: 8px;
-              padding: 25px;
-              margin: 30px 0;
-            }
-            .date-item {
-              padding: 12px 0;
-              border-bottom: 1px solid #e0e0e0;
-            }
-            .date-item:last-child {
-              border-bottom: none;
-            }
-            .date-title {
-              color: #C8A96A;
-              font-weight: bold;
-              font-size: 16px;
-            }
-            .footer {
-              text-align: center;
-              padding-top: 30px;
-              border-top: 2px solid #C8A96A;
-              color: #666;
-              font-size: 14px;
-              margin-top: 40px;
-            }
+            body { font-family: sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { text-align: center; padding: 30px 0; border-bottom: 2px solid ${wedding.config.theme.primaryColor}; }
+            .header h1 { color: ${wedding.config.theme.primaryColor}; margin: 0; }
+            .content { padding: 30px 0; }
+            .confirmation-box { background: ${wedding.config.theme.primaryColor}; color: white; padding: 20px; border-radius: 8px; text-align: center; }
           </style>
         </head>
         <body>
           <div class="header">
-            <h1>Golden Love 2026</h1>
-            <p style="color: #666; margin: 15px 0 0 0; font-size: 18px;">Ruth & Arnold</p>
+            <h1>${wedding.title}</h1>
           </div>
-          
           <div class="content">
             <div class="confirmation-box">
               <h2>Merci ${guestData.firstName} !</h2>
-              <p style="margin: 0;">Votre réponse a bien été enregistrée</p>
+              <p>Votre réponse a bien été enregistrée</p>
             </div>
-            
-            <p>Cher(e) ${guestData.firstName} ${guestData.lastName},</p>
-            
-            <p>Nous avons bien reçu votre réponse et nous vous remercions chaleureusement d'avoir pris le temps de nous répondre.</p>
-            
-            <div class="info-box">
-              <p style="margin: 0;"><strong>Votre disponibilité :</strong></p>
-              <p style="margin: 10px 0 0 0; font-size: 18px; color: #C8A96A;">${availabilityText}</p>
-            </div>
-            
-            <p style="background: #fff8e7; border: 1px solid #C8A96A; border-radius: 6px; padding: 15px; font-size: 14px; color: #666;">
-              <strong style="color: #C8A96A;">Important :</strong> Votre réponse a bien été enregistrée, mais celle-ci ne constitue pas une confirmation définitive de votre présence. Votre invitation officielle vous sera envoyée avant le mariage.
-            </p>
-            
-            <p>Nous avons hâte de partager ces moments précieux avec vous !</p>
-            
-            <p style="margin-top: 30px;">
-              Avec toute notre affection,<br>
-              <strong>Ruth & Arnold</strong>
-            </p>
-          </div>
-          
-          <div class="footer">
-            <p>© 2026 Ruth & Arnold - Golden Love</p>
+            <p>Cher(e) ${guestData.firstName} ${guestData.lastName}, nous avons bien reçu votre réponse : <strong>${availabilityText}</strong>.</p>
           </div>
         </body>
       </html>
@@ -258,131 +151,54 @@ export async function sendGuestConfirmationEmail(guestData: {
     const info = await transporter.sendMail({
       from: fromEmail,
       to: guestData.email,
-      subject: `Merci ${guestData.firstName} ! Votre réponse a bien été enregistrée - Ruth & Arnold`,
+      subject,
       html: emailHtml,
     });
 
-    console.log("Guest confirmation email sent successfully:", info.messageId);
+    await logEmail(wedding.id, guestData.email, subject, type, 'sent', undefined, guestData);
     return info;
   } catch (error) {
-    console.error("Failed to send guest confirmation email:", error);
+    await logEmail(wedding.id, guestData.email, subject, type, 'failed', (error as Error).message, guestData);
     throw error;
   }
 }
 
-export async function sendContributionNotification(contributionData: {
+export async function sendContributionNotification(wedding: Wedding, contributionData: {
   donorName: string;
   amount: number;
   currency: string;
   message?: string | null;
 }) {
-  try {
-    const formattedAmount = (contributionData.amount / 100).toFixed(2);
-    const currencySymbol = contributionData.currency === 'eur' ? '€' : contributionData.currency.toUpperCase();
+  const type = 'contribution_received_admin';
+  const formattedAmount = (contributionData.amount / 100).toFixed(2);
+  const currencySymbol = contributionData.currency === 'eur' ? '€' : contributionData.currency.toUpperCase();
+  const subject = `Nouvelle contribution - ${contributionData.donorName} : ${formattedAmount}${currencySymbol}`;
+  const recipient = wedding.ownerId; // Logic for admin recipient
 
+  try {
     const emailHtml = `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
           <style>
-            body {
-              font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-              line-height: 1.6;
-              color: #333;
-              max-width: 600px;
-              margin: 0 auto;
-              padding: 20px;
-            }
-            .header {
-              text-align: center;
-              padding: 30px 0;
-              border-bottom: 2px solid #C8A96A;
-            }
-            .header h1 {
-              font-family: 'Playfair Display', serif;
-              color: #C8A96A;
-              margin: 0;
-              font-size: 32px;
-            }
-            .content {
-              padding: 30px 0;
-            }
-            .amount-box {
-              background: linear-gradient(135deg, #C8A96A 0%, #D4AF37 100%);
-              color: white;
-              padding: 25px;
-              border-radius: 8px;
-              text-align: center;
-              margin: 25px 0;
-            }
-            .amount-box h2 {
-              margin: 0;
-              font-size: 36px;
-            }
-            .info-box {
-              background: #f9f9f9;
-              border-left: 4px solid #C8A96A;
-              padding: 15px;
-              margin: 20px 0;
-            }
-            .message-box {
-              background: #fff8e7;
-              border: 1px solid #C8A96A;
-              border-radius: 8px;
-              padding: 20px;
-              margin: 20px 0;
-              font-style: italic;
-            }
-            .footer {
-              text-align: center;
-              padding-top: 20px;
-              border-top: 1px solid #e0e0e0;
-              color: #666;
-              font-size: 14px;
-            }
+            body { font-family: sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { text-align: center; padding: 30px 0; border-bottom: 2px solid ${wedding.config.theme.primaryColor}; }
+            .header h1 { color: ${wedding.config.theme.primaryColor}; margin: 0; }
+            .amount-box { background: ${wedding.config.theme.primaryColor}; color: white; padding: 20px; border-radius: 8px; text-align: center; }
           </style>
         </head>
         <body>
           <div class="header">
-            <h1>Golden Love 2026</h1>
-            <p style="color: #666; margin: 10px 0 0 0;">Ruth & Arnold</p>
+            <h1>${wedding.title}</h1>
           </div>
-          
           <div class="content">
-            <h2 style="color: #333;">Nouvelle contribution reçue !</h2>
-            
+            <h2>Nouvelle contribution reçue !</h2>
             <div class="amount-box">
-              <p style="margin: 0 0 10px 0; font-size: 14px; opacity: 0.9;">Montant de la contribution</p>
               <h2>${formattedAmount} ${currencySymbol}</h2>
             </div>
-            
-            <div class="info-box">
-              <p><strong>Donateur :</strong> ${contributionData.donorName}</p>
-              <p><strong>Date :</strong> ${new Date().toLocaleDateString(
-                "fr-FR",
-                {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                },
-              )}</p>
-            </div>
-            
-            ${contributionData.message ? `
-            <div class="message-box">
-              <p style="margin: 0 0 10px 0; font-weight: bold; color: #C8A96A;">Message du donateur :</p>
-              <p style="margin: 0;">"${contributionData.message}"</p>
-            </div>
-            ` : ''}
-            
-            <p>Félicitations ! Une nouvelle contribution a été effectuée pour votre cagnotte de mariage.</p>
-          </div>
-          
-          <div class="footer">
-            <p>© 2026 Ruth & Arnold - Golden Love</p>
+            <p><strong>Donateur :</strong> ${contributionData.donorName}</p>
+            ${contributionData.message ? `<p><em>"${contributionData.message}"</em></p>` : ''}
           </div>
         </body>
       </html>
@@ -390,162 +206,52 @@ export async function sendContributionNotification(contributionData: {
 
     const info = await transporter.sendMail({
       from: fromEmail,
-      to: "we@ar2k26.com",
-      subject: `Nouvelle contribution - ${contributionData.donorName} : ${formattedAmount}${currencySymbol}`,
+      to: recipient,
+      subject,
       html: emailHtml,
     });
 
-    console.log("Contribution notification email sent successfully:", info.messageId);
+    await logEmail(wedding.id, recipient, subject, type, 'sent', undefined, contributionData);
     return info;
   } catch (error) {
-    console.error("Failed to send contribution notification email:", error);
+    await logEmail(wedding.id, recipient, subject, type, 'failed', (error as Error).message, contributionData);
     throw error;
   }
 }
 
-export async function sendContributorThankYou(contributorData: {
+export async function sendContributorThankYou(wedding: Wedding, contributorData: {
   email: string;
   donorName: string;
   amount: number;
   currency: string;
 }) {
-  try {
-    const formattedAmount = (contributorData.amount / 100).toFixed(2);
-    const currencySymbol = contributorData.currency === 'eur' ? '€' : contributorData.currency.toUpperCase();
+  const type = 'contribution_thank_you_guest';
+  const formattedAmount = (contributorData.amount / 100).toFixed(2);
+  const currencySymbol = contributorData.currency === 'eur' ? '€' : contributorData.currency.toUpperCase();
+  const subject = `Merci ${contributorData.donorName} ! 💕 - ${wedding.title}`;
 
+  try {
     const emailHtml = `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
           <style>
-            body {
-              font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-              line-height: 1.8;
-              color: #333;
-              max-width: 600px;
-              margin: 0 auto;
-              padding: 20px;
-              background: #fff;
-            }
-            .header {
-              text-align: center;
-              padding: 40px 0;
-              background: linear-gradient(135deg, #f5f5f0 0%, #fff 100%);
-              border-radius: 8px;
-              margin-bottom: 30px;
-            }
-            .header h1 {
-              font-family: 'Playfair Display', serif;
-              color: #C8A96A;
-              margin: 0;
-              font-size: 36px;
-              letter-spacing: 2px;
-            }
-            .content {
-              padding: 20px 0;
-            }
-            .heart-icon {
-              text-align: center;
-              font-size: 48px;
-              margin: 20px 0;
-            }
-            .thank-you-box {
-              background: linear-gradient(135deg, #C8A96A 0%, #D4AF37 100%);
-              color: white;
-              padding: 30px;
-              border-radius: 12px;
-              text-align: center;
-              margin: 25px 0;
-            }
-            .thank-you-box h2 {
-              margin: 0 0 10px 0;
-              font-size: 28px;
-              font-family: 'Playfair Display', serif;
-            }
-            .amount-display {
-              background: rgba(255,255,255,0.2);
-              padding: 15px 25px;
-              border-radius: 8px;
-              display: inline-block;
-              margin-top: 15px;
-            }
-            .amount-display span {
-              font-size: 24px;
-              font-weight: bold;
-            }
-            .message-section {
-              background: #fff8e7;
-              border: 2px solid #C8A96A;
-              border-radius: 12px;
-              padding: 25px;
-              margin: 30px 0;
-              text-align: center;
-            }
-            .signature {
-              text-align: center;
-              margin-top: 30px;
-              padding-top: 20px;
-              border-top: 2px solid #C8A96A;
-            }
-            .signature p {
-              font-family: 'Great Vibes', cursive;
-              font-size: 28px;
-              color: #C8A96A;
-              margin: 10px 0;
-            }
-            .footer {
-              text-align: center;
-              padding-top: 20px;
-              color: #666;
-              font-size: 14px;
-              margin-top: 30px;
-            }
+            body { font-family: sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { text-align: center; padding: 30px 0; border-bottom: 2px solid ${wedding.config.theme.primaryColor}; }
+            .header h1 { color: ${wedding.config.theme.primaryColor}; margin: 0; }
+            .thank-you-box { background: ${wedding.config.theme.primaryColor}; color: white; padding: 20px; border-radius: 8px; text-align: center; }
           </style>
         </head>
         <body>
           <div class="header">
-            <h1>Golden Love 2026</h1>
-            <p style="color: #666; margin: 15px 0 0 0; font-size: 18px;">Ruth & Arnold</p>
+            <h1>${wedding.title}</h1>
           </div>
-          
           <div class="content">
-            <div class="heart-icon">💕</div>
-            
             <div class="thank-you-box">
               <h2>Merci infiniment, ${contributorData.donorName} !</h2>
-              <p style="margin: 10px 0 0 0; opacity: 0.95;">Votre générosité nous touche profondément</p>
-              <div class="amount-display">
-                <span>${formattedAmount} ${currencySymbol}</span>
-              </div>
+              <p>Votre générosité de ${formattedAmount} ${currencySymbol} nous touche profondément.</p>
             </div>
-            
-            <div class="message-section">
-              <p style="font-size: 18px; margin: 0; color: #333;">
-                Cher(e) ${contributorData.donorName},
-              </p>
-              <p style="margin: 15px 0; color: #555;">
-                Du fond du cœur, nous tenons à vous remercier pour votre précieuse contribution à notre cagnotte de mariage.
-              </p>
-              <p style="margin: 15px 0; color: #555;">
-                Votre geste d'amour et de générosité nous aide à construire les plus beaux souvenirs pour notre nouvelle vie ensemble. Chaque contribution est un témoignage de votre affection qui nous accompagnera pour toujours.
-              </p>
-              <p style="margin: 15px 0 0 0; color: #555;">
-                Nous avons hâte de partager ces moments magiques avec vous les 19 et 21 mars 2026 !
-              </p>
-            </div>
-            
-            <div class="signature">
-              <p>Avec tout notre amour,</p>
-              <p style="font-size: 24px; margin-top: 5px;"><strong>Ruth & Arnold</strong></p>
-            </div>
-          </div>
-          
-          <div class="footer">
-            <p>© 2026 Ruth & Arnold - Golden Love</p>
-            <p style="font-size: 12px; color: #999; margin-top: 10px;">
-              Ce message a été envoyé suite à votre contribution sur notre site de mariage.
-            </p>
           </div>
         </body>
       </html>
@@ -554,41 +260,33 @@ export async function sendContributorThankYou(contributorData: {
     const info = await transporter.sendMail({
       from: fromEmail,
       to: contributorData.email,
-      subject: `Merci ${contributorData.donorName} ! 💕 Votre contribution nous touche - Ruth & Arnold`,
+      subject,
       html: emailHtml,
     });
 
-    console.log("Contributor thank you email sent successfully:", info.messageId);
+    await logEmail(wedding.id, contributorData.email, subject, type, 'sent', undefined, contributorData);
     return info;
   } catch (error) {
-    console.error("Failed to send contributor thank you email:", error);
+    await logEmail(wedding.id, contributorData.email, subject, type, 'failed', (error as Error).message, contributorData);
     throw error;
   }
 }
 
-export async function sendPersonalizedInvitation(recipientData: {
+export async function sendPersonalizedInvitation(wedding: Wedding, recipientData: {
   id?: number;
   email: string;
   firstName: string;
   lastName: string;
   message?: string;
-  qrToken?: string;
+  publicToken?: string;
 }) {
+  const type = 'invitation_personalized_guest';
+  const subject = `Vous êtes invité(e) à notre mariage - ${wedding.title}`;
+
   try {
-    const customMessage =
-      recipientData.message ||
-      `Nous serions honorés de votre présence à notre mariage.`;
-    const domain =
-      process.env.SITE_URL ||
-      (process.env.REPLIT_DEV_DOMAIN
-        ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-        : "http://localhost:5000");
-    const invitationPageLink = recipientData.id 
-      ? `${domain}/guest/${recipientData.id}`
-      : null;
-    const link = recipientData.qrToken
-      ? `${domain}/checkin?token=${recipientData.qrToken}`
-      : `${domain}/invitation/viewer`;
+    const customMessage = recipientData.message || `Nous serions honorés de votre présence à notre mariage.`;
+    const domain = process.env.SITE_URL || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : "http://localhost:5000");
+    const invitationPageLink = recipientData.id ? `${domain}/guest/${recipientData.id}` : null;
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -596,134 +294,19 @@ export async function sendPersonalizedInvitation(recipientData: {
         <head>
           <meta charset="utf-8">
           <style>
-            body {
-              font-family: 'Georgia', 'Times New Roman', serif;
-              line-height: 1.9;
-              color: #3a3a3a;
-              max-width: 600px;
-              margin: 0 auto;
-              padding: 20px;
-              background: #fdfcfa;
-            }
-            .container {
-              background: linear-gradient(180deg, #fffefa 0%, #faf7f0 100%);
-              border-radius: 12px;
-              padding: 50px 40px;
-              border: 1px solid #e8dcc8;
-            }
-            .header {
-              text-align: center;
-              margin-bottom: 40px;
-            }
-            .header h1 {
-              font-family: 'Playfair Display', Georgia, serif;
-              color: #C8A96A;
-              margin: 0;
-              font-size: 38px;
-              letter-spacing: 3px;
-              font-weight: 400;
-            }
-            .divider {
-              width: 60px;
-              height: 2px;
-              background: linear-gradient(90deg, transparent, #C8A96A, transparent);
-              margin: 20px auto;
-            }
-            .content {
-              text-align: center;
-            }
-            .greeting {
-              font-size: 20px;
-              color: #4a4a4a;
-              margin-bottom: 30px;
-            }
-            .message {
-              font-size: 17px;
-              color: #555;
-              line-height: 2;
-              margin: 30px 0;
-              padding: 0 10px;
-            }
-            .cta-section {
-              margin: 40px 0;
-              padding: 30px;
-              background: rgba(200, 169, 106, 0.08);
-              border-radius: 10px;
-            }
-            .cta-text {
-              color: #666;
-              font-size: 15px;
-              margin-bottom: 20px;
-            }
-            .cta-button {
-              display: inline-block;
-              background: linear-gradient(135deg, #C8A96A 0%, #B8956A 100%);
-              color: white !important;
-              padding: 18px 50px;
-              text-decoration: none;
-              border-radius: 30px;
-              font-weight: 600;
-              font-size: 16px;
-              letter-spacing: 1px;
-              box-shadow: 0 4px 15px rgba(200, 169, 106, 0.3);
-            }
-            .signature {
-              margin-top: 40px;
-              font-style: italic;
-              color: #777;
-              font-size: 16px;
-            }
-            .signature strong {
-              display: block;
-              margin-top: 10px;
-              font-style: normal;
-              color: #C8A96A;
-              font-size: 20px;
-              letter-spacing: 2px;
-            }
-            .footer {
-              text-align: center;
-              padding-top: 25px;
-              margin-top: 30px;
-              border-top: 1px solid #e8dcc8;
-              color: #999;
-              font-size: 12px;
-            }
+            body { font-family: serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+            .container { padding: 40px; border: 1px solid ${wedding.config.theme.primaryColor}; border-radius: 12px; }
+            .header h1 { color: ${wedding.config.theme.primaryColor}; text-align: center; }
+            .cta-button { display: inline-block; background: ${wedding.config.theme.primaryColor}; color: white !important; padding: 15px 30px; text-decoration: none; border-radius: 25px; margin: 20px 0; }
           </style>
         </head>
         <body>
           <div class="container">
-            <div class="header">
-              <h1>Ruth & Arnold</h1>
-              <div class="divider"></div>
-            </div>
-            
-            <div class="content">
-              <p class="greeting">Cher(e) ${recipientData.firstName} ${recipientData.lastName},</p>
-              
-              <p class="message">
-                Voici votre invitation officielle pour notre mariage.<br><br>
-                Nous serions profondément honorés de votre présence<br>
-                pour partager avec nous ces moments de joie et de bonheur.
-              </p>
-              
-              ${invitationPageLink ? `
-              <div class="cta-section">
-                <p class="cta-text">Pour accéder à votre invitation personnalisée :</p>
-                <a href="${invitationPageLink}" class="cta-button">
-                  Accéder à mon invitation
-                </a>
-              </div>
-              ` : ''}
-              
-              <p class="signature">
-                Avec tout notre amour,
-                <strong>Ruth & Arnold</strong>
-              </p>
-            </div>
-            
-            <div class="footer">
-              <p>Golden Love 2026</p>
+            <div class="header"><h1>${wedding.title}</h1></div>
+            <div style="text-align: center;">
+              <p>Cher(e) ${recipientData.firstName} ${recipientData.lastName},</p>
+              <p>${customMessage}</p>
+              ${invitationPageLink ? `<a href="${invitationPageLink}" class="cta-button">Accéder à mon invitation</a>` : ''}
             </div>
           </div>
         </body>
@@ -733,24 +316,26 @@ export async function sendPersonalizedInvitation(recipientData: {
     const info = await transporter.sendMail({
       from: fromEmail,
       to: recipientData.email,
-      subject: `Vous êtes invité(e) à notre mariage - Ruth & Arnold`,
+      subject,
       html: emailHtml,
     });
 
-    console.log("Personalized invitation sent successfully:", info.messageId);
+    await logEmail(wedding.id, recipientData.email, subject, type, 'sent', undefined, recipientData);
     return info;
   } catch (error) {
-    console.error("Failed to send personalized invitation:", error);
+    await logEmail(wedding.id, recipientData.email, subject, type, 'failed', (error as Error).message, recipientData);
     throw error;
   }
 }
 
-// Email for when availability is changed from "both" to "21-march" only
-export async function sendDateChangeApologyEmail(guestData: {
+export async function sendDateChangeApologyEmail(wedding: Wedding, guestData: {
   email: string;
   firstName: string;
   lastName: string;
 }) {
+  const type = 'date_change_apology';
+  const subject = `Information importante concernant notre mariage - ${wedding.title}`;
+
   try {
     const emailHtml = `
       <!DOCTYPE html>
@@ -758,115 +343,29 @@ export async function sendDateChangeApologyEmail(guestData: {
         <head>
           <meta charset="utf-8">
           <style>
-            body {
-              font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-              line-height: 1.8;
-              color: #333;
-              max-width: 600px;
-              margin: 0 auto;
-              padding: 20px;
-              background-color: #faf8f5;
-            }
-            .container {
-              background: linear-gradient(135deg, #fffef9 0%, #faf5eb 100%);
-              border-radius: 12px;
-              padding: 40px;
-              box-shadow: 0 4px 20px rgba(200, 169, 106, 0.15);
-            }
-            .header {
-              text-align: center;
-              padding-bottom: 25px;
-              border-bottom: 2px solid #C8A96A;
-              margin-bottom: 30px;
-            }
-            .header h1 {
-              font-family: 'Playfair Display', Georgia, serif;
-              color: #C8A96A;
-              font-size: 28px;
-              margin: 0;
-              font-weight: 400;
-            }
-            .content {
-              padding: 20px 0;
-            }
-            .content p {
-              margin: 15px 0;
-              font-size: 16px;
-              color: #555;
-            }
-            .highlight {
-              background: linear-gradient(135deg, #C8A96A 0%, #d4b87a 100%);
-              color: white;
-              padding: 20px 25px;
-              border-radius: 10px;
-              text-align: center;
-              margin: 25px 0;
-            }
-            .highlight strong {
-              font-size: 20px;
-              display: block;
-              margin-bottom: 5px;
-            }
-            .footer {
-              text-align: center;
-              padding-top: 25px;
-              border-top: 1px solid #e8e0d0;
-              margin-top: 30px;
-              color: #888;
-              font-size: 14px;
-            }
-            .signature {
-              font-family: 'Great Vibes', cursive;
-              font-size: 24px;
-              color: #C8A96A;
-              margin-top: 20px;
-            }
+            body { font-family: sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header h1 { color: ${wedding.config.theme.primaryColor}; border-bottom: 2px solid ${wedding.config.theme.primaryColor}; }
           </style>
         </head>
         <body>
-          <div class="container">
-            <div class="header">
-              <h1>Ruth & Arnold</h1>
-            </div>
-            <div class="content">
-              <p>Cher(e) ${guestData.firstName} ${guestData.lastName},</p>
-              
-              <p>Nous vous remercions sincèrement d'avoir répondu à notre invitation et d'avoir exprimé votre souhait d'être présent(e) aux deux dates de notre mariage.</p>
-              
-              <p>Cependant, en raison du <strong>nombre de places limité</strong> pour la cérémonie du 19 mars, nous avons dû faire des choix difficiles pour l'organisation.</p>
-              
-              <p>Nous vous prions de bien vouloir nous excuser pour ce changement. Nous comptons sur votre compréhension, car comme mentionné dans notre invitation initiale, ces informations nous servaient principalement à mieux nous organiser.</p>
-              
-              <div class="highlight">
-                <strong>Nous vous attendons avec joie</strong>
-                Le 21 mars 2026<br>
-                Mariage Civil + Bénédiction Nuptiale + Grande Fête
-              </div>
-              
-              <p>Votre présence à cette journée exceptionnelle compte énormément pour nous, et nous avons hâte de célébrer ce moment unique avec vous.</p>
-              
-              <p>Avec toute notre affection,</p>
-              <p class="signature">Ruth & Arnold</p>
-            </div>
-            <div class="footer">
-              <p>21 Mars 2026 • Bruxelles, Belgique</p>
-            </div>
-          </div>
+          <h1>${wedding.title}</h1>
+          <p>Cher(e) ${guestData.firstName}, nous vous contactons pour vous informer d'un changement dans l'organisation de notre événement.</p>
+          <p>Veuillez consulter votre invitation mise à jour sur notre site.</p>
         </body>
       </html>
     `;
 
     const info = await transporter.sendMail({
-      from: `"Ruth & Arnold - Mariage 2026" <${fromEmail}>`,
+      from: fromEmail,
       to: guestData.email,
-      subject: `Information importante concernant notre mariage - Ruth & Arnold`,
+      subject,
       html: emailHtml,
     });
 
-    console.log("Date change apology email sent successfully:", info.messageId);
+    await logEmail(wedding.id, guestData.email, subject, type, 'sent', undefined, guestData);
     return info;
   } catch (error) {
-    console.error("Failed to send date change apology email:", error);
+    await logEmail(wedding.id, guestData.email, subject, type, 'failed', (error as Error).message, guestData);
     throw error;
   }
 }

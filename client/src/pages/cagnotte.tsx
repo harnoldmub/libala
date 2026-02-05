@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { Gift, Heart, CreditCard, Loader2, ArrowLeft } from "lucide-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Gift, Heart, CreditCard, Loader2, ArrowLeft, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { z } from "zod";
 import { Link } from "wouter";
+import { type Contribution } from "@shared/schema";
 import couplePhoto from "@assets/DSC_8913_1766077508558.jpg";
 
 const contributionFormSchema = z.object({
@@ -92,75 +93,54 @@ function Countdown() {
 }
 
 
-const funMessages = [
-  "💍 Saviez-vous que Ruth a dit OUI en 0.3 secondes ? Un record olympique !",
-  "💸 Chaque euro nous rapproche un peu plus de la lune de miel 🌴",
-  "🍕 Promis, cet argent ne servira pas que pour les pizzas.",
-  "🛋️ Merci de soutenir l'amour… et notre futur canapé.",
-  "😉 Ce don augmente vos chances d'être invité à l'anniversaire de mariage",
-  "💕 L'amour, c'est beau. L'amour + une cagnotte, c'est encore mieux.",
-  "🚀 Un petit geste pour vous, un grand pas pour notre voyage.",
-  "🌙 Spoiler : on pensera à vous pendant la lune de miel 💕",
-  "🎯 Ce bouton n'a jamais fait autant plaisir à deux personnes.",
-  "🏖️ Ce don finance notre futur débat : plage ou montagne ?",
-  "🍝 Grâce à vous, on pourra manger autre chose que des pâtes",
-  "💰 Oui, ceci est un investissement émotionnel.",
-  "✈️ L'amour ne s'achète pas… mais le voyage de noces, si.",
-  "😅 Merci, ce don nous évite de vendre un rein.",
-  "💍 Merci de faire partie de notre histoire",
-  "✨ Un petit geste qui restera longtemps dans nos souvenirs.",
-  "❤️ Votre contribution compte plus que vous ne l'imaginez",
-  "💎 Entourés de vous, on se sent déjà riches.",
-  "🌟 Merci d'ajouter un peu plus de magie à ce jour.",
-  "😉 Si tu lis ça, c'est que tu comptes beaucoup pour nous",
-  "👋 On espère te voir très vite… et pas seulement sur cette page !",
-  "🙏 Merci de soutenir ce grand jour à ta façon.",
-  "🥂 On promet de trinquer à ta santé",
-  "💝 Ce mariage ne serait pas pareil sans toi."
-];
-
-function AnimatedFunMessages() {
+function AnimatedMessages({ messages }: { messages: string[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
+    if (messages.length <= 1) return;
+
     const interval = setInterval(() => {
       setIsVisible(false);
       setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % funMessages.length);
+        setCurrentIndex((prev) => (prev + 1) % messages.length);
         setIsVisible(true);
       }, 500);
-    }, 6000); // Change message every 6 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [messages.length]);
+
+  if (messages.length === 0) return null;
 
   return (
     <div className="py-8 px-6 bg-gradient-to-br from-primary/10 via-primary/5 to-background rounded-xl border border-primary/20 mb-8 shadow-sm">
       <div className="flex items-center justify-center gap-2 text-sm font-medium text-primary/80 mb-6">
-        <Heart className="h-4 w-4 animate-pulse" />
-        <span className="uppercase tracking-wider">Le saviez-vous ?</span>
-        <Heart className="h-4 w-4 animate-pulse" />
+        <MessageCircle className="h-4 w-4" />
+        <span className="uppercase tracking-wider">Leurs messages d'affection</span>
+        <MessageCircle className="h-4 w-4" />
       </div>
       <div
         className={`text-center transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
           }`}
       >
-        <p className="text-lg md:text-xl font-medium text-foreground/90 leading-relaxed px-4">
-          {funMessages[currentIndex]}
+        <p className="text-lg md:text-xl font-serif italic text-foreground/90 leading-relaxed px-4">
+          « {messages[currentIndex]} »
         </p>
       </div>
-      <div className="flex justify-center gap-1.5 mt-6">
-        {funMessages.map((_, idx) => (
-          <div
-            key={idx}
-            className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex
-              ? 'bg-primary w-8'
-              : 'bg-primary/20 w-1.5'
-              }`}
-          />
-        ))}
-      </div>
+      {messages.length > 1 && (
+        <div className="flex justify-center gap-1.5 mt-6">
+          {messages.map((_, idx) => (
+            <div
+              key={idx}
+              className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex
+                ? 'bg-primary w-8'
+                : 'bg-primary/20 w-1.5'
+                }`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -168,6 +148,18 @@ function AnimatedFunMessages() {
 export default function CagnottePage() {
   const { toast } = useToast();
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
+
+  const { data: contributions } = useQuery<Contribution[]>({
+    queryKey: ["/api/contributions/confirmed"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/contributions/confirmed");
+      return response.json();
+    },
+  });
+
+  const messages = contributions
+    ?.map(c => c.message)
+    .filter((m): m is string => !!m && m.length > 0) || [];
 
   const form = useForm<ContributionFormValues>({
     resolver: zodResolver(contributionFormSchema),
@@ -264,7 +256,7 @@ export default function CagnottePage() {
               <Countdown />
             </div>
 
-            <AnimatedFunMessages />
+            <AnimatedMessages messages={messages} />
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

@@ -170,8 +170,8 @@ export default function CheckIn() {
                                     <span className="text-muted-foreground">Disponibilité</span>
                                     <span className="font-medium text-slate-900">
                                         {guest?.availability === 'both' && 'Les deux dates'}
-                                        {guest?.availability === '19-march' && '19 mars'}
-                                        {guest?.availability === '21-march' && '21 mars'}
+                                        {guest?.availability === 'confirmed' && 'Présent'}
+                                        {guest?.availability === 'declined' && 'Absent'}
                                         {guest?.availability === 'unavailable' && 'Indisponible'}
                                     </span>
                                 </div>

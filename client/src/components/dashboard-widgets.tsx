@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
-import { TrendingUp, Users, Calendar, CheckCircle, XCircle, Table2 } from "lucide-react";
+import { TrendingUp, Users, Calendar, CheckCircle, XCircle, Table2, Palette, ArrowRight } from "lucide-react";
+import { Link, useParams } from "wouter";
 import {
   PieChart,
   Pie,
@@ -14,52 +15,36 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { RsvpResponse } from "@shared/schema";
-
 interface DashboardWidgetsProps {
   responses: RsvpResponse[];
   onFilterChange?: (filter: string) => void;
 }
 
 export function DashboardWidgets({ responses, onFilterChange }: DashboardWidgetsProps) {
-  // Filter responses by availability
-  const availableFor19 = responses.filter((r) => r.availability === "both" || r.availability === "19-march");
-  const availableFor21 = responses.filter((r) => r.availability === "both" || r.availability === "21-march");
-  
+  const { weddingId } = useParams();
   const stats = {
     total: responses.length,
-    both: responses.filter((r) => r.availability === "both").length,
-    march19Only: responses.filter((r) => r.availability === "19-march").length,
-    march21Only: responses.filter((r) => r.availability === "21-march").length,
-    unavailable: responses.filter((r) => r.availability === "unavailable").length,
+    confirmed: responses.filter((r) => r.availability === "confirmed").length,
+    declined: responses.filter((r) => r.availability === "declined").length,
     pending: responses.filter((r) => r.availability === "pending").length,
     assigned: responses.filter((r) => r.tableNumber !== null).length,
     totalGuests: responses.reduce((sum, r) => sum + r.partySize, 0),
     solo: responses.filter((r) => r.partySize === 1).length,
     couple: responses.filter((r) => r.partySize === 2).length,
-    // Stats for March 19
-    guests19: availableFor19.reduce((sum, r) => sum + r.partySize, 0),
-    solo19: availableFor19.filter((r) => r.partySize === 1).length,
-    couple19: availableFor19.filter((r) => r.partySize === 2).length,
-    // Stats for March 21
-    guests21: availableFor21.reduce((sum, r) => sum + r.partySize, 0),
-    solo21: availableFor21.filter((r) => r.partySize === 1).length,
-    couple21: availableFor21.filter((r) => r.partySize === 2).length,
+    confirmedGuests: responses
+      .filter((r) => r.availability === "confirmed")
+      .reduce((sum, r) => sum + r.partySize, 0),
   };
-  
-  const totalMarch19 = stats.march19Only + stats.both;
-  const totalMarch21 = stats.march21Only + stats.both;
 
   const availabilityData = [
-    { name: "Les deux dates", value: stats.both, color: "hsl(var(--primary))" },
-    { name: "19 mars uniquement", value: stats.march19Only, color: "hsl(var(--chart-2))" },
-    { name: "21 mars uniquement", value: stats.march21Only, color: "hsl(var(--chart-3))" },
-    { name: "Indisponibles", value: stats.unavailable, color: "hsl(var(--muted-foreground))" },
+    { name: "Présents", value: stats.confirmed, color: "hsl(var(--chart-2))" },
+    { name: "Absents", value: stats.declined, color: "hsl(var(--chart-5))" },
     { name: "En attente", value: stats.pending, color: "hsl(var(--chart-4))" },
   ];
 
   const partySizeData = [
-    { name: "Solo (1)", value: stats.solo, fill: "hsl(var(--chart-4))" },
-    { name: "Couple (2)", value: stats.couple, fill: "hsl(var(--chart-5))" },
+    { name: "Solo (1)", value: stats.solo, fill: "hsl(var(--chart-1))" },
+    { name: "Couple (2)", value: stats.couple, fill: "hsl(var(--chart-2))" },
   ];
 
   const tableAssignmentData = [
@@ -76,7 +61,7 @@ export function DashboardWidgets({ responses, onFilterChange }: DashboardWidgets
   ];
 
   const confirmationRate = stats.total > 0
-    ? Math.round(((stats.total - stats.unavailable) / stats.total) * 100)
+    ? Math.round((stats.confirmed / stats.total) * 100)
     : 0;
 
   const statCards = [
@@ -92,38 +77,37 @@ export function DashboardWidgets({ responses, onFilterChange }: DashboardWidgets
       clickable: true,
     },
     {
-      title: "Confirmations",
-      value: stats.total - stats.unavailable - stats.pending,
-      description: `${confirmationRate}% taux`,
+      title: "Absents",
+      value: stats.declined,
+      description: "Invités indisponibles",
+      icon: XCircle,
+      color: "text-destructive",
+      bgColor: "bg-destructive/10",
+      testId: "stat-declined",
+      filter: "declined",
+      clickable: true,
+    },
+    {
+      title: "Confirmés",
+      value: stats.confirmed,
+      description: `${stats.confirmedGuests} personnes totales`,
       icon: CheckCircle,
       color: "text-chart-2",
       bgColor: "bg-chart-2/10",
-      testId: "stat-confirmations",
-      filter: null,
-      clickable: false,
-    },
-    {
-      title: "Présents le 19",
-      value: stats.guests19,
-      description: `${stats.solo19} solo + ${stats.couple19} couples`,
-      icon: Calendar,
-      color: "text-chart-2",
-      bgColor: "bg-chart-2/10",
-      testId: "stat-march19-total",
-      filter: "19-march",
+      testId: "stat-confirmed",
+      filter: "confirmed",
       clickable: true,
     },
     {
-      title: "Présents le 21",
-      value: stats.guests21,
-      description: `${stats.solo21} solo + ${stats.couple21} couples`,
-      icon: Calendar,
-      color: "text-chart-3",
-      bgColor: "bg-chart-3/10",
-      testId: "stat-march21-total",
-      filter: "21-march",
+      title: "Site & Design",
+      value: "Custom",
+      description: "Personnalisez votre site",
+      icon: Palette,
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+      href: `/app/:weddingId/templates`,
       clickable: true,
-    },
+    }
   ];
 
   return (
@@ -136,8 +120,12 @@ export function DashboardWidgets({ responses, onFilterChange }: DashboardWidgets
           return (
             <Card
               key={idx}
-              className={`p-6 transition-all duration-300 ${isClickable ? 'cursor-pointer hover:ring-2 hover:ring-primary/50 hover:shadow-lg' : ''}`}
+              className={`p-6 transition-all duration-300 ${(isClickable || stat.href) ? 'cursor-pointer hover:ring-2 hover:ring-primary/50 hover:shadow-lg' : ''}`}
               onClick={() => {
+                if (stat.href) {
+                  window.location.href = stat.href.replace(':weddingId', weddingId || '');
+                  return;
+                }
                 if (isClickable && stat.filter) {
                   onFilterChange(stat.filter);
                 }

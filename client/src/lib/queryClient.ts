@@ -20,9 +20,16 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  // Try to get wedding slug from URL or localStorage
+  const urlParams = new URLSearchParams(window.location.search);
+  const slug = urlParams.get('wedding') || localStorage.getItem("last_wedding_slug") || 'notre-mariage';
+
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers: {
+      ...(data ? { "Content-Type": "application/json" } : {}),
+      "x-wedding-slug": slug,
+    },
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
@@ -37,7 +44,13 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
     async ({ queryKey }) => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const slug = urlParams.get('wedding') || localStorage.getItem("last_wedding_slug") || 'notre-mariage';
+
       const res = await fetch(queryKey.join("/") as string, {
+        headers: {
+          "x-wedding-slug": slug,
+        },
         credentials: "include",
       });
 

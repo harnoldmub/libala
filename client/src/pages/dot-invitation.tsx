@@ -94,24 +94,16 @@ export default function GuestInvitationPage() {
     );
   }
 
-  const showMarch19 = guest.availability === "19-march" || guest.availability === "both";
-  const showMarch21 = guest.availability === "21-march" || guest.availability === "both";
+  const showConfirmed = guest.availability === "confirmed" || guest.availability === "pending";
   const isCouple = guest.partySize >= 2;
 
   // Determine the countdown target date based on availability
   const getCountdownDate = () => {
-    if (guest.availability === "19-march") {
-      return new Date("2026-03-19T00:00:00");
-    } else if (guest.availability === "21-march") {
-      return new Date("2026-03-21T00:00:00");
-    } else {
-      // For "both", show countdown to the first date (19 March)
-      return new Date("2026-03-19T00:00:00");
-    }
+    return new Date("2026-03-21T00:00:00");
   };
 
   const countdownDate = getCountdownDate();
-  const countdownLabel = guest.availability === "21-march" ? "21 Mars 2026" : "19 Mars 2026";
+  const countdownLabel = "21 Mars 2026";
 
   const handleDownloadDot = () => {
     if (guest.pdfUrl) {
@@ -141,7 +133,7 @@ export default function GuestInvitationPage() {
       <div className="relative z-10 w-full max-w-md">
         {/* Gold border effect */}
         <div className="absolute -inset-[2px] bg-gradient-to-b from-amber-400 via-amber-500/50 to-amber-400 rounded-2xl" />
-        
+
         <div className="relative bg-[#0d0d18] rounded-2xl p-8 text-center">
           {/* Logo */}
           <div className="mb-6">
@@ -151,7 +143,7 @@ export default function GuestInvitationPage() {
               className="w-24 h-24 mx-auto"
             />
           </div>
-          
+
           {/* Title */}
           <h1 className="text-3xl font-serif text-amber-400 mb-1">
             Ruth & Arnold
@@ -172,7 +164,7 @@ export default function GuestInvitationPage() {
                 {isCouple ? "Invitation Couple" : "Invitation Personnelle"}
               </span>
             </div>
-            
+
             <h2 className="text-2xl font-serif text-white">
               {guest.firstName} {guest.lastName}
             </h2>
@@ -192,29 +184,29 @@ export default function GuestInvitationPage() {
 
           {/* Buttons */}
           <div className="space-y-4">
-            {showMarch19 && (
+            {showConfirmed && (
               <div>
                 <p className="text-amber-300/80 text-xs mb-2 uppercase tracking-widest">
-                  Soirée de la DOT
+                  Soirée du Mariage
                 </p>
                 {guest.pdfUrl ? (
                   <Button
                     onClick={handleDownloadDot}
                     className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold h-14 text-base rounded-xl"
-                    data-testid="button-download-19"
+                    data-testid="button-download-confirm"
                   >
                     <Calendar className="w-5 h-5 mr-3" />
-                    19 Mars 2026
+                    Télécharger l'Invitation
                     <Download className="w-4 h-4 ml-3" />
                   </Button>
                 ) : (
                   <Button
                     disabled
                     className="w-full bg-gray-800 text-gray-500 font-medium h-14 text-base rounded-xl cursor-not-allowed border border-gray-700"
-                    data-testid="button-download-19-disabled"
+                    data-testid="button-download-pending"
                   >
                     <Calendar className="w-5 h-5 mr-3" />
-                    19 Mars 2026
+                    21 Mars 2026
                     <span className="ml-3 text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded">
                       Bientôt
                     </span>
@@ -223,28 +215,10 @@ export default function GuestInvitationPage() {
               </div>
             )}
 
-            {showMarch21 && (
-              <div>
-                <p className="text-amber-300/80 text-xs mb-2 uppercase tracking-widest">
-                  Mariage Civil & Religieux
-                </p>
-                <Button
-                  disabled
-                  className="w-full bg-gray-800 text-gray-500 font-medium h-14 text-base rounded-xl cursor-not-allowed border border-gray-700"
-                  data-testid="button-download-21"
-                >
-                  <Calendar className="w-5 h-5 mr-3" />
-                  21 Mars 2026
-                  <span className="ml-3 text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded">
-                    Coming soon
-                  </span>
-                </Button>
-              </div>
-            )}
 
-            {!showMarch19 && !showMarch21 && (
+            {!showConfirmed && (
               <div className="text-amber-200/60 text-sm py-4">
-                Aucune invitation disponible pour le moment
+                Invitation non disponible ou participation déclinée
               </div>
             )}
           </div>

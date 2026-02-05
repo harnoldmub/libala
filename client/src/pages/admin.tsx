@@ -40,36 +40,11 @@ import logoRA from "@assets/logo-ra.png";
 
 // Wedding tables with poetic names - Golden Love theme
 const WEDDING_TABLES = [
-  { number: 1, name: "Amour Éternel", subtitle: "Un amour scellé pour toujours" },
-  { number: 2, name: "Âmes Sœurs", subtitle: "Deux cœurs, une destinée" },
-  { number: 3, name: "Promesse Dorée", subtitle: "Une parole donnée devant Dieu" },
-  { number: 4, name: "Alliance Sacrée", subtitle: "Ce que Dieu unit, nul ne le sépare" },
-  { number: 5, name: "Coup de Foudre", subtitle: "Quand l'amour commence" },
-  { number: 6, name: "Grâce Divine", subtitle: "L'amour soutenu par la grâce" },
-  { number: 7, name: "Cœurs Unis", subtitle: "Unis dans l'amour et la foi" },
-  { number: 8, name: "Passion d'Or", subtitle: "Un amour précieux et ardent" },
-  { number: 9, name: "Serment Éternel", subtitle: "Fidélité, respect et engagement" },
-  { number: 10, name: "Flamme d'Amour", subtitle: "Un feu qui ne s'éteint jamais" },
-  { number: 11, name: "Harmonie Dorée", subtitle: "Marcher ensemble en paix" },
-  { number: 12, name: "Union Parfaite", subtitle: "Deux vies, un seul chemin" },
-  { number: 13, name: "Destin Doré", subtitle: "Écrits l'un pour l'autre" },
-  { number: 14, name: "Éclat de Bonheur", subtitle: "La joie d'aimer et d'être aimé" },
-  { number: 15, name: "Joyau Précieux", subtitle: "Un amour de grande valeur" },
-  { number: 16, name: "Couronne d'Amour", subtitle: "Un amour honoré et célébré" },
-  { number: 17, name: "Lien Sacré", subtitle: "Attachés par l'amour et la foi" },
-  { number: 18, name: "Origine Divine", subtitle: "Un amour voulu par Dieu" },
-  { number: 19, name: "Héritage d'Amour", subtitle: "Un amour transmis et béni" },
-  { number: 20, name: "Lumière Éternelle", subtitle: "Un amour qui éclaire le chemin" },
-  { number: 21, name: "Cantique d'Amour", subtitle: "Un amour chanté devant Dieu" },
-  { number: 22, name: "Main dans la Main", subtitle: "Marcher ensemble toute une vie" },
-  { number: 23, name: "Promesse Céleste", subtitle: "Un engagement venu du ciel" },
-  { number: 24, name: "Trésor du Cœur", subtitle: "Là où est ton trésor, là est ton cœur" },
-  { number: 25, name: "Éternelle Allégresse", subtitle: "La joie scellée par l'amour" },
-  { number: 26, name: "Souffle d'Or", subtitle: "Quand Dieu insuffle l'amour" },
-  { number: 27, name: "Chemin de Grâce", subtitle: "Guidés par la foi et l'amour" },
-  { number: 28, name: "Amour Triomphant", subtitle: "L'amour qui surmonte tout" },
-  { number: 29, name: "Scellement Divin", subtitle: "Une union bénie pour toujours" },
-  { number: 30, name: "Rayon de Gloire", subtitle: "Un amour qui reflète la gloire de Dieu" },
+  { number: 1, name: "Table 1", subtitle: "Bienvenue" },
+  { number: 2, name: "Table 2", subtitle: "Nous sommes ravis de vous voir" },
+  { number: 3, name: "Table 3", subtitle: "Profitez de la soirée" },
+  { number: 4, name: "Table 4", subtitle: "Merci d'être là" },
+  { number: 5, name: "Table 5", subtitle: "Un moment inoubliable" },
 ];
 
 // Helper function to get table info by number
@@ -84,10 +59,8 @@ const ImportGuestForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
   const parseAvailability = (value: string): string => {
     const lower = value.toLowerCase().trim();
-    if (lower.includes('19') && lower.includes('21') || lower === 'both' || lower === 'les deux') return 'both';
-    if (lower.includes('19') || lower === '19-march') return '19-march';
-    if (lower.includes('21') || lower === '21-march') return '21-march';
-    if (lower.includes('non') || lower === 'unavailable' || lower === 'indisponible') return 'unavailable';
+    if (lower === 'confirmed' || lower === 'oui' || lower === 'présent') return 'confirmed';
+    if (lower === 'declined' || lower === 'non' || lower === 'absent') return 'declined';
     return 'pending';
   };
 
@@ -99,7 +72,7 @@ const ImportGuestForm = ({ onSuccess }: { onSuccess: () => void }) => {
       const rows = text.split(/\n/).map(row => row.trim()).filter(row => row);
       const guests = rows.map(row => {
         const parts = row.split(/\t/);
-        
+
         const fullName = (parts[0] || "").trim();
         const email = (parts[1] || "").trim();
         const phone = (parts[2] || "").trim();
@@ -176,7 +149,7 @@ const ImportGuestForm = ({ onSuccess }: { onSuccess: () => void }) => {
         <div className="text-xs text-muted-foreground space-y-1">
           <p className="font-medium">Colonnes (séparées par tabulation) :</p>
           <p>1. Nom Complet* | 2. Email | 3. Téléphone | 4. Nb personnes | 5. Disponibilité | 6. Commentaire</p>
-          <p className="text-muted-foreground/70">Disponibilité: "19", "21", "19-21" ou "les deux", "non" ou vide (en attente)</p>
+          <p className="text-muted-foreground/70">Disponibilité: "oui", "non" ou vide (en attente)</p>
         </div>
       </div>
       <Button onClick={handleSubmit} disabled={isSubmitting} className="w-full" data-testid="button-import-submit">
@@ -217,7 +190,7 @@ export default function Admin() {
     email: "",
     phone: "",
     partySize: 1,
-    availability: "21-march",
+    availability: "pending",
     notes: "",
   });
 
@@ -514,7 +487,7 @@ export default function Admin() {
       try {
         const errorData = await error.json?.();
         if (errorData?.message) errorMessage = errorData.message;
-      } catch {}
+      } catch { }
       toast({
         title: "Erreur",
         description: errorMessage,
@@ -549,7 +522,7 @@ export default function Admin() {
       try {
         const errorData = await error.json?.();
         if (errorData?.message) errorMessage = errorData.message;
-      } catch {}
+      } catch { }
       toast({
         title: "Erreur",
         description: errorMessage,
@@ -581,7 +554,7 @@ export default function Admin() {
         email: "",
         phone: "",
         partySize: 1,
-        availability: "21-march",
+        availability: "pending",
         notes: "",
       });
     },
@@ -665,10 +638,8 @@ export default function Admin() {
       (response.email && response.email.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesAvailability =
-      filterAvailability === "all" || 
-      response.availability === filterAvailability ||
-      (filterAvailability === "19-march" && response.availability === "both") ||
-      (filterAvailability === "21-march" && response.availability === "both");
+      (filterAvailability === "confirmed" && response.availability === "confirmed") ||
+      (filterAvailability === "declined" && response.availability === "declined");
 
     return matchesSearch && matchesAvailability;
   });
@@ -688,10 +659,9 @@ export default function Admin() {
   // Stats
   const stats = {
     total: responses.length,
-    both: responses.filter(r => r.availability === 'both').length,
-    march19: responses.filter(r => r.availability === '19-march').length,
-    march21: responses.filter(r => r.availability === '21-march').length,
-    unavailable: responses.filter(r => r.availability === 'unavailable').length,
+    confirmed: responses.filter(r => r.availability === 'confirmed').length,
+    declined: responses.filter(r => r.availability === 'declined').length,
+    pending: responses.filter(r => r.availability === 'pending').length,
     assigned: responses.filter(r => r.tableNumber !== null).length,
   };
 
@@ -831,10 +801,8 @@ export default function Admin() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="19-march">19 mars seulement</SelectItem>
-                                <SelectItem value="21-march">21 mars seulement</SelectItem>
-                                <SelectItem value="both">Les deux dates</SelectItem>
-                                <SelectItem value="unavailable">Non disponible</SelectItem>
+                                <SelectItem value="confirmed">Confirmé</SelectItem>
+                                <SelectItem value="declined">Absent</SelectItem>
                                 <SelectItem value="pending">En attente</SelectItem>
                               </SelectContent>
                             </Select>
@@ -864,7 +832,7 @@ export default function Admin() {
                               email: "",
                               phone: "",
                               partySize: 1,
-                              availability: "21-march",
+                              availability: "confirmed",
                               notes: "",
                             });
                           }}
@@ -1057,10 +1025,8 @@ export default function Admin() {
                   <SelectContent>
                     <SelectItem value="all">Tout le monde</SelectItem>
                     <SelectItem value="pending">En attente (Non répondu)</SelectItem>
-                    <SelectItem value="both">Présents (Les deux dates)</SelectItem>
-                    <SelectItem value="19-march">Présents (19 mars)</SelectItem>
-                    <SelectItem value="21-march">Présents (21 mars)</SelectItem>
-                    <SelectItem value="unavailable">Absents</SelectItem>
+                    <SelectItem value="confirmed">Présents</SelectItem>
+                    <SelectItem value="declined">Absents</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1214,18 +1180,14 @@ export default function Admin() {
                             </span>
                           </TableCell>
                           <TableCell>
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-sans border ${response.availability === 'both'
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-sans border ${response.availability === 'confirmed'
                               ? 'bg-green-50 text-green-700 border-green-200'
-                              : response.availability === 'unavailable'
+                              : response.availability === 'declined'
                                 ? 'bg-slate-50 text-slate-500 border-slate-200'
-                                : response.availability === 'pending'
-                                  ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                                  : 'bg-blue-50 text-blue-700 border-blue-200'
+                                : 'bg-yellow-50 text-yellow-700 border-yellow-200'
                               }`}>
-                              {response.availability === 'both' && 'Les deux dates'}
-                              {response.availability === '19-march' && '19 mars'}
-                              {response.availability === '21-march' && '21 mars'}
-                              {response.availability === 'unavailable' && 'Indisponible'}
+                              {response.availability === 'confirmed' && 'Présent'}
+                              {response.availability === 'declined' && 'Absent'}
                               {response.availability === 'pending' && 'En attente'}
                             </span>
                           </TableCell>
@@ -1287,16 +1249,16 @@ export default function Admin() {
                                             }
                                           }}
                                         >
-                                          <SelectTrigger 
-                                            className="w-full mt-2" 
+                                          <SelectTrigger
+                                            className="w-full mt-2"
                                             data-testid={`select-table-${response.id}`}
                                           >
                                             <SelectValue placeholder="Choisir une table..." />
                                           </SelectTrigger>
                                           <SelectContent className="max-h-[300px]">
                                             {WEDDING_TABLES.map((table) => (
-                                              <SelectItem 
-                                                key={table.number} 
+                                              <SelectItem
+                                                key={table.number}
                                                 value={table.number.toString()}
                                                 data-testid={`option-table-${table.number}`}
                                               >
@@ -1615,8 +1577,8 @@ export default function Admin() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="19-march">19 mars seulement</SelectItem>
-                        <SelectItem value="21-march">21 mars seulement</SelectItem>
+                        <SelectItem value="confirmed">Confirmé</SelectItem>
+                        <SelectItem value="declined">Absent</SelectItem>
                         <SelectItem value="both">Les deux dates</SelectItem>
                         <SelectItem value="unavailable">Je ne serai pas disponible</SelectItem>
                         <SelectItem value="pending">En attente</SelectItem>

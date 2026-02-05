@@ -82,7 +82,7 @@ function FunMessageBanner({
         // Show dynamic message with real contribution data
         const template = dynamicMessageTemplates[Math.floor(Math.random() * dynamicMessageTemplates.length)];
         message = template
-          .replace("{name}", latestContribution.donorName)
+          .replace("{name}", latestContribution.donorName || "Un invité")
           .replace("{amount}", formatAmount(latestContribution.amount));
       } else {
         // Show random generic/romantic/complicity/live message
