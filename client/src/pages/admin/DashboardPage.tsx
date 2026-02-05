@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { type RsvpResponse, type Wedding } from "@shared/schema";
-import { DashboardWidgets } from "@/components/dashboard-widgets";
-import { useParams } from "wouter";
-import { Loader2 } from "lucide-react";
+import { OnboardingChecklist } from "@/components/onboarding-checklist";
+
+// ...
 
 export default function DashboardPage() {
     const { weddingId } = useParams<{ weddingId: string }>();
@@ -33,6 +33,8 @@ export default function DashboardPage() {
                     Aperçu de l'organisation pour <span className="font-semibold">{wedding?.title}</span>
                 </p>
             </div>
+
+            {wedding && <OnboardingChecklist wedding={wedding} />}
 
             <DashboardWidgets
                 responses={responses || []}

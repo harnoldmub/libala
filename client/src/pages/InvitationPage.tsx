@@ -43,7 +43,10 @@ import {
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { AccommodationSection } from "@/components/accommodation";
 import { motion } from "framer-motion";
-import { useWedding } from "@/hooks/use-api";
+import { useWedding, useUpdateWedding } from "@/hooks/use-api";
+import { useAuth } from "@/hooks/useAuth";
+import { InlineEditor } from "@/components/ui/inline-editor";
+import { Layout, Eye } from "lucide-react";
 
 // Default/Fake data for empty state or loading
 const FAKE_DATA = {
@@ -114,9 +117,39 @@ export default function InvitationPage() {
         : window.location.pathname.split('/')[1]);
 
     const { data: wedding, isLoading } = useWedding(slug);
+    const updateWedding = useUpdateWedding();
+    const { user } = useAuth();
     const queryClient = useQueryClient();
     const { toast } = useToast();
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+
+    // Determines if current user can edit this wedding
+    const canEdit = !!(user && wedding && user.id === wedding.ownerId);
+
+    // Save text helper
+    const handleSaveText = async (key: string, value: string) => {
+        if (!wedding) return;
+
+        try {
+            await updateWedding.mutateAsync({
+                id: wedding.id,
+                config: {
+                    ...wedding.config,
+                    texts: {
+                        ...((wedding.config as any).texts || {}),
+                        [key]: value
+                    }
+                }
+            });
+            toast({ title: "Modifications enregistrées" });
+        } catch (error) {
+            toast({
+                title: "Erreur lors de la sauvegarde",
+                variant: "destructive"
+            });
+        }
+    };
 
     const form = useForm<InsertRsvpResponse>({
         resolver: zodResolver(insertRsvpResponseSchema),
@@ -170,7 +203,34 @@ export default function InvitationPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background relative group/page">
+            {/* Edit Toggle for Owner */}
+            {canEdit && (
+                <div className="fixed bottom-6 right-6 z-50 flex gap-2">
+                    {editMode ? (
+                        <div className="bg-primary text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 animate-in slide-in-from-bottom-5">
+                            <span className="text-sm font-medium">Mode Édition</span>
+                            <Button
+                                size="sm"
+                                variant="secondary"
+                                className="h-7 px-2 rounded-full text-xs"
+                                onClick={() => setEditMode(false)}
+                            >
+                                <Check className="h-3 w-3 mr-1" /> Terminer
+                            </Button>
+                        </div>
+                    ) : (
+                        <Button
+                            className="rounded-full shadow-lg h-12 px-6 bg-primary/90 hover:bg-primary backdrop-blur-sm"
+                            onClick={() => setEditMode(true)}
+                        >
+                            <Layout className="mr-2 h-4 w-4" />
+                            Modifier les textes
+                        </Button>
+                    )}
+                </div>
+            )}
+
             {/* Hero Section */}
             <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
                 <motion.div
@@ -183,13 +243,18 @@ export default function InvitationPage() {
                 <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-background" />
 
                 <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
-                    <motion.p
-                        className="text-xs md:text-sm font-sans tracking-[0.3em] uppercase text-primary mb-3"
+                    <motion.div
+                        className="text-xs md:text-sm font-sans tracking-[0.3em] uppercase text-primary mb-3 flex justify-center"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
-                        Le Mariage de
-                    </motion.p>
+                        <InlineEditor
+                            value={currentWedding.config?.texts?.heroSubtitle || "Le Mariage de"}
+                            onSave={(val) => handleSaveText("heroSubtitle", val)}
+                            canEdit={canEdit && editMode}
+                            placeholder="Le Mariage de"
+                        />
+                    </motion.div>
 
                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-light text-foreground mb-6 leading-tight">
                         {currentWedding.title.split(" & ").map((name: string, i: number) => (
@@ -224,9 +289,23 @@ export default function InvitationPage() {
                             <div className="mb-12">
                                 <Countdown weddingDate={currentWedding.weddingDate || FAKE_DATA.date} />
                             </div>
-                            <h2 className="text-3xl md:text-4xl font-serif font-light text-center mb-16 text-foreground tracking-wide">
-                                CONFIRMEZ VOTRE PRÉSENCE
+                            <h2 className="text-3xl md:text-4xl font-serif font-light text-center mb-4 text-foreground tracking-wide flex justify-center">
+                                <InlineEditor
+                                    value={currentWedding.config?.texts?.rsvpTitle || "CONFIRMEZ VOTRE PRÉSENCE"}
+                                    onSave={(val) => handleSaveText("rsvpTitle", val)}
+                                    canEdit={canEdit && editMode}
+                                    className="uppercase" // Force uppercase display
+                                />
                             </h2>
+                            <p className="text-center text-muted-foreground mb-12 max-w-xl mx-auto flex justify-center">
+                                <InlineEditor
+                                    value={currentWedding.config?.texts?.rsvpDescription || "Nous serions ravis de vous compter parmi nous"}
+                                    onSave={(val) => handleSaveText("rsvpDescription", val)}
+                                    canEdit={canEdit && editMode}
+                                    isTextArea={true} // Allow multiline for description
+                                    className="text-center"
+                                />
+                            </p>
 
                             <Card className="p-8 md:p-16 border-2 border-primary/10">
                                 <Form {...form}>

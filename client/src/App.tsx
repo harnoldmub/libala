@@ -1,4 +1,4 @@
-import { Switch, Route, Redirect } from "wouter";
+import { Switch, Route, Redirect, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -52,73 +52,17 @@ function AppRoot() {
   return <Redirect to={`/app/${wedding.id}/dashboard`} />;
 }
 
-function Router() {
-  const { user, isLoading } = useAuth();
+// Subdomain logic helper
+const isAppSubdomain = () => {
+  const hostname = window.location.hostname;
+  return hostname.startsWith('app.') || (hostname === 'localhost' && window.location.pathname.startsWith('/app'));
+};
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-      </div>
-    );
-  }
-
+function MarketingRouter() {
   return (
     <Switch>
-      {/* Root & Auth */}
-      {/* Root & Auth */}
+      {/* Landing Page */}
       <Route path="/" component={LandingPage} />
-      <Route path="/login" component={Login} />
-      <Route path="/signup" component={Signup} />
-      <Route path="/verify-email" component={VerifyEmail} />
-      <Route path="/forgot-password" component={ForgotPassword} />
-      <Route path="/reset-password" component={ResetPassword} />
-      <Route path="/onboarding" component={Onboarding} />
-
-      {/* Global Shared Public Routes (Success etc) */}
-      <Route path="/contribution/merci" component={ContributionMerci} />
-
-      {/* Admin Protected Routes */}
-      <Route path="/app">
-        {!user ? <Redirect to="/login" /> : <AppRoot />}
-      </Route>
-
-      <Route path="/app/:weddingId/:subpage*">
-        {(params) => (
-          !user ? <Redirect to="/login" /> : (
-            <AdminLayout>
-              <Switch>
-                <Route path="/app/:weddingId/dashboard" component={DashboardPage} />
-                <Route path="/app/:weddingId/welcome" component={WelcomePage} />
-                <Route path="/app/:weddingId/guests" component={GuestsPage} />
-                <Route path="/app/:weddingId/gifts" component={GiftsPage} />
-                <Route path="/app/:weddingId/billing" component={PricingPage} />
-                <Route path="/app/:weddingId/emails" component={EmailLogsPage} />
-                <Route path="/app/:weddingId/templates" component={TemplatesPage} />
-                {/* Fallback to Admin Dashboard */}
-                <Route><Redirect to={`/app/${params.weddingId}/dashboard`} /></Route>
-              </Switch>
-            </AdminLayout>
-          )
-        )}
-      </Route>
-
-      {/* Preview Routes (Draft Access) */}
-      <Route path="/preview/:slug/:page*">
-        {(params) => (
-          <PublicLayout>
-            <Switch>
-              <Route path="/preview/:slug" component={InvitationPage} />
-              <Route path="/preview/:slug/rsvp" component={InvitationPage} />
-              <Route path="/preview/:slug/cagnotte" component={CagnottePage} />
-              <Route path="/preview/:slug/live" component={LiveContributions} />
-              <Route path="/preview/:slug/checkin" component={CheckIn} />
-              <Route path="/preview/:slug/guest/:guestId" component={GuestInvitation} />
-              <Route component={NotFound} />
-            </Switch>
-          </PublicLayout>
-        )}
-      </Route>
 
       {/* Guest Public Routes (Slug-based) */}
       <Route path="/:slug/:page*">
@@ -140,9 +84,86 @@ function Router() {
       {/* Legacy / Catch-all */}
       <Route path="/invitation/:id" component={Invitation} />
       <Route path="/checkin" component={CheckIn} />
+
+      {/* Redirect Auth routes to App subdomain logic (simulated here for dev) */}
+      <Route path="/login"><Redirect to="/app/login" /></Route>
+      <Route path="/signup"><Redirect to="/app/signup" /></Route>
+
       <Route component={NotFound} />
     </Switch>
   );
+}
+
+function AppRouter() {
+  const { user, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+      </div>
+    );
+  }
+
+  // Handle direct access to /app without subdomain in dev
+  // In production, Nginx/Vercel handles subdomain routing to same app but we check hostname
+
+  return (
+    <Switch>
+      {/* Auth Routes */}
+      <Route path="/app/login" component={Login} />
+      <Route path="/app/signup" component={Signup} />
+      <Route path="/app/verify-email" component={VerifyEmail} />
+      <Route path="/app/forgot-password" component={ForgotPassword} />
+      <Route path="/app/reset-password" component={ResetPassword} />
+      <Route path="/app/onboarding" component={Onboarding} />
+
+      {/* Global Shared Protected Routes */}
+      <Route path="/app/contribution/merci" component={ContributionMerci} />
+
+      {/* Admin Protected Routes */}
+      <Route path="/app">
+        {!user ? <Redirect to="/app/login" /> : <AppRoot />}
+      </Route>
+
+      <Route path="/app/dashboard">
+        {!user ? <Redirect to="/app/login" /> : <AppRoot />}
+      </Route>
+
+      <Route path="/app/:weddingId/:subpage*">
+        {(params) => (
+          !user ? <Redirect to="/app/login" /> : (
+            <AdminLayout>
+              <Switch>
+                <Route path="/app/:weddingId/dashboard" component={DashboardPage} />
+                <Route path="/app/:weddingId/welcome" component={WelcomePage} />
+                <Route path="/app/:weddingId/guests" component={GuestsPage} />
+                <Route path="/app/:weddingId/gifts" component={GiftsPage} />
+                <Route path="/app/:weddingId/billing" component={PricingPage} />
+                <Route path="/app/:weddingId/emails" component={EmailLogsPage} />
+                <Route path="/app/:weddingId/templates" component={TemplatesPage} />
+                {/* Fallback to Admin Dashboard */}
+                <Route><Redirect to={`/app/${params.weddingId}/dashboard`} /></Route>
+              </Switch>
+            </AdminLayout>
+          )
+        )}
+      </Route>
+
+      {/* Catch-all for App subdomain */}
+      <Route><Redirect to="/app" /></Route>
+    </Switch>
+  );
+}
+
+function Router() {
+  // For local development ease, we treat paths starting with /app as the "App Subdomain"
+  // In production, we would strictly check window.location.hostname
+  const [location] = useLocation();
+  const isApp = location.startsWith('/app');
+
+  return isApp ? <AppRouter /> : <MarketingRouter />;
 }
 
 function App() {

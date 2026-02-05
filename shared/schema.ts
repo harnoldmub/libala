@@ -73,8 +73,19 @@ export const weddings = pgTable("weddings", {
   }>().notNull().default({
     theme: { primaryColor: '#D4AF37', secondaryColor: '#FFFFFF', fontFamily: 'serif' },
     seo: { title: 'Notre Mariage', description: 'Rejoignez-nous pour célébrer notre union' },
-    features: { jokesEnabled: true, giftsEnabled: true, cagnotteEnabled: true }
-  }),
+    features: { jokesEnabled: true, giftsEnabled: true, cagnotteEnabled: true },
+    texts: {
+      heroTitle: "", // Default: dynamic from title
+      heroSubtitle: "Le Mariage de",
+      weddingDate: "", // Default: dynamic from date
+      rsvpTitle: "CONFIRMEZ VOTRE PRÉSENCE",
+      rsvpDescription: "Nous serions ravis de vous compter parmi nous",
+      locationTitle: "LIEU & ACCÈS",
+      locationDescription: "Toutes les informations pour nous rejoindre",
+      programTitle: "DÉROULEMENT",
+      programDescription: "Le programme de notre journée"
+    }
+  } as Record<string, any>),
   currentPlan: varchar("current_plan", { length: 20 }).notNull().default('free'), // 'free', 'premium'
   isPublished: boolean("is_published").notNull().default(false), // Draft by default
   createdAt: timestamp("created_at").defaultNow(),
